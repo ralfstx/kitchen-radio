@@ -1,0 +1,2 @@
+
+exports.baseDir = "/media/music";

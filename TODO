@@ -1,0 +1,35 @@
+
+* Error handling
+
+* Key navigation
+
+* Playlist history
+
+* Memorize position in playlist / album / track - important for audio books
+
+* Let user put albums on a list for later playback
+
+* DOM elements should be created by modules programmatically
+
+* Make parts mashable
+
+* Firefox extension for "Play on Musicbox"
+
+* Means to rename Albums, Song metadata
+
+* Tabbed browsing - allow to open albums, radio stations, etc. in extra browser window
+
+* Add control for switching fading on and off
+
+* Control that shows number of tracks to play
+
+* Text box for dropping URLs
+
+* Display audio quality
+
+* Add tags infrastructure
+
+* Fade-in playlist
+
+* add, edit, delete stations
+
