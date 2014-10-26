@@ -2,6 +2,7 @@ var Http = require("http");
 var Url = require("url");
 var Path = require("path");
 
+var Config = require("./config.js");
 var Mpd = require("./mpd");
 var Server = require("./server.js");
 var Stations = require("./stations.js");
@@ -54,14 +55,14 @@ var handlers = {
   },
   stations: function(path, response) {
     if (path) {
-      Server.writeFile(response, Path.join("/media/music/stations", path));
+      Server.writeFile(response, Path.join(Config.baseDir, "stations", path));
     } else {
       Stations.list(response);
     }
   },
   albums: function(path, response) {
     if (path) {
-      Server.writeFile(response, Path.join("/media/music/albums", path));
+      Server.writeFile(response, Path.join(Config.baseDir, "albums", path));
     } else {
       Albums.list(response);
     }
