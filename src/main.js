@@ -11,43 +11,43 @@ var port = 8080;
 
 var handlers = {
   status: function(path, response) {
-    var safe = Server.safe(response);
+    var safe = Server.safeRunner(response);
     Mpd.status(safe(function(status) {
       Server.writeJson(response, status);
     }));
   },
   playlist: function(path, response) {
-    var safe = Server.safe(response);
+    var safe = Server.safeRunner(response);
     Mpd.playlist(safe(function(status) {
       Server.writeJson(response, status);
     }));
   },
   play: function(path, response) {
-    var safe = Server.safe(response);
+    var safe = Server.safeRunner(response);
     Mpd.play(path, safe(function() {
       Server.writeJson(response, {});
     }));
   },
   stop: function(path, response) {
-    var safe = Server.safe(response);
+    var safe = Server.safeRunner(response);
     Mpd.stop(safe(function() {
       Server.writeJson(response, {});
     }));
   },
   pause: function(path, response) {
-    var safe = Server.safe(response);
+    var safe = Server.safeRunner(response);
     Mpd.pause(safe(function() {
       Server.writeJson(response, {});
     }));
   },
   prev: function(path, response) {
-    var safe = Server.safe(response);
+    var safe = Server.safeRunner(response);
     Mpd.prev(safe(function() {
       Server.writeJson(response, {});
     }));
   },
   next: function(path, response) {
-    var safe = Server.safe(response);
+    var safe = Server.safeRunner(response);
     Mpd.next(safe(function() {
       Server.writeJson(response, {});
     }));

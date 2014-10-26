@@ -61,7 +61,7 @@ exports.writeJson = function(response, data, code) {
   response.end(JSON.stringify(data, null, " "));
 };
 
-exports.safe = function(response) {
+exports.safeRunner = function(response) {
   return Util.safeRunner(function(err) {
     /*global console: false */
     console.error("ERROR", err.stack ? err.stack : err.message, "\n");

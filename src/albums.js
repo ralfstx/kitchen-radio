@@ -11,9 +11,7 @@ exports.list = function(response) {
     if (exists) {
       Server.writeFile(response, filepath);
     } else {
-      var safe = Util.safeRunner(function(err) {
-        Server.writeJson(response, {error: err.message, stack: err.stack}, 500);
-      });
+      var safe = Server.safeRunner(response);
       buildIndex(safe(function(index) {
         Fs.writeFile(filepath, Util.toJson(index), safe(function() {
           Server.writeFile(response, filepath);
