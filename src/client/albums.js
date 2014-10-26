@@ -29,7 +29,7 @@ tabris.load(function() {
       }
     ],
   }).on("selection", function(event) {
-    openAlbum(event.item);
+    shared.openAlbumPage(event.item);
   }).appendTo(page);
 
   var albums;
@@ -46,7 +46,6 @@ tabris.load(function() {
     showAlbums();
   });
 
-
   function showAlbums() {
     var filter = filterText.get("text");
     if (filter) {
@@ -56,40 +55,6 @@ tabris.load(function() {
     } else {
       albumsList.set("items", _.shuffle(albums).slice(0, 20));
     }
-  }
-
-  function openAlbum(album) {
-    var page = tabris.create("Page", {
-      title: album.name
-    }).on("resize", layout);
-
-    var coverView = tabris.create("ImageView", {
-      image: album.icon,
-      scaleMode: "fill"
-    }).appendTo(page);
-
-    tabris.create("Button", {
-      text: "play album",
-      layoutData: {left: 20, bottom: 20}
-    }).on("selection", function() {
-      $.getJSON(config.SERVER + "/play/" + album.path + "/album.m3u", function() {
-      });
-    }).appendTo(page);
-
-    page.open();
-
-    function layout() {
-      var bounds = page.get("bounds");
-      var coverSize = Math.floor(Math.min(bounds.width, bounds.height) / 2);
-      if (bounds.width > bounds.height) {
-        // landscape
-        coverView.set("layoutData", {left: 20, centerY: 0, width: coverSize, height: coverSize});
-      } else {
-        // portrait
-        coverView.set("layoutData", {centerX: 0, top: 20, width: coverSize, height: coverSize});
-      }
-    }
-
   }
 
 });

@@ -27,6 +27,7 @@
     "_": false,
     "exports": false,
     "require": false,
-    "config": true
+    "config": true,
+    "shared": true
   }
 }
