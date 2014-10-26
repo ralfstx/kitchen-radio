@@ -10,6 +10,9 @@
       "src": "lib/jquery.min.js"
     },
     {
+      "src": "lib/underscore-min.js"
+    },
+    {
       "src": "config.js"
     },
     {

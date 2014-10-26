@@ -24,6 +24,7 @@
   "globals": {
     "tabris": false,
     "$": false,
+    "_": false,
     "exports": false,
     "require": false,
     "config": true

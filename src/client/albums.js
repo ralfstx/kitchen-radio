@@ -6,9 +6,14 @@ tabris.load(function() {
     topLevel: true
   });
 
+  var filterText = tabris.create("Text", {
+    layoutData: {left: 0, right: 0, top: 0},
+    message: "filter"
+  }).on("modify", showAlbums).appendTo(page);
+
   var albumsList = tabris.create("List", {
     linesVisible: true,
-    layoutData: {left: 0, right: 0, top: 0, bottom: 0},
+    layoutData: {left: 0, right: 0, top: [filterText, 0], bottom: 0},
     itemHeight: 60,
     template: [
       {
@@ -27,19 +32,30 @@ tabris.load(function() {
     openAlbum(event.item);
   }).appendTo(page);
 
-  $.getJSON(config.SERVER + "/albums", function(albums) {
-    showAlbums(albums);
-  });
+  var albums;
 
-  function showAlbums(albums) {
-    albumsList.set("items", albums.map(function(item) {
+  $.getJSON(config.SERVER + "/albums", function(result) {
+    albums = result.map(function(item) {
       return {
         name: item.name,
         stream: item.stream,
         path: config.SERVER + "/albums/" + item.path,
-        icon: {src: config.SERVER + "/albums/" + item.path + "/cover.jpg", width: 300, height: 300}
+        icon: {src: config.SERVER + "/albums/" + item.path + "/cover-250.jpg", width: 250, height: 250}
       };
-    }));
+    });
+    showAlbums();
+  });
+
+
+  function showAlbums() {
+    var filter = filterText.get("text");
+    if (filter) {
+      albumsList.set("items", albums.filter(function(album) {
+        return album.name.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
+      }).slice(0, 20));
+    } else {
+      albumsList.set("items", _.shuffle(albums).slice(0, 20));
+    }
   }
 
   function openAlbum(album) {
@@ -75,6 +91,5 @@ tabris.load(function() {
     }
 
   }
-
 
 });
