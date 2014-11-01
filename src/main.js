@@ -3,6 +3,7 @@ var Url = require("url");
 var Path = require("path");
 
 var Config = require("./config.js");
+var Logger = require("./logger.js");
 var Mpd = require("./mpd");
 var Server = require("./server.js");
 var Stations = require("./stations.js");
@@ -75,8 +76,7 @@ var handlers = {
 Http.createServer(function(request, response) {
   try {
     var urlpath = decodeURIComponent(Url.parse(request.url).pathname).substr(1);
-    /*global console: false */
-    console.log(urlpath);
+    Logger.debug("request %s", urlpath);
     var parts = splitPath(urlpath);
     if (parts[0] === "") {
       Server.writeJson(response, {message: "Hello!"});
@@ -89,14 +89,12 @@ Http.createServer(function(request, response) {
       }
     }
   } catch (error) {
-    response.writeHead(500, {"Content-Type": "text/plain"});
-    var text = "ERROR: " + error.message;
-    if ("stack" in error) {
-      text += "\n\n" + error.stack;
-    }
-    response.end(text);
+    Logger.error(error.stack ? error.stack : error.message);
+    Server.writeJson(response, {error: error.message}, 500);
   }
 }).listen(port);
+
+Logger.info("Started on port %d", port);
 
 function splitPath(path) {
   var start = (path.substr(0, 1) === "/") ? 1 : 0;

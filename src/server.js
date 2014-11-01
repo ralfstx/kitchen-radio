@@ -1,6 +1,8 @@
 var Fs = require("fs");
 var Path = require("path");
 var Util = require("./util");
+var Logger = require("./logger");
+var Server = require("./server");
 
 var mimetypes = {
   // text
@@ -63,9 +65,7 @@ exports.writeJson = function(response, data, code) {
 
 exports.safeRunner = function(response) {
   return Util.safeRunner(function(err) {
-    /*global console: false */
-    console.error("ERROR", err.stack ? err.stack : err.message, "\n");
-    response.writeHead(500, {"Content-Type": "application/json; charset: utf-8"});
-    response.end(JSON.stringify({error: "Internal Server Error"}, null, " "));
+    Logger.error(err.stack ? err.stack : err.message);
+    Server.writeJson(response, {error: err.message}, 500);
   });
 };

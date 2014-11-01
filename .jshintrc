@@ -25,6 +25,7 @@
     "tabris": false,
     "$": false,
     "_": false,
+    "module": false,
     "exports": false,
     "require": false,
     "config": true,
