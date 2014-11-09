@@ -46,13 +46,14 @@ function buildIndex(callback) {
 
 function getAlbumInfo(file, callback) {
   var safe = Util.safeRunner(callback);
-  var path = Path.join(Config.baseDir, "albums", file, "info");
+  var path = Path.join(Config.baseDir, "albums", file, "index.json");
   Fs.exists(path, function(exists) {
     if (exists) {
       Fs.readFile(path, {encoding: "utf8"}, safe(function(data) {
+        var json = JSON.parse(data);
         callback(null, {
           path: file,
-          name: data.split("\n", 1)[0]
+          name: json.name
         });
       }));
     } else {

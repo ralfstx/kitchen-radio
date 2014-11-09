@@ -38,8 +38,8 @@ tabris.load(function() {
     albums = result.map(function(item) {
       return {
         name: item.name,
-        stream: item.stream,
-        path: config.SERVER + "/albums/" + item.path,
+        path: item.path,
+        url: config.SERVER + "/albums/" + item.path,
         icon: {src: config.SERVER + "/albums/" + item.path + "/cover-250.jpg", width: 250, height: 250}
       };
     });
@@ -50,7 +50,7 @@ tabris.load(function() {
     var filter = filterText.get("text");
     if (filter) {
       albumsList.set("items", albums.filter(function(album) {
-        return album.name.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
+        return (album.name || "").toLowerCase().indexOf(filter.toLowerCase()) !== -1;
       }).slice(0, 20));
     } else {
       albumsList.set("items", _.shuffle(albums).slice(0, 20));

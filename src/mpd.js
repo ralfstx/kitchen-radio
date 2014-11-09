@@ -50,6 +50,17 @@ exports.play = function(url, callback) {
   });
 };
 
+exports.replace = function(urls, callback) {
+  var cmds = ["clear"];
+  urls.forEach(function(url) {
+    cmds.push("add \"" + url + "\"");
+  });
+  cmds.push("play");
+  client.sendCommands(cmds, function(err, msg) {
+    callback(err, msg);
+  });
+};
+
 exports.stop = function(callback) {
   client.sendCommand("stop", function(err, msg) {
     callback(err, msg);

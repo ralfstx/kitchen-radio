@@ -5,7 +5,7 @@ var Server = require("./server.js");
 var Util = require("./util.js");
 
 exports.list = function(response) {
-  var filepath = musicdb.baseDir + "/stations/.index";
+  var filepath = musicdb.baseDir + "/stations/index.json";
   Fs.exists(filepath, function(exists) {
     if (exists) {
       Server.writeFile(response, filepath);
@@ -44,17 +44,13 @@ function buildIndex(callback) {
 }
 
 function getStationInfo(file, callback) {
-  var path = musicdb.baseDir + "/stations/" + file + "/info";
+  var safe = Util.safeRunner(callback);
+  var path = musicdb.baseDir + "/stations/" + file + "/index.json";
   Fs.exists(path, function(exists) {
     if (exists) {
-//      callback(null, file);
-      Util.readPropFile(path, function(err, data) {
-        if (err) {
-          callback(err);
-        } else {
-          callback(null, data);
-        }
-      });
+      Fs.readFile(path, {encoding: "utf8"}, safe(function(data) {
+        callback(null, JSON.parse(data));
+      }));
     } else {
       callback(new Error("file not found:", path));
     }

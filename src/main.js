@@ -54,6 +54,19 @@ var handlers = {
       Server.writeJson(response, {});
     }));
   },
+  replace: function(path, response, req) {
+    var body = "";
+    req.on("data", function (data) {
+      body += data;
+    });
+    req.on("end", function () {
+      var urls = JSON.parse(body);
+      var safe = Server.safeRunner(response);
+      Mpd.replace(urls, safe(function() {
+        Server.writeJson(response, {});
+      }));
+    });
+  },
   stations: function(path, response) {
     if (path) {
       Server.writeFile(response, Path.join(Config.baseDir, "stations", path));
@@ -83,7 +96,7 @@ Http.createServer(function(request, response) {
     } else {
       var handler = handlers[parts[0]];
       if (handler) {
-        handler(parts[1], response);
+        handler(parts[1], response, request);
       } else {
         Server.writeJson(response, {error: "Not Found: " + parts[0]}, 404);
       }
