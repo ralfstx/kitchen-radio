@@ -19,7 +19,7 @@ var mimetypes = {
   ".ogg": "audio/ogg",
   ".wav": "audio/wav",
   // binary
-  ".json": "application/json",
+  ".json": "application/json; charset=UTF-8",
   ".js": "application/javascript",
   ".pdf": "application/pdf",
   ".xml": "application/xml",
