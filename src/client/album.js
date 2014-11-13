@@ -44,7 +44,7 @@ shared.openAlbumPage = function(album) {
     if ("discs" in index) {
       return Array.prototype.concat.apply([], index.discs.map(function(disc) {
         return disc.tracks.map(function(track) {
-          return disc.path + "/" + track;
+          return disc.path + "/" + track.path;
         });
       }));
     }
