@@ -41,26 +41,25 @@ tabris.load(function() {
     maximum: 1000
   }).appendTo(page);
 
-  var playlistList = tabris.create("List", {
-    linesVisible: true,
+  var playlistList = tabris.create("CollectionView", {
     layoutData: {left: 0, right: 0, top: [slider, 5], bottom: 0},
     itemHeight: 60,
-    template: [
-      {
-        type: "text",
-        binding: "name",
-        left: 10, right: 100, top: 5, bottom: 5,
+    initializeCell: function(cell) {
+      var nameLabel = tabris.create("Label", {
+        layoutData: {left: 10, right: 100, top: 5, bottom: 5},
         foreground: "rgb(74, 74, 74)"
-      },
-      {
-        type: "text",
-        binding: "time",
-        right: 10, top: 5, bottom: 5, width: 80,
+      }).appendTo(cell);
+      var timeLabel = tabris.create("Label", {
+        layoutData: {right: 10, top: 5, bottom: 5, width: 80},
         foreground: "rgb(74, 74, 74)",
         background: "yellow",
-        horizontalAlignment: "RIGHT"
-      }
-    ]
+        alignment: "right"
+      }).appendTo(cell);
+      cell.on("itemchange", function(item) {
+        nameLabel.set("text", item.name);
+        timeLabel.set("text", item.time);
+      });
+    }
   }).appendTo(page);
 
   var playlist;

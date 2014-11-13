@@ -5,7 +5,7 @@ shared.openAlbumPage = function(album) {
 
   var page = tabris.create("Page", {
     title: album.name
-  }).on("resize", layout);
+  }).on("change:bounds", layout);
 
   var coverView = tabris.create("ImageView", {
     image: album.icon,
@@ -13,7 +13,6 @@ shared.openAlbumPage = function(album) {
   }).appendTo(page);
 
   var titleLabel = tabris.create("Label", {
-    wrap: true,
     background: "#cecece"
   }).appendTo(page);
 

@@ -4,9 +4,6 @@
       "src": "lib/tabris.min.js"
     },
     {
-      "src": "lib/domMock.js"
-    },
-    {
       "src": "lib/jquery.min.js"
     },
     {
