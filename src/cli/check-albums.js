@@ -8,73 +8,71 @@ var Util = require("../util");
 
 var ALBUMS = Path.join(Config.baseDir, "albums");
 
-var count = 0;
+var stat = {};
+
 Fs.readdirSync(ALBUMS).forEach(function(file) {
-  if (Fs.statSync(Path.join(ALBUMS, file)).isDirectory()) {
-    checkAlbum(file);
-    count++;
+  var dir = Path.join(ALBUMS, file);
+  if (Fs.statSync(dir).isDirectory()) {
+    checkAlbum(dir);
+    count("albums checked");
   }
 });
-console.log(count + " albums checked");
+for (var key in stat) {
+  console.log(stat[key] + " " + key);
+}
 
-function checkAlbum(path) {
-  var dir = Path.join(ALBUMS, path);
+function count(name, increment) {
+  stat[name] = (stat[name] || 0) + (increment || 1);
+}
+
+function checkAlbum(dir) {
   checkIndex(dir);
-//  checkPlaylist(dir);
   checkCover(dir);
 }
 
 function checkIndex(dir) {
+  var index = createIndex(dir);
   var file = Path.join(dir, "index.json");
-  if (!Fs.existsSync(file)) {
+  if (Fs.existsSync(file)) {
+    var index = JSON.parse(Fs.readFileSync(file, {encoding: "utf-8"}));
+    if (!index.name) {
+      console.log("missing album name for " + dir);
+      count("albums with missing name", 1);
+    }
+  } else {
     var index = createIndex(dir);
     Fs.writeFileSync(file, Util.toJson(index));
   }
 }
 
-function createIndex(dir, info) {
-  var index = info || {};
-  var tracks = findTracks(dir);
+function createIndex(dir) {
+  var index = {};
+  index.name = "";
+  var tracks = getTracksIndex(dir);
   if (tracks.length) {
-    index.tracks = tracks.map(function(path) {
-      return {path: path};
-    });
+    index.tracks = tracks;
   }
-  var discs = Fs.readdirSync(dir).filter(function(file) {
-    return Fs.statSync(Path.join(dir, file)).isDirectory();
-  }).map(function(subdir) {
-    return {path: subdir, tracks: findTracks(Path.join(dir, subdir))};
-  }).filter(function(disc) {
-    return disc.tracks.length > 0;
-  });
+  var discs = getDiscsIndex(dir);
   if (discs.length) {
     index.discs = discs;
   }
   return index;
 }
 
-function checkPlaylist(dir) {
-  var file = Path.join(dir, "album.m3u");
-  if (!Fs.existsSync(file)) {
-    var playlist = createPlaylist(dir);
-    if (playlist) {
-      Fs.writeFileSync(file, playlist.join("\n"));
-    } else {
-      console.warn("Missing: " + file);
+function getDiscsIndex(dir) {
+  return getSubDirs(dir).map(function(subdir) {
+    var tracks = getTracksIndex(Path.join(dir, subdir));
+    if (tracks.length) {
+      return {path: subdir, tracks: tracks};
     }
-  }
+  }).filter(function(disc) {
+    return !!disc;
+  });
 }
 
-function createPlaylist(dir) {
-  var tracks = findTracks(dir);
-  if (tracks.length) {
-    return tracks;
-  }
-  var subdirs = Fs.readdirSync(dir).filter(function(file) {
-    return Fs.statSync(Path.join(dir, file)).isDirectory();
-  });
-  subdirs.map(function(subdir) {
-    findTracks(Path.join(dir, subdir));
+function getTracksIndex(dir) {
+  return findTracks(dir).map(function(path) {
+    return {path: path};
   });
 }
 
@@ -109,5 +107,11 @@ function resizeCover(srcPath, dstPath, size) {
       console.error(err);
     else
       console.log("created " + dstPath);
+  });
+}
+
+function getSubDirs(dir) {
+  return Fs.readdirSync(dir).filter(function(file) {
+    return Fs.statSync(Path.join(dir, file)).isDirectory();
   });
 }
