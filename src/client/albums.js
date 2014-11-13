@@ -1,6 +1,10 @@
 
 tabris.load(function() {
 
+  // Temporary fix for missing modify event
+  util.extend(tabris.Text._listen, {"modify": "Modify"});
+  util.extend(tabris.Text._trigger, {"Modify": "modify"});
+
   var page = tabris.create("Page", {
     title: "Collection",
     topLevel: true
