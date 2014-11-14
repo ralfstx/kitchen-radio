@@ -35,7 +35,7 @@ function getMimeType(filename) {
 
 exports.writeFile = function(response, filepath) {
   var path = Path.normalize(filepath);
-  if (path.indexOf("..") !== -1) {
+  if (path.indexOf("../") !== -1) {
     throw new Error("Illegal path " + path);
   }
   Fs.exists(path, function(exists) {
