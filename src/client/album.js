@@ -42,22 +42,31 @@ shared.openAlbumPage = function(album) {
 
   function play() {
     var url = config.SERVER + "/replace";
-    var data = getTracks().map(function(track) {
-      return config.SERVER + "/albums/" + album.path + "/" + encodeURIComponent(track.path);
-    });
+    var data = getTracks().map(getTrackUrl);
     $.post(url, JSON.stringify(data));
   }
 
+  function getTrackUrl(track) {
+    var path  = track.disc ? track.disc.path + "/" + track.path : track.path;
+    return config.SERVER + "/albums/" + album.path + "/" + encodeURIComponent(path);
+  }
+
   function getTracks() {
-    if ("discs" in index) {
-      return Array.prototype.concat.apply([], index.discs.map(function(disc) {
-        return disc.tracks.map(function(track) {
-          track.path = disc.path + "/" + track.path;
-          return track;
-        });
-      }));
+    var tracks = [];
+    if (index && index.discs) {
+      index.discs.forEach(function(disc) {
+        if (disc.tracks) {
+          disc.tracks.forEach(function(track) {
+            track.disc = disc;
+          });
+          tracks = tracks.concat(disc.tracks);
+        }
+      });
     }
-    return index.tracks;
+    if (index && index.tracks) {
+      tracks = tracks.concat(index.tracks);
+    }
+    return tracks;
   }
 
   function layout() {
