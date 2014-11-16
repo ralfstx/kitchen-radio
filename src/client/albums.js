@@ -27,9 +27,9 @@ tabris.load(function() {
         layoutData: {left: 80, right: 10, top: 5, bottom: 5},
         foreground: "rgb(74, 74, 74)"
       }).appendTo(cell);
-      cell.on("itemchange", function(item) {
-        iconView.set("image", item.icon);
-        nameLabel.set("text", item.name);
+      cell.on("itemchange", function(album) {
+        iconView.set("image", getCoverImage(album));
+        nameLabel.set("text", album.name);
       });
     }
   }).on("selection", function(event) {
@@ -39,16 +39,13 @@ tabris.load(function() {
   var albums;
 
   $.getJSON(config.SERVER + "/albums", function(result) {
-    albums = result.map(function(item) {
-      return {
-        name: item.name,
-        path: item.path,
-        url: config.SERVER + "/albums/" + item.path,
-        icon: {src: config.SERVER + "/albums/" + item.path + "/cover-250.jpg", width: 250, height: 250}
-      };
-    });
+    albums = result;
     showAlbums();
   });
+
+  function getCoverImage(album) {
+    return {src: config.SERVER + "/albums/" + album.path + "/cover-250.jpg", width: 250, height: 250};
+  }
 
   function showAlbums() {
     var filter = filterText.get("text");
