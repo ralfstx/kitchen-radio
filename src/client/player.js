@@ -1,5 +1,7 @@
+var $ = require("./lib/jquery.min.js");
+var config = require("./config.js");
 
-tabris.load(function() {
+exports.createPage = function() {
 
   var page = tabris.create("Page", {
     title: "Player",
@@ -67,8 +69,6 @@ tabris.load(function() {
 
   updateStatus();
 
-  page.open();
-
   function updateStatus() {
     $.getJSON(config.SERVER + "/status", function(status) {
       statusLabel.set("text", status.state);
@@ -113,7 +113,9 @@ tabris.load(function() {
     return min + (sec < 10 ? ":0" : ":") + sec;
   }
 
-});
+  return page;
+
+};
 
 /*
 

@@ -1,5 +1,8 @@
+var $ = require("./lib/jquery.min.js");
+var _ = require("./lib/underscore-min.js");
+var config = require("./config.js");
 
-shared.openAlbumPage = function(album) {
+exports.createAlbumPage = function(album) {
 
   var page = tabris.create("Page", {
     title: album.name
@@ -16,7 +19,7 @@ shared.openAlbumPage = function(album) {
         layoutData: {left: 10, right: 10, top: 5, bottom: 5}
       }).appendTo(cell);
       cell.on("itemchange", function(track) {
-        label.set("text", track.name || track.path);
+        label.set("text", track.title || track.path);
       });
     }
   }).on("selection", function(event) {
@@ -29,8 +32,6 @@ shared.openAlbumPage = function(album) {
   }).on("selection", function() {
     play(getTracks());
   }).appendTo(page);
-
-  page.open();
 
   $.getJSON(config.SERVER + "/albums/" + album.path + "/index.json", function(result) {
     _.extend(album, result);
@@ -90,5 +91,7 @@ shared.openAlbumPage = function(album) {
       trackListView.set("layoutData", {left: 0, top: coverSize, right: 0, bottom: 0});
     }
   }
+
+  return page;
 
 };

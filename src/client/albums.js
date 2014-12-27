@@ -1,9 +1,9 @@
+var $ = require("./lib/jquery.min.js");
+var _ = require("./lib/underscore-min.js");
+var config = require("./config.js");
+var AlbumPage = require("./album.js");
 
-tabris.load(function() {
-
-  // Temporary fix for missing modify event
-  util.extend(tabris.Text._listen, {"modify": "Modify"});
-  util.extend(tabris.Text._trigger, {"Modify": "modify"});
+exports.createPage = function() {
 
   var page = tabris.create("Page", {
     title: "Collection",
@@ -13,7 +13,7 @@ tabris.load(function() {
   var filterText = tabris.create("Text", {
     layoutData: {left: 0, right: 0, top: 0},
     message: "filter"
-  }).on("modify", showAlbums).appendTo(page);
+  }).on("change:text", showAlbums).appendTo(page);
 
   var albumsList = tabris.create("CollectionView", {
     layoutData: {left: 0, right: 0, top: [filterText, 0], bottom: 0},
@@ -33,7 +33,7 @@ tabris.load(function() {
       });
     }
   }).on("selection", function(event) {
-    shared.openAlbumPage(event.item);
+    AlbumPage.createAlbumPage(event.item).open();
   }).appendTo(page);
 
   var albums;
@@ -58,4 +58,4 @@ tabris.load(function() {
     }
   }
 
-});
+};

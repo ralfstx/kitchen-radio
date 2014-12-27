@@ -1,5 +1,7 @@
+var $ = require("./lib/jquery.min.js");
+var config = require("./config.js");
 
-tabris.load(function() {
+exports.createPage = function() {
 
   var page = tabris.create("Page", {
     title: "Radio Stations",
@@ -40,10 +42,12 @@ tabris.load(function() {
       };
     }));
   }
- 
+
   function tuneIn(station) {
     $.getJSON(config.SERVER + "/play/" + station.stream, function() {
     });
   }
 
-});
+  return page;
+
+};

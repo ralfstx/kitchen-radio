@@ -23,12 +23,8 @@
   "browser": true, // globals exposed by modern browsers e.g. `window`, `document`, etc.
   "globals": {
     "tabris": false,
-    "$": false,
-    "_": false,
     "module": false,
     "exports": false,
-    "require": false,
-    "config": true,
-    "shared": true
+    "require": false
   }
 }
