@@ -52,9 +52,9 @@ exports.createPage = function() {
     if (filter) {
       albumsList.set("items", albums.filter(function(album) {
         return (album.name || "").toLowerCase().indexOf(filter.toLowerCase()) !== -1;
-      }).slice(0, 20));
+      }));
     } else {
-      albumsList.set("items", _.shuffle(albums).slice(0, 20));
+      albumsList.set("items", _.shuffle(albums));
     }
   }
 
