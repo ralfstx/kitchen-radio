@@ -54,8 +54,9 @@ exports.createAlbumPage = function(album) {
   }
 
   function getTrackUrl(track) {
-    var path  = track.disc ? track.disc.path + "/" + track.path : track.path;
-    return config.SERVER + "/albums/" + album.path + "/" + encodeURIComponent(path);
+    function notEmpty(value) { return !!value; }
+    var parts = [album.path, track.disc ? track.disc.path : "", track.path];
+    return config.SERVER + "/albums/" + parts.filter(notEmpty).map(encodeURIComponent).join("/");
   }
 
   function getTracks() {
