@@ -15,16 +15,41 @@ exports.createAlbumPage = function(album) {
   var trackListView = tabris.create("CollectionView", {
     itemHeight: 35,
     initializeCell: function(cell) {
-      var label = tabris.create("Label", {
-        layoutData: {left: 10, right: 10, top: 5, bottom: 5}
+      var numberLabel = tabris.create("Label", {
+        layoutData: {left: 10, width: 30, top: 5, bottom: 5},
+        font: "15px sans-serif",
+        alignment: "right"
       }).appendTo(cell);
-      cell.on("itemchange", function(track) {
-        label.set("text", track.title || track.path);
+      var titleLabel = tabris.create("Label", {
+        layoutData: {left: 45, right: 85, top: 5, bottom: 5},
+        font: "15px sans-serif"
+      }).appendTo(cell);
+      var timeLabel = tabris.create("Label", {
+        layoutData: {right: 10, width: 70, top: 5, bottom: 5},
+        font: "15px sans-serif",
+        alignment: "right"
+      }).appendTo(cell);
+      cell.on("itemchange", function(item) {
+        if (item.type === "track") {
+          numberLabel.set("text", item.number + ".");
+          titleLabel.set("text", item.title || item.path);
+          titleLabel.set("font", "15px sans-serif");
+        } else {
+          numberLabel.set("text", "");
+          var isMulti = item.album.discs.length > 1;
+          titleLabel.set("text", isMulti ? "Disc " + item.number : "");
+          titleLabel.set("font", "bold 18px sans-serif");
+        }
+        timeLabel.set("text", formatLength(item.length));
       });
     }
   }).on("selection", function(event) {
-    var track = event.item;
-    play([track]);
+    var item = event.item;
+    if (item.type === "track") {
+      play([item]);
+    } else {
+      play(item.tracks);
+    }
   }).appendTo(page);
 
   var playButton = tabris.create("Button", {
@@ -41,7 +66,7 @@ exports.createAlbumPage = function(album) {
   function update() {
     page.set("title", album.name || "unknown album");
     coverView.set("image", getCoverImage());
-    trackListView.set("items", getTracks());
+    trackListView.set("items", getItems());
   }
 
   function play(tracks) {
@@ -55,26 +80,37 @@ exports.createAlbumPage = function(album) {
 
   function getTrackUrl(track) {
     function notEmpty(value) { return !!value; }
-    var parts = [album.path, track.disc ? track.disc.path : "", track.path];
+    var parts = [album.path, track.disc && track.disc !== track.album ? track.disc.path : "", track.path];
     return config.SERVER + "/albums/" + parts.filter(notEmpty).map(encodeURIComponent).join("/");
   }
 
-  function getTracks() {
-    var tracks = [];
-    if (album && album.discs) {
-      album.discs.forEach(function(disc) {
+  function getItems() {
+    var items = [];
+    if (album) {
+      album.discs = album.discs || [album];
+      album.discs.forEach(function(disc, index) {
+        disc.album = album;
+        disc.number = index + 1;
+        disc.type = "disc";
+        items.push(disc);
         if (disc.tracks) {
-          disc.tracks.forEach(function(track) {
+          disc.tracks.forEach(function(track, index) {
+            track.album = album;
             track.disc = disc;
+            track.number = index + 1;
+            track.type = "track";
           });
-          tracks = tracks.concat(disc.tracks);
+          items = items.concat(disc.tracks);
         }
       });
     }
-    if (album && album.tracks) {
-      tracks = tracks.concat(album.tracks);
-    }
-    return tracks;
+    return items;
+  }
+
+  function getTracks() {
+    return getItems().filter(function(item) {
+      return item.type === "track";
+    });
   }
 
   function layout() {
@@ -91,6 +127,18 @@ exports.createAlbumPage = function(album) {
       playButton.set("layoutData", {right: 20, top: 20});
       trackListView.set("layoutData", {left: 0, top: coverSize, right: 0, bottom: 0});
     }
+  }
+
+  function formatLength(seconds) {
+    if (!seconds) {
+      return "";
+    }
+    function pad(n) {
+      return n < 10 ? "0" + n : "" + n;
+    }
+    var m = Math.floor(seconds / 60);
+    var s = Math.floor(seconds - (m * 60));
+    return m + ":" + pad(s);
   }
 
   return page;
