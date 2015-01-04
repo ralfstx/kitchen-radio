@@ -25,6 +25,7 @@
     "tabris": false,
     "module": false,
     "exports": false,
-    "require": false
+    "require": false,
+    "Promise": true
   }
 }

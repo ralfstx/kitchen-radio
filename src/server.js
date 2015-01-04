@@ -2,7 +2,6 @@ var Fs = require("fs");
 var Path = require("path");
 var Util = require("./lib/util");
 var Logger = require("./lib/logger");
-var Server = require("./server");
 
 var mimetypes = {
   // text
@@ -33,7 +32,12 @@ function getMimeType(filename) {
   return mimetypes[Path.extname(filename)] || mimetypes.other;
 }
 
-exports.writeFile = function(response, filepath) {
+exports.writeFile = writeFile;
+exports.writeJson = writeJson;
+exports.safeRunner = safeRunner;
+exports.handleError = handleError;
+
+function writeFile(response, filepath) {
   var path = Path.normalize(filepath);
   if (path.indexOf("../") !== -1) {
     throw new Error("Illegal path " + path);
@@ -56,16 +60,21 @@ exports.writeFile = function(response, filepath) {
       response.end("Not Found: " + path + "\n");
     }
   });
-};
+}
 
-exports.writeJson = function(response, data, code) {
+function writeJson(response, data, code) {
   response.writeHead(code || 200, {"Content-Type": "application/json; charset: utf-8"});
   response.end(JSON.stringify(data, null, " "));
-};
+}
 
-exports.safeRunner = function(response) {
+function safeRunner(response) {
   return Util.safeRunner(function(err) {
     Logger.error(err.stack ? err.stack : err.message);
-    Server.writeJson(response, {error: err.message}, 500);
+    writeJson(response, {error: err.message}, 500);
   });
-};
+}
+
+function handleError(response, err) {
+  Logger.error(err.stack ? err.stack : err.message);
+  writeJson(response, {error: err.message}, 500);
+}

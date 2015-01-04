@@ -1,58 +1,40 @@
-var Fs = require("fs");
 
-var musicdb = require("./lib/config.js");
+var Promise = require("bluebird");
+var Fs = Promise.promisifyAll(require("fs"));
+var Path = require("path");
+
+var Config = require("./lib/config.js");
 var Util = require("./lib/util.js");
+var Files = require("./lib/files");
+
 var Server = require("./server.js");
 
+var stationsDir = Path.join(Config.baseDir, "stations");
+
 exports.list = function(response) {
-  var filepath = musicdb.baseDir + "/stations/index.json";
-  Fs.exists(filepath, function(exists) {
-    if (exists) {
-      Server.writeFile(response, filepath);
-    } else {
-      var safe = Server.safeRunner(response);
-      buildIndex(safe(function(index) {
-        Fs.writeFile(filepath, Util.toJson(index), safe(function() {
-          Server.writeFile(response, filepath);
-        }));
-      }));
+  var filepath = Path.join(stationsDir, "index.json");
+  return Files.statAsyncSafe(filepath).then(function(stats) {
+    if (!stats) {
+      return buildIndex().then(function(index) {
+        return Fs.writeFileAsync(filepath, Util.toJson(index));
+      });
     }
+  }).then(function() {
+    return Server.writeFile(response, filepath);
   });
 };
 
-function buildIndex(callback) {
-  var safe = Util.safeRunner(callback);
-  var path = musicdb.baseDir + "/stations/";
-  var index = [];
-  Fs.readdir(path, safe(function(files) {
-    Util.walk(files, function(file, next) {
-      var filepath = path + file;
-      Fs.stat(filepath, safe(function(stats) {
-        if (stats.isDirectory()) {
-          getStationInfo(file, safe(function(info) {
-            index.push(info);
-            next();
-          }));
-        } else {
-          next();
-        }
-      }));
-    }, function() {
-      callback(null, index);
-    });
-  }));
+function buildIndex() {
+  return Files.getSubDirs(stationsDir).map(function(dir) {
+    return getStationInfo(dir);
+  });
 }
 
-function getStationInfo(file, callback) {
-  var safe = Util.safeRunner(callback);
-  var path = musicdb.baseDir + "/stations/" + file + "/index.json";
-  Fs.exists(path, function(exists) {
-    if (exists) {
-      Fs.readFile(path, {encoding: "utf8"}, safe(function(data) {
-        callback(null, JSON.parse(data));
-      }));
-    } else {
-      callback(new Error("file not found:", path));
-    }
+function getStationInfo(dir) {
+  var path = Path.join(stationsDir, dir, "index.json");
+  return Files.ensureIsFile(path).then(function() {
+    return Files.readJsonFile(path).then(function(data) {
+      return data;
+    });
   });
 }

@@ -7,6 +7,7 @@ var Config = require("./config");
 var logger = new Winston.Logger({
   transports: [
     new Winston.transports.Console({
+      handleExceptions: true,
       level: "debug",
       colorize: true
     }),
