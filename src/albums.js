@@ -12,34 +12,54 @@ var Server = require("./server.js");
 
 var albumsDir = Path.join(Config.baseDir, "albums");
 
-exports.list = function(response) {
-  var filepath = Path.join(albumsDir, "index.json");
-  return Files.statAsyncSafe(filepath).then(function(stats) {
-    if (!stats) {
-      return buildIndex().then(function(index) {
-        return Fs.writeFileAsync(filepath, Util.toJson(index));
-      });
-    }
-  }).then(function() {
-    return Server.writeFile(response, filepath);
-  });
+exports.get = function(response, path) {
+  return path ? writeAlbumFile(response, path) : writeAlbumsList(response);
 };
 
-function buildIndex() {
-  return Files.getSubDirs(albumsDir).map(function(dir) {
-    return getAlbumInfo(dir);
+function writeAlbumFile(response, path) {
+  var file = Path.join(albumsDir, path);
+  return Files.statAsyncSafe(file).then(function(stats) {
+    if (!stats) {
+      throw new Error("Not found: '" + file + "'");
+    } else if (stats.isDirectory()) {
+      var indexFile = Path.join(file, "index.json");
+      return Files.ensureIsFile(indexFile).then(function() {
+        return Server.writeFile(response, indexFile);
+      });
+    } else {
+      return Server.writeFile(response, file);
+    }
   });
 }
 
-function getAlbumInfo(dir) {
-  var path = Path.join(albumsDir, dir, "index.json");
-  return Files.ensureIsFile(path).then(function() {
-    return Files.readJsonFile(path).then(function(data) {
+function writeAlbumsList(response) {
+  var indexFile = Path.join(albumsDir, "index.json");
+  return Files.statAsyncSafe(indexFile).then(function(stats) {
+    if (!stats) {
+      return buildIndex().then(function(index) {
+        return Fs.writeFileAsync(indexFile, Util.toJson(index));
+      });
+    }
+  }).then(function() {
+    return Server.writeFile(response, indexFile);
+  });
+}
+
+function buildIndex() {
+  return Files.getSubDirs(albumsDir).map(function(subdir) {
+    return getAlbumInfo(subdir);
+  });
+}
+
+function getAlbumInfo(subdir) {
+  var indexFile = Path.join(albumsDir, subdir, "index.json");
+  return Files.ensureIsFile(indexFile).then(function() {
+    return Files.readJsonFile(indexFile).then(function(data) {
       if (!data.name) {
-        Logger.warn("Missing album name for '" + dir + "'");
+        Logger.warn("Missing album name for '" + subdir + "'");
       }
       return {
-        path: dir,
+        path: subdir,
         name: data.name
       };
     });

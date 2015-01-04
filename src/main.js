@@ -9,8 +9,6 @@ var Server = require("./server.js");
 var Stations = require("./stations.js");
 var Albums = require("./albums.js");
 
-var port = 8080;
-
 var handlers = {
   status: function(path, response) {
     var safe = Server.safeRunner(response);
@@ -68,18 +66,10 @@ var handlers = {
     });
   },
   stations: function(path, response) {
-    if (path) {
-      Server.writeFile(response, Path.join(Config.baseDir, "stations", path));
-    } else {
-      Stations.list(response);
-    }
+    return Stations.get(response, path);
   },
   albums: function(path, response) {
-    if (path) {
-      Server.writeFile(response, Path.join(Config.baseDir, "albums", path));
-    } else {
-      Albums.list(response);
-    }
+    return Albums.get(response, path);
   },
   client: function(path, response) {
     Server.writeFile(response, Path.join("client", path));
@@ -105,9 +95,9 @@ Http.createServer(function(request, response) {
     Logger.error(error.stack ? error.stack : error.message);
     Server.writeJson(response, {error: error.message}, 500);
   }
-}).listen(port);
+}).listen(Config.port);
 
-Logger.info("Started on port %d", port);
+Logger.info("Started on port %d", Config.port);
 
 function splitPath(path) {
   var start = (path.substr(0, 1) === "/") ? 1 : 0;

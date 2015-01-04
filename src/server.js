@@ -1,7 +1,9 @@
 var Fs = require("fs");
 var Path = require("path");
+
 var Util = require("./lib/util");
 var Logger = require("./lib/logger");
+var Files = require("./lib/files");
 
 var mimetypes = {
   // text
@@ -40,24 +42,22 @@ exports.handleError = handleError;
 function writeFile(response, filepath) {
   var path = Path.normalize(filepath);
   if (path.indexOf("../") !== -1) {
-    throw new Error("Illegal path " + path);
+    throw new Error("Illegal path '" + path + "'");
   }
-  Fs.exists(path, function(exists) {
-    if (exists) {
-      Fs.stat(path, function(err, stats) {
-        if (stats.isFile()) {
-          response.writeHead(200, {"Content-Type": getMimeType(path)});
-          // omit Content-Length header to enable chunked transfer encoding
-          // response.writeHead(200, {'Content-Length': stats.size});
-          Fs.createReadStream(path).pipe(response);
-        } else {
-          response.writeHead(403, {"Content-Type": "text/plain"});
-          response.end("Not a File: " + path + "\n");
-        }
-      });
-    } else {
+  return Files.statAsyncSafe(path).then(function(stats) {
+    if (!stats) {
       response.writeHead(404, {"Content-Type": "text/plain"});
       response.end("Not Found: " + path + "\n");
+      throw new Error("Not Found: " + path + "\n");
+    } else if (!stats.isFile()) {
+      response.writeHead(403, {"Content-Type": "text/plain"});
+      response.end("Not a File: " + path + "\n");
+      throw new Error("Not a File: " + path + "\n");
+    } else {
+      response.writeHead(200, {"Content-Type": getMimeType(path)});
+      // omit Content-Length header to enable chunked transfer encoding
+      // response.writeHead(200, {'Content-Length': stats.size});
+      Fs.createReadStream(path).pipe(response);
     }
   });
 }
