@@ -4,7 +4,7 @@ var Path = require("path");
 
 var Config = require("./lib/config.js");
 var Logger = require("./lib/logger.js");
-var Mpd = require("./lib/mpd");
+var Player = require("./lib/player");
 var Server = require("./server.js");
 var Stations = require("./stations.js");
 var Albums = require("./albums.js");
@@ -14,43 +14,43 @@ var port = 8080;
 var handlers = {
   status: function(path, response) {
     var safe = Server.safeRunner(response);
-    Mpd.status(safe(function(status) {
+    Player.status(safe(function(status) {
       Server.writeJson(response, status);
     }));
   },
   playlist: function(path, response) {
     var safe = Server.safeRunner(response);
-    Mpd.playlist(safe(function(status) {
+    Player.playlist(safe(function(status) {
       Server.writeJson(response, status);
     }));
   },
   play: function(path, response) {
     var safe = Server.safeRunner(response);
-    Mpd.play(path, safe(function() {
+    Player.play(path, safe(function() {
       Server.writeJson(response, {});
     }));
   },
   stop: function(path, response) {
     var safe = Server.safeRunner(response);
-    Mpd.stop(safe(function() {
+    Player.stop(safe(function() {
       Server.writeJson(response, {});
     }));
   },
   pause: function(path, response) {
     var safe = Server.safeRunner(response);
-    Mpd.pause(safe(function() {
+    Player.pause(safe(function() {
       Server.writeJson(response, {});
     }));
   },
   prev: function(path, response) {
     var safe = Server.safeRunner(response);
-    Mpd.prev(safe(function() {
+    Player.prev(safe(function() {
       Server.writeJson(response, {});
     }));
   },
   next: function(path, response) {
     var safe = Server.safeRunner(response);
-    Mpd.next(safe(function() {
+    Player.next(safe(function() {
       Server.writeJson(response, {});
     }));
   },
@@ -62,7 +62,7 @@ var handlers = {
     req.on("end", function () {
       var urls = JSON.parse(body);
       var safe = Server.safeRunner(response);
-      Mpd.replace(urls, safe(function() {
+      Player.replace(urls, safe(function() {
         Server.writeJson(response, {});
       }));
     });

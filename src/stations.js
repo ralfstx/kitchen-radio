@@ -1,8 +1,8 @@
 var Fs = require("fs");
 
 var musicdb = require("./lib/config.js");
-var Server = require("./lib/server.js");
-var Util = require("./util.js");
+var Util = require("./lib/util.js");
+var Server = require("./server.js");
 
 exports.list = function(response) {
   var filepath = musicdb.baseDir + "/stations/index.json";
