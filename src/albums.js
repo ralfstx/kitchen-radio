@@ -1,9 +1,9 @@
 var Fs = require("fs");
 var Path = require("path");
 
-var Config = require("./config.js");
+var Config = require("./lib/config.js");
+var Util = require("./lib/util.js");
 var Server = require("./server.js");
-var Util = require("./util.js");
 
 exports.list = function(response) {
   var filepath = Config.baseDir + "/albums/index.json";

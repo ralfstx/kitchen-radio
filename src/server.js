@@ -1,7 +1,7 @@
 var Fs = require("fs");
 var Path = require("path");
-var Util = require("./util");
-var Logger = require("./logger");
+var Util = require("./lib/util");
+var Logger = require("./lib/logger");
 var Server = require("./server");
 
 var mimetypes = {

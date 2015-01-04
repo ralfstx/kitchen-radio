@@ -2,9 +2,9 @@ var Http = require("http");
 var Url = require("url");
 var Path = require("path");
 
-var Config = require("./config.js");
-var Logger = require("./logger.js");
-var Mpd = require("./mpd");
+var Config = require("./lib/config.js");
+var Logger = require("./lib/logger.js");
+var Mpd = require("./lib/mpd");
 var Server = require("./server.js");
 var Stations = require("./stations.js");
 var Albums = require("./albums.js");

@@ -1,7 +1,7 @@
 var Fs = require("fs");
 
-var musicdb = require("./config.js");
-var Server = require("./server.js");
+var musicdb = require("./lib/config.js");
+var Server = require("./lib/server.js");
 var Util = require("./util.js");
 
 exports.list = function(response) {
