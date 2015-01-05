@@ -12,7 +12,7 @@ var Server = require("./server.js");
 
 var albumsDir = Path.join(Config.baseDir, "albums");
 
-exports.get = function(response, path) {
+exports.get = function(request, response, path) {
   return path ? writeAlbumFile(response, path) : writeAlbumsList(response);
 };
 

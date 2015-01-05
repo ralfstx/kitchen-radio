@@ -1,29 +1,53 @@
-var mpd = require("mpd");
+var Promise = require("bluebird");
+var Mpd = require("mpd");
+
 var Util = require("./util");
+var Config = require("./config");
 
 var mpdClient;
-
-var config = {
-  port: 6600,
-  host: "localhost"
-};
 
 connectMpd();
 
 function connectMpd() {
-  mpdClient = mpd.connect(config).on("end", connectMpd);
+  var config = {
+    host: Config.mpdHost || "localhost",
+    port: Config.mpdPort || 6600
+  };
+  mpdClient = Mpd.connect(config).on("end", connectMpd);
 }
 
-exports.status = function(callback) {
-  mpdClient.sendCommand(mpd.cmd("status", []), function(err, msg) {
-    if (err) return callback(err);
-    callback(undefined, Util.readProps(msg));
+function sendCommand(command) {
+  return new Promise(function(resolve, reject) {
+    mpdClient.sendCommand(command, function(err) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve.apply(this, Array.prototype.slice.call(arguments, 1));
+      }
+    });
+  });
+}
+
+function sendCommands(commands) {
+  return new Promise(function(resolve, reject) {
+    mpdClient.sendCommands(commands, function(err) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve.apply(this, Array.prototype.slice.call(arguments, 1));
+      }
+    });
+  });
+}
+
+exports.status = function() {
+  return sendCommand(Mpd.cmd("status", [])).then(function(msg) {
+    return Util.readProps(msg);
   });
 };
 
-exports.playlist = function(callback) {
-  mpdClient.sendCommand(mpd.cmd("playlistinfo", []), function(err, msg) {
-    if (err) return callback(err);
+exports.playlist = function() {
+  return sendCommand(Mpd.cmd("playlistinfo", [])).then(function(msg) {
     var playlist = [];
     var entry = {};
     Util.readProps(msg, function(key, value) {
@@ -33,53 +57,41 @@ exports.playlist = function(callback) {
       }
       entry[key] = value;
     });
-    callback(undefined, playlist);
+    return playlist;
   });
 };
 
-exports.play = function(url, callback) {
+exports.play = function(url) {
   var cmds = ["play"];
   if (url) {
     var ext = url.substr(-4).toLowerCase();
     var isPlaylist = ext === ".m3u" || ext === ".pls" || ext === ".asx";
     cmds = ["clear", (isPlaylist ? "load " : "add ") + url, "play"];
   }
-  mpdClient.sendCommands(cmds, function(err, msg) {
-    callback(err, msg);
-  });
+  return sendCommands(cmds);
 };
 
-exports.replace = function(urls, callback) {
+exports.replace = function(urls) {
   var cmds = ["clear"];
   urls.forEach(function(url) {
     cmds.push("add \"" + url + "\"");
   });
   cmds.push("play");
-  mpdClient.sendCommands(cmds, function(err, msg) {
-    callback(err, msg);
-  });
+  return sendCommands(cmds);
 };
 
-exports.stop = function(callback) {
-  mpdClient.sendCommand("stop", function(err, msg) {
-    callback(err, msg);
-  });
+exports.stop = function() {
+  return sendCommand("stop");
 };
 
-exports.pause = function(callback) {
-  mpdClient.sendCommand("pause", function(err, msg) {
-    callback(err, msg);
-  });
+exports.pause = function() {
+  return sendCommand("pause");
 };
 
-exports.prev = function(callback) {
-  mpdClient.sendCommand("previous", function(err, msg) {
-    callback(err, msg);
-  });
+exports.prev = function() {
+  return sendCommand("previous");
 };
 
-exports.next = function(callback) {
-  mpdClient.sendCommand("next", function(err, msg) {
-    callback(err, msg);
-  });
+exports.next = function() {
+  return sendCommand("next");
 };

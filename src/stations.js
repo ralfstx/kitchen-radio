@@ -11,7 +11,7 @@ var Server = require("./server.js");
 
 var stationsDir = Path.join(Config.baseDir, "stations");
 
-exports.get = function(response, path) {
+exports.get = function(request, response, path) {
   return path ? writeStationFile(response, path) : writeStationsList(response);
 };
 

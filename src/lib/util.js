@@ -3,7 +3,6 @@ var Fs = require("fs");
 exports.walk = walk;
 exports.readProps = readProps;
 exports.readPropFile = readPropFile;
-exports.safeRunner = safeRunner;
 exports.toJson = toJson;
 
 function walk(list, fn, callback) {
@@ -52,18 +51,6 @@ function readPropFile(path, callback) {
       callback(new Error(err2.message + " in file " + path));
     }
   });
-}
-
-function safeRunner(errorHandler) {
-  return function(handler) {
-    return function(err) {
-      if (err) {
-        errorHandler(err);
-      } else {
-        handler.apply(null, Array.prototype.slice.call(arguments, 1));
-      }
-    };
-  };
 }
 
 function toJson(data) {

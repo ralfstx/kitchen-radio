@@ -1,7 +1,6 @@
 var Fs = require("fs");
 var Path = require("path");
 
-var Util = require("./lib/util");
 var Logger = require("./lib/logger");
 var Files = require("./lib/files");
 
@@ -36,7 +35,6 @@ function getMimeType(filename) {
 
 exports.writeFile = writeFile;
 exports.writeJson = writeJson;
-exports.safeRunner = safeRunner;
 exports.handleError = handleError;
 
 function writeFile(response, filepath) {
@@ -65,13 +63,6 @@ function writeFile(response, filepath) {
 function writeJson(response, data, code) {
   response.writeHead(code || 200, {"Content-Type": "application/json; charset: utf-8"});
   response.end(JSON.stringify(data, null, " "));
-}
-
-function safeRunner(response) {
-  return Util.safeRunner(function(err) {
-    Logger.error(err.stack ? err.stack : err.message);
-    writeJson(response, {error: err.message}, 500);
-  });
 }
 
 function handleError(response, err) {
