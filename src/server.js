@@ -1,6 +1,10 @@
-var Fs = require("fs");
+var Promise = require("bluebird");
+var Fs = Promise.promisifyAll(require("fs"));
 var Path = require("path");
+var Http = require("http");
+var Url = require("url");
 
+var Config = require("./lib/config.js");
 var Logger = require("./lib/logger");
 var Files = require("./lib/files");
 
@@ -33,9 +37,72 @@ function getMimeType(filename) {
   return mimetypes[Path.extname(filename)] || mimetypes.other;
 }
 
+exports.start = start;
+exports.addHandler = addHandler;
+exports.readBody = readBody;
 exports.writeFile = writeFile;
 exports.writeJson = writeJson;
-exports.handleError = handleError;
+
+var handlers = {
+  "": function(request, response) {
+    writeJson(response, {message: "Hello!"});
+  }
+};
+
+function start() {
+  Http.createServer(handleRequest).listen(Config.port);
+  Logger.info("Started on port %d", Config.port);
+}
+
+function addHandler(prefix, handler) {
+  var old = handlers[prefix];
+  handlers[prefix] = handler;
+  return old;
+}
+
+function handleRequest(request, response) {
+  return Promise.resolve().then(function() {
+    var urlpath = getUrlPath(request);
+    Logger.debug("request %s", urlpath);
+    var parts = splitPath(urlpath);
+    var handler = handlers[parts[0]];
+    if (handler) {
+      return handler(request, response, parts[1]);
+    } else {
+      writeJson(response, {error: "Not Found: " + parts[0]}, 404);
+    }
+  }).catch(function(err) {
+    Logger.error(err.stack || err.message || err);
+    writeJson(response, {error: err.message}, 500);
+  });
+}
+
+function getUrlPath(request) {
+  return decodeURIComponent(Url.parse(request.url).pathname).substr(1);
+}
+
+function splitPath(path) {
+  var start = (path.substr(0, 1) === "/") ? 1 : 0;
+  var index = path.indexOf("/", start);
+  var head = path.substr(start, index === -1 ? path.length : index);
+  var tail = index === -1 ? "" : path.substr(index + 1, path.length);
+  return [head, tail];
+}
+
+function readBody(request) {
+  return new Promise(function(resolve, reject) {
+    var body = "";
+    request.on("data", function (data) {
+      body += data;
+    });
+    request.on("end", function () {
+      resolve(body);
+    });
+    request.on("error", function (err) {
+      reject(err);
+    });
+  });
+}
 
 function writeFile(response, filepath) {
   var path = Path.normalize(filepath);
@@ -63,9 +130,4 @@ function writeFile(response, filepath) {
 function writeJson(response, data, code) {
   response.writeHead(code || 200, {"Content-Type": "application/json; charset: utf-8"});
   response.end(JSON.stringify(data, null, " "));
-}
-
-function handleError(response, err) {
-  Logger.error(err.stack ? err.stack : err.message);
-  writeJson(response, {error: err.message}, 500);
 }
