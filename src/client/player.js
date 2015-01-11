@@ -1,5 +1,5 @@
 var $ = require("./lib/jquery.min.js");
-var config = require("./config.js");
+var config = require("./config");
 
 exports.createPage = function() {
 
@@ -20,7 +20,7 @@ exports.createPage = function() {
       layoutData: {top: 0, left: lastButton ? [lastButton, 0] : 0},
       text: cmd
     }).on("selection", function() {
-      $.getJSON(config.SERVER + "/" + cmd);
+      $.getJSON(config.server + "/" + cmd);
     });
     lastButton = button;
     return button;
@@ -70,7 +70,7 @@ exports.createPage = function() {
   updateStatus();
 
   function updateStatus() {
-    $.getJSON(config.SERVER + "/status", function(status) {
+    $.getJSON(config.server + "/status", function(status) {
       statusLabel.set("text", status.state);
       if (status.time) {
         var times = status.time.split(':');
@@ -91,7 +91,7 @@ exports.createPage = function() {
   }
 
   function updatePlaylist() {
-    $.getJSON(config.SERVER + "/playlist", function(playlist) {
+    $.getJSON(config.server + "/playlist", function(playlist) {
       playlistList.set("items", playlist.map(function(item, index) {
         return {
           name: item.Name || item.Title || index.toString(),

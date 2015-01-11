@@ -1,5 +1,5 @@
 var $ = require("./lib/jquery.min.js");
-var config = require("./config.js");
+var config = require("./config");
 
 exports.createPage = function() {
 
@@ -29,7 +29,7 @@ exports.createPage = function() {
     tuneIn(event.item);
   }).appendTo(page);
 
-  $.getJSON(config.SERVER + "/stations", function(stations) {
+  $.getJSON(config.server + "/stations", function(stations) {
     showStations(stations);
   });
 
@@ -38,13 +38,13 @@ exports.createPage = function() {
       return {
         name: item.name,
         stream: item.stream,
-        icon: {src: config.SERVER + "/stations/" + item.icon, width: 300, height: 300}
+        icon: {src: config.server + "/stations/" + item.icon, width: 300, height: 300}
       };
     }));
   }
 
   function tuneIn(station) {
-    $.getJSON(config.SERVER + "/play/" + station.stream, function() {
+    $.getJSON(config.server + "/play/" + station.stream, function() {
     });
   }
 

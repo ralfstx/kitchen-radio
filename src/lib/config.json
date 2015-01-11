@@ -1,0 +1,7 @@
+{
+  "baseDir": "/media/music",
+  "logDir": "/var/log/node",
+  "mpdHost": "localhost",
+  "mpdPort": 6600,
+  "port": 8080
+}

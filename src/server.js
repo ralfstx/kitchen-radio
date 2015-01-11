@@ -4,7 +4,7 @@ var Path = require("path");
 var Http = require("http");
 var Url = require("url");
 
-var Config = require("./lib/config.js");
+var Config = require("./lib/config");
 var Logger = require("./lib/logger");
 var Files = require("./lib/files");
 

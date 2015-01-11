@@ -1,6 +1,6 @@
 var $ = require("./lib/jquery.min.js");
 var _ = require("./lib/underscore-min.js");
-var config = require("./config.js");
+var config = require("./config");
 
 exports.createAlbumPage = function(album) {
 
@@ -58,7 +58,7 @@ exports.createAlbumPage = function(album) {
     play(getTracks());
   }).appendTo(page);
 
-  $.getJSON(config.SERVER + "/albums/" + album.path + "/index.json", function(result) {
+  $.getJSON(config.server + "/albums/" + album.path + "/index.json", function(result) {
     _.extend(album, result);
     update();
   });
@@ -70,18 +70,18 @@ exports.createAlbumPage = function(album) {
   }
 
   function play(tracks) {
-    var url = config.SERVER + "/replace";
+    var url = config.server + "/replace";
     $.post(url, JSON.stringify(tracks.map(getTrackUrl)));
   }
 
   function getCoverImage() {
-    return {src: config.SERVER + "/albums/" + album.path + "/cover-250.jpg", width: 250, height: 250};
+    return {src: config.server + "/albums/" + album.path + "/cover-250.jpg", width: 250, height: 250};
   }
 
   function getTrackUrl(track) {
     function notEmpty(value) { return !!value; }
     var parts = [album.path, track.disc && track.disc !== track.album ? track.disc.path : "", track.path];
-    return config.SERVER + "/albums/" + parts.filter(notEmpty).map(encodeURIComponent).join("/");
+    return config.server + "/albums/" + parts.filter(notEmpty).map(encodeURIComponent).join("/");
   }
 
   function getItems() {

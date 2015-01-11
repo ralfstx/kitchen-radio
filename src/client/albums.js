@@ -1,7 +1,7 @@
 var $ = require("./lib/jquery.min.js");
 var _ = require("./lib/underscore-min.js");
-var config = require("./config.js");
-var AlbumPage = require("./album.js");
+var config = require("./config");
+var AlbumPage = require("./album");
 
 exports.createPage = function() {
 
@@ -38,13 +38,13 @@ exports.createPage = function() {
 
   var albums;
 
-  $.getJSON(config.SERVER + "/albums", function(result) {
+  $.getJSON(config.server + "/albums", function(result) {
     albums = result;
     showAlbums();
   });
 
   function getCoverImage(album) {
-    return {src: config.SERVER + "/albums/" + album.path + "/cover-250.jpg", width: 250, height: 250};
+    return {src: config.server + "/albums/" + album.path + "/cover-250.jpg", width: 250, height: 250};
   }
 
   function showAlbums() {

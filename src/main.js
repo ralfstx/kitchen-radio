@@ -1,10 +1,11 @@
 var Path = require("path");
 
+var Config = require("./lib/config");
 var Player = require("./lib/player");
 
-var Server = require("./server.js");
-var Albums = require("./albums.js");
-var Stations = require("./stations.js");
+var Server = require("./server");
+var Albums = require("./albums");
+var Stations = require("./stations");
 
 var handlers = {
   status: function(request, response) {

@@ -3,12 +3,12 @@ var Promise = require("bluebird");
 var Fs = Promise.promisifyAll(require("fs"));
 var Path = require("path");
 
-var Config = require("./lib/config.js");
-var Logger = require("./lib/logger.js");
-var Util = require("./lib/util.js");
+var Config = require("./lib/config");
+var Logger = require("./lib/logger");
+var Util = require("./lib/util");
 var Files = require("./lib/files");
 
-var Server = require("./server.js");
+var Server = require("./server");
 
 var albumsDir = Path.join(Config.baseDir, "albums");
 
