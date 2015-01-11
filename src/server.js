@@ -42,6 +42,7 @@ exports.addHandler = addHandler;
 exports.readBody = readBody;
 exports.writeFile = writeFile;
 exports.writeJson = writeJson;
+exports.createError = createError;
 
 var handlers = {
   "": function(request, response) {
@@ -72,8 +73,8 @@ function handleRequest(request, response) {
       writeJson(response, {error: "Not Found: " + parts[0]}, 404);
     }
   }).catch(function(err) {
-    Logger.error(err.stack || err.message || err);
-    writeJson(response, {error: err.message}, 500);
+    Logger.error(err.code || 500, err.stack || err.message || err);
+    writeJson(response, {error: err.message}, err.code || 500);
   });
 }
 
@@ -111,23 +112,33 @@ function writeFile(response, filepath) {
   }
   return Files.statAsyncSafe(path).then(function(stats) {
     if (!stats) {
-      response.writeHead(404, {"Content-Type": "text/plain"});
-      response.end("Not Found: " + path + "\n");
-      throw new Error("Not Found: " + path + "\n");
+      throw createError(404, "Not Found: '" + path + "'");
     } else if (!stats.isFile()) {
-      response.writeHead(403, {"Content-Type": "text/plain"});
-      response.end("Not a File: " + path + "\n");
-      throw new Error("Not a File: " + path + "\n");
+      throw createError(403, "Not a File: '" + path + "'");
     } else {
-      response.writeHead(200, {"Content-Type": getMimeType(path)});
-      // omit Content-Length header to enable chunked transfer encoding
-      // response.writeHead(200, {'Content-Length': stats.size});
-      Fs.createReadStream(path).pipe(response);
+      return writeExistingFile(response, path);
     }
+  });
+}
+
+function writeExistingFile(response, path) {
+  response.writeHead(200, {"Content-Type": getMimeType(path)});
+  // omit Content-Length header to enable chunked transfer encoding
+  // response.writeHead(200, {'Content-Length': stats.size});
+  return new Promise(function(resolve, reject) {
+    var stream = Fs.createReadStream(path);
+    stream.on("end", resolve).on("error", reject);
+    stream.pipe(response);
   });
 }
 
 function writeJson(response, data, code) {
   response.writeHead(code || 200, {"Content-Type": "application/json; charset: utf-8"});
   response.end(JSON.stringify(data, null, " "));
+}
+
+function createError(code, message) {
+  var error = new Error(message);
+  error.code = code;
+  return error;
 }

@@ -19,7 +19,7 @@ function writeStationFile(response, path) {
   var file = Path.join(stationsDir, path);
   return Files.statAsyncSafe(file).then(function(stats) {
     if (!stats) {
-      throw new Error("Not found: '" + file + "'");
+      throw Server.createError(404, "Not found: '" + file + "'");
     } else if (stats.isDirectory()) {
       var indexFile = Path.join(file, "index.json");
       return Files.ensureIsFile(indexFile).then(function() {
