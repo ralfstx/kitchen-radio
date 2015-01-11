@@ -38,13 +38,13 @@ exports.createPage = function() {
 
   var albums;
 
-  $.getJSON(config.server + "/albums", function(result) {
+  $.getJSON(config.server + "/files/albums", function(result) {
     albums = result;
     showAlbums();
   });
 
   function getCoverImage(album) {
-    return {src: config.server + "/albums/" + album.path + "/cover-250.jpg", width: 250, height: 250};
+    return {src: config.server + "/files/albums/" + album.path + "/cover-250.jpg", width: 250, height: 250};
   }
 
   function showAlbums() {

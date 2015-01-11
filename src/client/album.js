@@ -58,7 +58,7 @@ exports.createAlbumPage = function(album) {
     play(getTracks());
   }).appendTo(page);
 
-  $.getJSON(config.server + "/albums/" + album.path + "/index.json", function(result) {
+  $.getJSON(config.server + "/files/albums/" + album.path + "/", function(result) {
     _.extend(album, result);
     update();
   });
@@ -75,13 +75,13 @@ exports.createAlbumPage = function(album) {
   }
 
   function getCoverImage() {
-    return {src: config.server + "/albums/" + album.path + "/cover-250.jpg", width: 250, height: 250};
+    return {src: config.server + "/files/albums/" + album.path + "/cover-250.jpg", width: 250, height: 250};
   }
 
   function getTrackUrl(track) {
     function notEmpty(value) { return !!value; }
     var parts = [album.path, track.disc && track.disc !== track.album ? track.disc.path : "", track.path];
-    return config.server + "/albums/" + parts.filter(notEmpty).map(encodeURIComponent).join("/");
+    return config.server + "/files/albums/" + parts.filter(notEmpty).map(encodeURIComponent).join("/");
   }
 
   function getItems() {

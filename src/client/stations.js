@@ -29,7 +29,7 @@ exports.createPage = function() {
     tuneIn(event.item);
   }).appendTo(page);
 
-  $.getJSON(config.server + "/stations", function(stations) {
+  $.getJSON(config.server + "/files/stations", function(stations) {
     showStations(stations);
   });
 
@@ -38,7 +38,7 @@ exports.createPage = function() {
       return {
         name: item.name,
         stream: item.stream,
-        icon: {src: config.server + "/stations/" + item.icon, width: 300, height: 300}
+        icon: {src: config.server + "/files/stations/" + item.icon, width: 300, height: 300}
       };
     }));
   }
