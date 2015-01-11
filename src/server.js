@@ -43,6 +43,7 @@ exports.readBody = readBody;
 exports.writeFile = writeFile;
 exports.writeJson = writeJson;
 exports.createError = createError;
+exports.createFileHandler = createFileHandler;
 
 var handlers = {
   "": function(request, response) {
@@ -119,6 +120,30 @@ function writeFile(response, filepath) {
       return writeExistingFile(response, path);
     }
   });
+}
+
+function createFileHandler(dir) {
+  return function(request, response, path) {
+    var realPath = Path.normalize(Path.join(dir, path));
+    if (realPath.split("/").indexOf("..") !== -1) {
+      throw new Error("Illegal path '" + path + "'");
+    }
+    return Files.statAsyncSafe(realPath).then(function(stats) {
+      if (stats && stats.isFile()) {
+        return writeExistingFile(response, realPath);
+      }
+      if (stats && stats.isDirectory()) {
+        var indexPath = Path.join(realPath, "index.json");
+        return Files.statAsyncSafe(indexPath).then(function(stats) {
+          if (stats && stats.isFile()) {
+            return writeExistingFile(response, indexPath);
+          }
+          throw createError(403, "Forbidden: " + path);
+        });
+      }
+      throw createError(404, "Not Found: " + path);
+    });
+  };
 }
 
 function writeExistingFile(response, path) {

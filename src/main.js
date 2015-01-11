@@ -67,4 +67,6 @@ Server.addHandler("stations", function(request, response, path) {
   return Stations.get(request, response, path);
 });
 
+Server.addHandler("files", Server.createFileHandler(Config.baseDir));
+
 Server.start();
