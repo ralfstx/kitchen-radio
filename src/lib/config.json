@@ -1,5 +1,5 @@
 {
-  "baseDir": "/media/music",
+  "musicDir": "/media/music",
   "logDir": "/var/log/node",
   "mpdHost": "localhost",
   "mpdPort": 6600,

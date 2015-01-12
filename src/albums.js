@@ -10,38 +10,23 @@ var Files = require("./lib/files");
 
 var Server = require("./server");
 
-var albumsDir = Path.join(Config.baseDir, "albums");
+var albumsDir = Path.join(Config.musicDir, "albums");
 
 exports.get = function(request, response, path) {
-  return path ? writeAlbumFile(response, path) : writeAlbumsList(response);
+  if (path === "update") {
+    return updateAlbums().then(function() {
+      return Server.writeJson(response, "ok");
+    });
+  }
+  throw Server.createError(404, "Not found: '" + path + "'");
 };
 
-function writeAlbumFile(response, path) {
-  var file = Path.join(albumsDir, path);
-  return Files.statAsyncSafe(file).then(function(stats) {
-    if (!stats) {
-      throw Server.error(404, "Not found: '" + file + "'");
-    } else if (stats.isDirectory()) {
-      var indexFile = Path.join(file, "index.json");
-      return Files.ensureIsFile(indexFile).then(function() {
-        return Server.writeFile(response, indexFile);
-      });
-    } else {
-      return Server.writeFile(response, file);
-    }
-  });
-}
-
-function writeAlbumsList(response) {
+function updateAlbums() {
   var indexFile = Path.join(albumsDir, "index.json");
-  return Files.statAsyncSafe(indexFile).then(function(stats) {
-    if (!stats) {
-      return buildIndex().then(function(index) {
-        return Fs.writeFileAsync(indexFile, Util.toJson(index));
-      });
-    }
-  }).then(function() {
-    return Server.writeFile(response, indexFile);
+  console.log("update", indexFile);
+  return buildIndex().then(function(index) {
+    console.log("writing", indexFile);
+    return Fs.writeFileAsync(indexFile, Util.toJson(index));
   });
 }
 

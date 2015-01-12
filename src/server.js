@@ -34,7 +34,7 @@ var mimetypes = {
 };
 
 function getMimeType(filename) {
-  return mimetypes[Path.extname(filename)] || mimetypes.other;
+  return Promise.resolve(mimetypes[Path.extname(filename)] || mimetypes.other);
 }
 
 exports.start = start;
@@ -74,8 +74,8 @@ function handleRequest(request, response) {
       writeJson(response, {error: "Not Found: " + parts[0]}, 404);
     }
   }).catch(function(err) {
-    Logger.error(err.code || 500, err.stack || err.message || err);
-    writeJson(response, {error: err.message}, err.code || 500);
+    Logger.error("HTTP " + (err.httpCode || 500), err.stack || err.message || err);
+    writeJson(response, {error: err.message}, err.httpCode || 500);
   });
 }
 
@@ -107,17 +107,17 @@ function readBody(request) {
 }
 
 function writeFile(response, filepath) {
-  var path = Path.normalize(filepath);
-  if (path.indexOf("../") !== -1) {
-    throw new Error("Illegal path '" + path + "'");
+  var realpath = Path.normalize(filepath);
+  if (realpath.indexOf("../") !== -1) {
+    throw new Error("Illegal path '" + filepath + "'");
   }
-  return Files.statAsyncSafe(path).then(function(stats) {
+  return Files.statAsyncSafe(realpath).then(function(stats) {
     if (!stats) {
-      throw createError(404, "Not Found: '" + path + "'");
+      throw createError(404, "Not Found: '" + filepath + "'");
     } else if (!stats.isFile()) {
-      throw createError(403, "Not a File: '" + path + "'");
+      throw createError(403, "Not a File: '" + filepath + "'");
     } else {
-      return writeExistingFile(response, path);
+      return writeExistingFile(response, realpath);
     }
   });
 }
@@ -147,23 +147,32 @@ function createFileHandler(dir) {
 }
 
 function writeExistingFile(response, path) {
-  response.writeHead(200, {"Content-Type": getMimeType(path)});
-  // omit Content-Length header to enable chunked transfer encoding
-  // response.writeHead(200, {'Content-Length': stats.size});
-  return new Promise(function(resolve, reject) {
+  return getMimeType(path).then(function(mimeType) {
+    response.setHeader("Content-Type", mimeType);
+  }).then(function() {
+    // omit Content-Length header to enable chunked transfer encoding
+    // response.setHeader("Content-Length": stats.size);
     var stream = Fs.createReadStream(path);
-    stream.on("end", resolve).on("error", reject);
-    stream.pipe(response);
+    return new Promise(function(resolve, reject) {
+      stream.on("end", resolve).on("error", reject);
+      stream.pipe(response);
+    }).catch(function(err) {
+      if (err.code && err.code === "EACCES") {
+        throw createError(403, "Forbidden");
+      }
+      throw err;
+    });
   });
 }
 
-function writeJson(response, data, code) {
-  response.writeHead(code || 200, {"Content-Type": "application/json; charset: utf-8"});
+function writeJson(response, data, httpCode) {
+  response.statusCode = httpCode || 200;
+  response.setHeader("Content-Type", "application/json; charset: utf-8");
   response.end(JSON.stringify(data, null, " "));
 }
 
-function createError(code, message) {
+function createError(httpCode, message) {
   var error = new Error(message);
-  error.code = code;
+  error.httpCode = httpCode;
   return error;
 }

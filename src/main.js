@@ -57,16 +57,11 @@ Object.keys(handlers).forEach(function(name) {
   Server.addHandler(name, handlers[name]);
 });
 
-Server.addHandler("client", function(request, response, path) {
-  return Server.writeFile(response, Path.join("client", path));
-});
-Server.addHandler("albums", function(request, response, path) {
-  return Albums.get(request, response, path);
-});
-Server.addHandler("stations", function(request, response, path) {
-  return Stations.get(request, response, path);
-});
+var basedir = Path.dirname(process.argv[1]);
 
-Server.addHandler("files", Server.createFileHandler(Config.baseDir));
+Server.addHandler("albums", Albums.get);
+Server.addHandler("stations", Stations.get);
+Server.addHandler("client", Server.createFileHandler(Path.join(basedir, "client")));
+Server.addHandler("files", Server.createFileHandler(Config.musicDir));
 
 Server.start();
