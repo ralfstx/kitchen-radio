@@ -21,6 +21,7 @@
   // Globals
 
   "browser": true, // globals exposed by modern browsers e.g. `window`, `document`, etc.
+  "node": true, // globals exposed by Node.js
   "globals": {
     "tabris": false,
     "module": false,
