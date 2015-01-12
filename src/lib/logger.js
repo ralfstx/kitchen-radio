@@ -21,7 +21,7 @@ var logger = new Winston.Logger({
       level: "debug",
       handleExceptions: true,
       prettyPrint: false,
-      colorize: true,
+      colorize: false,
       silent: false,
       timestamp: true,
       json: false
