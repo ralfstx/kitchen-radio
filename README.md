@@ -1,14 +1,41 @@
-Radio Remote
-============
+Kitchen Radio
+=============
 
-Remote controller for my RaspberryPi based kitchen radio.
+Code for my remote-controlled RaspberryPi based kitchen radio.
 
-REQUIREMENTS
-============
+Requirements
+------------
 
 * MPD (music player daemon)
 
-LICENSE
-=======
+REST API
+--------
+
+### /albums/update
+
+Update albums index
+
+### /stations/update
+
+Update radio stations index
+
+### /files/
+
+Serve files in music dir, return index.json for directories, e.g.
+
+* /files/albums
+* /files/albums/lou-reed-berlin
+* /files/albums/lou-reed-berlin/01.ogg
+* /files/albums/lou-reed-berlin/cover-100.jpg
+
+### /player/
+
+/player/play
+/player/pause
+/player/stop
+/player/status
+
+License
+-------
 
 Code published under the [MIT License](LICENSE).
