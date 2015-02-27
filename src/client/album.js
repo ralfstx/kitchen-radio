@@ -15,32 +15,32 @@ exports.createAlbumPage = function(album) {
   var trackListView = tabris.create("CollectionView", {
     itemHeight: 35,
     initializeCell: function(cell) {
-      var numberLabel = tabris.create("Label", {
+      var numberView = tabris.create("TextView", {
         layoutData: {left: 10, width: 30, top: 5, bottom: 5},
         font: "15px sans-serif",
         alignment: "right"
       }).appendTo(cell);
-      var titleLabel = tabris.create("Label", {
+      var titleView = tabris.create("TextView", {
         layoutData: {left: 45, right: 85, top: 5, bottom: 5},
         font: "15px sans-serif"
       }).appendTo(cell);
-      var timeLabel = tabris.create("Label", {
+      var timeView = tabris.create("TextView", {
         layoutData: {right: 10, width: 70, top: 5, bottom: 5},
         font: "15px sans-serif",
         alignment: "right"
       }).appendTo(cell);
       cell.on("itemchange", function(item) {
         if (item.type === "track") {
-          numberLabel.set("text", item.number + ".");
-          titleLabel.set("text", item.title || item.path);
-          titleLabel.set("font", "15px sans-serif");
+          numberView.set("text", item.number + ".");
+          titleView.set("text", item.title || item.path);
+          titleView.set("font", "15px sans-serif");
         } else {
-          numberLabel.set("text", "");
+          numberView.set("text", "");
           var isMulti = item.album.discs.length > 1;
-          titleLabel.set("text", isMulti ? "Disc " + item.number : "");
-          titleLabel.set("font", "bold 18px sans-serif");
+          titleView.set("text", isMulti ? "Disc " + item.number : "");
+          titleView.set("font", "bold 18px sans-serif");
         }
-        timeLabel.set("text", formatLength(item.length));
+        timeView.set("text", formatLength(item.length));
       });
     }
   }).on("selection", function(event) {

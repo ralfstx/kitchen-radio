@@ -33,13 +33,13 @@ exports.createPage = function() {
     updateStatus();
   }).appendTo(page);
 
-  var statusLabel = tabris.create("Label", {
+  var statusView = tabris.create("TextView", {
     layoutData: {left: 0, right: 0, top: [lastButton, 5]},
     text: "..."
   }).appendTo(page);
 
   var slider = tabris.create("Slider", {
-    layoutData: {left: 0, right: 0, top: [statusLabel, 5]},
+    layoutData: {left: 0, right: 0, top: [statusView, 5]},
     maximum: 1000
   }).appendTo(page);
 
@@ -47,19 +47,19 @@ exports.createPage = function() {
     layoutData: {left: 0, right: 0, top: [slider, 5], bottom: 0},
     itemHeight: 60,
     initializeCell: function(cell) {
-      var nameLabel = tabris.create("Label", {
+      var nameView = tabris.create("TextView", {
         layoutData: {left: 10, right: 100, top: 5, bottom: 5},
         foreground: "rgb(74, 74, 74)"
       }).appendTo(cell);
-      var timeLabel = tabris.create("Label", {
+      var timeView = tabris.create("TextView", {
         layoutData: {right: 10, top: 5, bottom: 5, width: 80},
         foreground: "rgb(74, 74, 74)",
         background: "yellow",
         alignment: "right"
       }).appendTo(cell);
       cell.on("itemchange", function(item) {
-        nameLabel.set("text", item.name);
-        timeLabel.set("text", item.time);
+        nameView.set("text", item.name);
+        timeView.set("text", item.time);
       });
     }
   }).appendTo(page);
@@ -71,7 +71,7 @@ exports.createPage = function() {
 
   function updateStatus() {
     $.getJSON(config.server + "/status", function(status) {
-      statusLabel.set("text", status.state);
+      statusView.set("text", status.state);
       if (status.time) {
         var times = status.time.split(':');
         var total = parseInt(times[1]);

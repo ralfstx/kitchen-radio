@@ -10,26 +10,26 @@ exports.createPage = function() {
     topLevel: true
   });
 
-  var filterText = tabris.create("Text", {
+  var filterInput = tabris.create("TextInput", {
     layoutData: {left: 0, right: 0, top: 0},
     message: "filter"
   }).on("change:text", showAlbums).appendTo(page);
 
   var albumsList = tabris.create("CollectionView", {
-    layoutData: {left: 0, right: 0, top: [filterText, 0], bottom: 0},
+    layoutData: {left: 0, right: 0, top: [filterInput, 0], bottom: 0},
     itemHeight: 60,
     initializeCell: function(cell) {
       var iconView = tabris.create("ImageView", {
         layoutData: {left: 0, top: 0, width: 60, height: 60},
         scaleMode: "fill"
       }).appendTo(cell);
-      var nameLabel = tabris.create("Label", {
+      var nameView = tabris.create("TextView", {
         layoutData: {left: 80, right: 10, top: 5, bottom: 5},
         foreground: "rgb(74, 74, 74)"
       }).appendTo(cell);
       cell.on("itemchange", function(album) {
         iconView.set("image", getCoverImage(album));
-        nameLabel.set("text", album.name);
+        nameView.set("text", album.name);
       });
     }
   }).on("selection", function(event) {
@@ -48,7 +48,7 @@ exports.createPage = function() {
   }
 
   function showAlbums() {
-    var filter = filterText.get("text");
+    var filter = filterInput.get("text");
     if (filter) {
       albumsList.set("items", albums.filter(function(album) {
         return (album.name || "").toLowerCase().indexOf(filter.toLowerCase()) !== -1;

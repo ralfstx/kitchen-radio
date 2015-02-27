@@ -16,13 +16,13 @@ exports.createPage = function() {
         layoutData: {left: 0, top: 0, width: 120, height: 60},
         scaleMode: "fill"
       }).appendTo(cell);
-      var nameLabel = tabris.create("Label", {
+      var nameView = tabris.create("TextView", {
         layoutData: {left: 130, right: 10, top: 5, bottom: 5},
         foreground: "rgb(74, 74, 74)"
       }).appendTo(cell);
       cell.on("itemchange", function(item) {
         iconView.set("image", item.icon);
-        nameLabel.set("text", item.name);
+        nameView.set("text", item.name);
       });
     }
   }).on("selection", function(event) {
