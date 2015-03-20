@@ -10,3 +10,8 @@ tabris.create("Action", {
 }).on("selection", function() {
   $.get(config.server + "/stop");
 });
+
+var drawer = tabris.create("Drawer");
+
+tabris.create("PageSelector", {
+}).appendTo(drawer);
