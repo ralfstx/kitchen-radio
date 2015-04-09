@@ -1,7 +1,0 @@
-{
-  "name": "radio-client",
-  "main": "main.js",
-  "dependencies": {
-    "tabris": "0.9.2"
-  }
-}
