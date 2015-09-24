@@ -39,3 +39,5 @@ License
 -------
 
 Code published under the [MIT License](LICENSE).
+
+Test image is from http://upload.wikimedia.org/wikipedia/commons/5/52/Waterberg_Nashorn1.jpg
