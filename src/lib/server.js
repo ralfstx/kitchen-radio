@@ -3,6 +3,7 @@ var Fs = Promise.promisifyAll(require("fs"));
 var Path = require("path");
 var Http = require("http");
 var Url = require("url");
+var _ = require("underscore");
 
 var Config = require("./config");
 var Logger = require("./logger");
@@ -53,8 +54,10 @@ function start() {
 }
 
 function addHandlers(handlers) {
-  for (var path in handlers) {
-    addHandler(path, handlers[path]);
+  if (_.isObject(handlers)) {
+    for (var path in handlers) {
+      addHandler(path, handlers[path]);
+    }
   }
 }
 

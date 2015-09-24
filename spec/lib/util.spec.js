@@ -1,6 +1,5 @@
-var util = require("../src/util");
+var util = require("../../src/lib/util");
 
-console.log(util);
 describe("util", function() {
 
   describe("walk", function() {
