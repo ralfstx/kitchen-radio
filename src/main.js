@@ -7,13 +7,10 @@ var Albums = require("./albums");
 var Stations = require("./stations");
 
 var webDir = Path.join(Path.dirname(module.filename), "web");
-Server.addHandlers({
-  "": Server.createFileHandler(webDir, {
-    index: "index.html"
-  })
-});
 
-var handlers = {
+Server.addHandlers(Albums.requestHandlers);
+Server.addHandlers(Stations.requestHandlers);
+Server.addHandlers({
   status: function(request, response) {
     Player.status().then(function(status) {
       Server.writeJson(response, status);
@@ -57,14 +54,15 @@ var handlers = {
       return Server.writeJson(response, {});
     });
   }
-};
-
-Server.addHandlers(handlers);
-Server.addHandlers(Albums.requestHandlers);
-Server.addHandlers(Stations.requestHandlers);
+});
 Server.addHandlers({
   "files": Server.createFileHandler(Config.get("musicDir"), {
     index: "index.json"
+  })
+});
+Server.addHandlers({
+  "": Server.createFileHandler(webDir, {
+    index: "index.html"
   })
 });
 

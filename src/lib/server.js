@@ -39,7 +39,9 @@ function getMimeType(filename) {
 }
 
 exports.start = start;
+exports.stop = stop;
 exports.addHandlers = addHandlers;
+exports.clearHandlers = clearHandlers;
 exports.readBody = readBody;
 exports.writeFile = writeFile;
 exports.writeJson = writeJson;
@@ -47,11 +49,39 @@ exports.createError = createError;
 exports.createFileHandler = createFileHandler;
 
 var handlers = {};
+var server;
 
 function start() {
-  var port = Config.get("port");
-  Http.createServer(handleRequest).listen(port);
-  Logger.info("Started on port %d", port);
+  return new Promise((resolve) => {
+    if (server) {
+      resolve(false);
+    } else {
+      var port = Config.get("port");
+      server = Http.createServer(handleRequest);
+      server.listen(port, () => {
+        resolve(port);
+        Logger.info("Server started on port %d", port);
+      });
+    }
+  });
+}
+
+function stop() {
+  return new Promise((resolve) => {
+    if (server) {
+      server.close(() => {
+        server = null;
+        resolve(true);
+        Logger.info("Server stopped");
+      });
+    } else {
+      resolve(false);
+    }
+  });
+}
+
+function clearHandlers() {
+  handlers = {};
 }
 
 function addHandlers(handlers) {
@@ -73,14 +103,19 @@ function handleRequest(request, response) {
     var urlpath = getUrlPath(request);
     Logger.debug("request %s", urlpath);
     var parts = splitPath(urlpath);
-    var handler = handlers[parts[0]];
-    if (handler) {
-      return handler(request, response, parts[1]);
-    } else {
+    if (parts[0] in handlers) {
+      return handlers[parts[0]](request, response, parts[1]);
+    } else if ("" in handlers) {
       return handlers[""](request, response, urlpath);
+    } else {
+      throw createError(404, "Not Found: " + urlpath);
     }
   }).catch(function(err) {
-    Logger.error("HTTP " + (err.httpCode || 500), err.stack || err.message || err);
+    if (err.httpCode && err.httpCode < 500) {
+      Logger.debug("HTTP " + err.httpCode, err.message || err, request.url);
+    } else {
+      Logger.error("HTTP " + (err.httpCode || 500), err.stack || err.message || err);
+    }
     writeJson(response, {error: err.message}, err.httpCode || 500);
   });
 }
