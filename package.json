@@ -1,16 +1,18 @@
 {
-  "name": "radio-remote",
+  "name": "kitchen-radio",
   "version": "0.1.0",
   "dependencies": {
-    "async": "~0.9.0",
-    "underscore": "~1.7.0",
-    "mpd": "~1.2.0",
+    "bluebird": "^2.10.0",
+    "underscore": "^1.7.0",
+    "mpd": "^1.3.0",
     "musicmetadata": "~0.6.0",
     "imagemagick": "0.1.3"
   },
   "devDependencies": {
-    "grunt": "~0.4.5",
-    "grunt-contrib-jshint": "~0.10.0",
-    "grunt-rsync": "~0.6.2"
+    "grunt": "^0.4.5",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-copy": "^0.8.1",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-rsync": "^0.6.2"
   }
 }

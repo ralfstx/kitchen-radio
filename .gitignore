@@ -1,4 +1,5 @@
 .idea/
 .settings/
 .project
+build/
 node_modules/
