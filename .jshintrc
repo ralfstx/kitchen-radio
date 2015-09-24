@@ -28,6 +28,14 @@
     "module": false,
     "exports": false,
     "require": false,
-    "Promise": true
+    "Promise": true,
+
+    "jasmine": false,
+    "beforeEach": false,
+    "afterEach": false,
+    "describe": false,
+    "it": false,
+    "expect": false,
+    "spyOn": false
   }
 }

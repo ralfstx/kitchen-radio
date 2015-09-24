@@ -88,8 +88,8 @@ describe("server", () => {
 
   });
 
-  function createSpyHandler(result) {
-    return jasmine.createSpy("handler").and.callFake((request, response, path) => {
+  function createSpyHandler() {
+    return jasmine.createSpy("handler").and.callFake((request, response) => {
       Server.writeJson(response, {});
     });
   }
