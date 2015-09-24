@@ -12,6 +12,7 @@
   "nonew": true, // prohibit the use of constructor functions for side-effects
   "undef": true, // prohibit the use of explicitly undeclared variables
   "unused": true, // prohibit the declaration of variables that are never used
+  "esnext": true,
 
   // Relaxing Options
 
