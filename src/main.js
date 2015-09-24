@@ -1,8 +1,8 @@
 var Path = require("path");
 var Config = require("./lib/config");
 var Player = require("./lib/player");
+var Server = require("./lib/server");
 
-var Server = require("./server");
 var Albums = require("./albums");
 var Stations = require("./stations");
 

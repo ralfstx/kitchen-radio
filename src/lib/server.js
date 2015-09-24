@@ -4,9 +4,9 @@ var Path = require("path");
 var Http = require("http");
 var Url = require("url");
 
-var Config = require("./lib/config");
-var Logger = require("./lib/logger");
-var Files = require("./lib/files");
+var Config = require("./config");
+var Logger = require("./logger");
+var Files = require("./files");
 
 var mimetypes = {
   // text

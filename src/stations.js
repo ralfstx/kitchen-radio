@@ -6,8 +6,7 @@ var Path = require("path");
 var Config = require("./lib/config");
 var Util = require("./lib/util");
 var Files = require("./lib/files");
-
-var Server = require("./server");
+var Server = require("./lib/server");
 
 var stationsDir = Path.join(Config.musicDir, "stations");
 

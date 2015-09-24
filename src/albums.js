@@ -8,8 +8,7 @@ var Logger = require("./lib/logger");
 var Util = require("./lib/util");
 var Files = require("./lib/files");
 var Images = require("./lib/images");
-
-var Server = require("./server");
+var Server = require("./lib/server");
 
 var albumsDir = Path.join(Config.musicDir, "albums");
 
