@@ -2,8 +2,10 @@ var Config = require("../src/lib/config");
 
 var testConfig = {
   port: 9878,
-  logDir: "."
-}
+  logDir: ".",
+  logLevel: "debug",
+  musicDir: "/tmp/music"
+};
 
 var oldGet = Config.get;
 
@@ -12,4 +14,4 @@ Config.get = function(name) {
     return testConfig[name];
   }
   return oldGet(name);
-}
+};

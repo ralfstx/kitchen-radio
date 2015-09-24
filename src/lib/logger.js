@@ -7,7 +7,7 @@ var Config = require("./config");
 var logger = new Winston.Logger({
   transports: [
     new Winston.transports.Console({
-      level: "debug",
+      level: Config.get("logLevel"),
       handleExceptions: true,
       prettyPrint: true,
       colorize: true,
@@ -18,7 +18,7 @@ var logger = new Winston.Logger({
       filename: Path.join(Config.get("logDir"), "debug.log"),
       maxsize: 40000,
       maxFiles: 10,
-      level: "debug",
+      level: Config.get("logLevel"),
       handleExceptions: true,
       prettyPrint: false,
       colorize: false,
