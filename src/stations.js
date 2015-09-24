@@ -11,14 +11,18 @@ var Server = require("./server");
 
 var stationsDir = Path.join(Config.musicDir, "stations");
 
-exports.get = function(request, response, path) {
+exports.requestHandlers = {
+  "/stations": handleRequest
+};
+
+function handleRequest(request, response, path) {
   if (path === "update") {
     return updateStations().then(function() {
       return Server.writeJson(response, "ok");
     });
   }
   throw Server.createError(404, "Not found: '" + path + "'");
-};
+}
 
 function updateStations() {
   var indexFile = Path.join(stationsDir, "index.json");

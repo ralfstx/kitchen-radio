@@ -38,22 +38,24 @@ function getMimeType(filename) {
 }
 
 exports.start = start;
-exports.addHandler = addHandler;
+exports.addHandlers = addHandlers;
 exports.readBody = readBody;
 exports.writeFile = writeFile;
 exports.writeJson = writeJson;
 exports.createError = createError;
 exports.createFileHandler = createFileHandler;
 
-var handlers = {
-  "": function(request, response) {
-    writeJson(response, {message: "Hello!"});
-  }
-};
+var handlers = {};
 
 function start() {
   Http.createServer(handleRequest).listen(Config.port);
   Logger.info("Started on port %d", Config.port);
+}
+
+function addHandlers(handlers) {
+  for (var path in handlers) {
+    addHandler(path, handlers[path]);
+  }
 }
 
 function addHandler(prefix, handler) {
@@ -71,7 +73,7 @@ function handleRequest(request, response) {
     if (handler) {
       return handler(request, response, parts[1]);
     } else {
-      writeJson(response, {error: "Not Found: " + parts[0]}, 404);
+      return handlers[""](request, response, urlpath);
     }
   }).catch(function(err) {
     Logger.error("HTTP " + (err.httpCode || 500), err.stack || err.message || err);
@@ -122,24 +124,27 @@ function writeFile(response, filepath) {
   });
 }
 
-function createFileHandler(dir) {
+function createFileHandler(dir, options) {
   return function(request, response, path) {
     var realPath = Path.normalize(Path.join(dir, path));
     if (realPath.split("/").indexOf("..") !== -1) {
-      throw new Error("Illegal path '" + path + "'");
+      throw createError(403, "Illegal path: " + path);
     }
     return Files.statAsyncSafe(realPath).then(function(stats) {
       if (stats && stats.isFile()) {
         return writeExistingFile(response, realPath);
       }
       if (stats && stats.isDirectory()) {
-        var indexPath = Path.join(realPath, "index.json");
-        return Files.statAsyncSafe(indexPath).then(function(stats) {
-          if (stats && stats.isFile()) {
-            return writeExistingFile(response, indexPath);
-          }
-          throw createError(403, "Forbidden: " + path);
-        });
+        if (options && "index" in options) {
+          var indexPath = Path.join(realPath, options.index);
+          return Files.statAsyncSafe(indexPath).then(function(stats) {
+            if (stats && stats.isFile()) {
+              return writeExistingFile(response, indexPath);
+            }
+            throw createError(403, "Forbidden: " + path);
+          });
+        }
+        throw createError(403, "Forbidden: " + path);
       }
       throw createError(404, "Not Found: " + path);
     });

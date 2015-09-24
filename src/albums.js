@@ -13,7 +13,11 @@ var Server = require("./server");
 
 var albumsDir = Path.join(Config.musicDir, "albums");
 
-exports.get = function(request, response, path) {
+exports.requestHandlers ={
+  "albums": handleRequest
+};
+
+function handleRequest(request, response, path) {
   if (path === "update") {
     return updateIndex().then(function() {
       return Server.writeJson(response, "ok");
@@ -25,7 +29,7 @@ exports.get = function(request, response, path) {
     });
   }
   throw Server.createError(404, "Not found: '" + path + "'");
-};
+}
 
 function updateIndex() {
   var indexFile = Path.join(albumsDir, "index.json");
