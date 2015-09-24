@@ -8,7 +8,7 @@ var Util = require("./lib/util");
 var Files = require("./lib/files");
 var Server = require("./lib/server");
 
-var stationsDir = Path.join(Config.musicDir, "stations");
+var stationsDir = Path.join(Config.get("musicDir"), "stations");
 
 exports.requestHandlers = {
   "/stations": handleRequest

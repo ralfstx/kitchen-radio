@@ -49,8 +49,9 @@ exports.createFileHandler = createFileHandler;
 var handlers = {};
 
 function start() {
-  Http.createServer(handleRequest).listen(Config.port);
-  Logger.info("Started on port %d", Config.port);
+  var port = Config.get("port");
+  Http.createServer(handleRequest).listen(port);
+  Logger.info("Started on port %d", port);
 }
 
 function addHandlers(handlers) {

@@ -63,7 +63,7 @@ Server.addHandlers(handlers);
 Server.addHandlers(Albums.requestHandlers);
 Server.addHandlers(Stations.requestHandlers);
 Server.addHandlers({
-  "files": Server.createFileHandler(Config.musicDir, {
+  "files": Server.createFileHandler(Config.get("musicDir"), {
     index: "index.json"
   })
 });

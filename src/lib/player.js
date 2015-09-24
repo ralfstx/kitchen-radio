@@ -10,8 +10,8 @@ connectMpd();
 
 function connectMpd() {
   var config = {
-    host: Config.mpdHost || "localhost",
-    port: Config.mpdPort || 6600
+    host: Config.get("mpdHost") || "localhost",
+    port: Config.get("mpdPort") || 6600
   };
   mpdClient = Mpd.connect(config).on("end", connectMpd);
 }

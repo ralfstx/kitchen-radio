@@ -15,7 +15,7 @@ var logger = new Winston.Logger({
       timestamp: false
     }),
     new Winston.transports.File({
-      filename: Path.join(Config.logDir, "debug.log"),
+      filename: Path.join(Config.get("logDir"), "debug.log"),
       maxsize: 40000,
       maxFiles: 10,
       level: "debug",
