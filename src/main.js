@@ -53,6 +53,14 @@ Server.addHandlers({
     }).then(function() {
       return Server.writeJson(response, {});
     });
+  },
+  append: function(request, response) {
+    return Server.readBody(request).then(function(body) {
+      var urls = JSON.parse(body);
+      return Player.append(urls);
+    }).then(function() {
+      return Server.writeJson(response, {});
+    });
   }
 });
 Server.addHandlers({

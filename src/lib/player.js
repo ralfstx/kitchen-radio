@@ -80,6 +80,15 @@ exports.replace = function(urls) {
   return sendCommands(cmds);
 };
 
+exports.append = function(urls) {
+  var cmds = [];
+  urls.forEach(function(url) {
+    cmds.push("add \"" + url + "\"");
+  });
+  cmds.push("play");
+  return sendCommands(cmds);
+};
+
 exports.stop = function() {
   return sendCommand("stop");
 };
