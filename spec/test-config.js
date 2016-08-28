@@ -1,13 +1,13 @@
-var Config = require("../src/lib/config");
+let Config = require('../src/lib/config');
 
-var testConfig = {
+let testConfig = {
   port: 9878,
-  logDir: ".",
-  logLevel: "debug",
-  musicDir: "/tmp/music"
+  logDir: '.',
+  logLevel: 'debug',
+  musicDir: '/tmp/music'
 };
 
-var oldGet = Config.get;
+let oldGet = Config.get;
 
 Config.get = function(name) {
   if (name in testConfig) {

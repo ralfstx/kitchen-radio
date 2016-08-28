@@ -1,11 +1,11 @@
-var Http = require("http");
+let Http = require('http');
 
-var Config = require("../../src/lib/config");
-var Server = require("../../src/lib/server");
+let Config = require('../../src/lib/config');
+let Server = require('../../src/lib/server');
 
-describe("server", () => {
+describe('server', () => {
 
-  var port = Config.get("port");
+  let port = Config.get('port');
 
   beforeEach(done => {
     Server.clearHandlers();
@@ -17,16 +17,16 @@ describe("server", () => {
     Server.clearHandlers();
   });
 
-  describe("start", () => {
+  describe('start', () => {
 
-    it("returns port when started", done => {
+    it('returns port when started', done => {
       Server.stop()
         .then(() => Server.start())
         .then(result => expect(result).toBe(port))
         .then(done, done.fail);
     });
 
-    it("returns false when already running", done => {
+    it('returns false when already running', done => {
       Server.start()
         .then(() => Server.start())
         .then(result => expect(result).toBe(false))
@@ -35,9 +35,9 @@ describe("server", () => {
 
   });
 
-  describe("addHandler", () => {
+  describe('addHandler', () => {
 
-    it("ignores non-objects", () => {
+    it('ignores non-objects', () => {
       expect(() => {
         Server.addHandlers();
         Server.addHandlers(23);
@@ -49,39 +49,39 @@ describe("server", () => {
 
   describe("added handler for 'foo'", () => {
 
-    var handler;
+    let handler;
 
     beforeEach(() => {
       handler = createSpyHandler();
       Server.addHandlers({
-        "foo": handler
+        'foo': handler
       });
     });
 
     it("receives '/foo'", done => {
-      request("/foo").then(() => {
+      request('/foo').then(() => {
         expect(handler).toHaveBeenCalled();
       }).then(done, done.fail);
     });
 
     it("receives '/foo/'", done => {
-      request("/foo/").then(() => {
+      request('/foo/').then(() => {
         expect(handler).toHaveBeenCalled();
       }).then(done, done.fail);
     });
 
     it("receives '/foo/bar'", done => {
-      request("/foo/bar").then(() => {
+      request('/foo/bar').then(() => {
         expect(handler).toHaveBeenCalled();
       }).then(done, done.fail);
     });
 
   });
 
-  describe("request", () => {
+  describe('request', () => {
 
-    it("without matching handler returns 404", done => {
-      request("/foo").then(response => {
+    it('without matching handler returns 404', done => {
+      request('/foo').then(response => {
         expect(response.statusCode).toBe(404);
       }).then(done, done.fail);
     });
@@ -89,14 +89,14 @@ describe("server", () => {
   });
 
   function createSpyHandler() {
-    return jasmine.createSpy("handler").and.callFake((request, response) => {
+    return jasmine.createSpy('handler').and.callFake((request, response) => {
       Server.writeJson(response, {});
     });
   }
 
   function request(path) {
     return new Promise((resolve, reject) => {
-      Http.get("http://localhost:" + port + path, resolve).on("error", reject);
+      Http.get('http://localhost:' + port + path, resolve).on('error', reject);
     });
   }
 

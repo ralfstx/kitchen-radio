@@ -1,23 +1,23 @@
-var Promise = require("bluebird");
-var Path = require("path");
-var Fs = Promise.promisifyAll(require("fs"));
-var del = require("del");
-var mkdirp = Promise.promisify(require('mkdirp'));
+let Promise = require('bluebird');
+let Path = require('path');
+let Fs = Promise.promisifyAll(require('fs'));
+let del = require('del');
+let mkdirp = Promise.promisify(require('mkdirp'));
 
-var Config = require("../src/lib/config");
-var Albums = require("../src/albums");
+let Config = require('../src/lib/config');
+let Albums = require('../src/albums');
 
-describe("albums", () => {
+describe('albums', () => {
 
-  var musicDir = Config.get("musicDir");
-  var albumsDir = Path.join(musicDir, "albums");
-  var testDir = Path.dirname(module.filename);
+  let musicDir = Config.get('musicDir');
+  let albumsDir = Path.join(musicDir, 'albums');
+  let testDir = Path.dirname(module.filename);
 
   beforeEach(done => {
     mkdirp(albumsDir)
-      .then(mkdirp(Path.join(albumsDir, "foo")))
-      .then(mkdirp(Path.join(albumsDir, "bar")))
-      .then(copy(Path.join(testDir, "Nashorn.jpg"), Path.join(albumsDir, "bar", "cover.jpg")))
+      .then(mkdirp(Path.join(albumsDir, 'foo')))
+      .then(mkdirp(Path.join(albumsDir, 'bar')))
+      .then(copy(Path.join(testDir, 'Nashorn.jpg'), Path.join(albumsDir, 'bar', 'cover.jpg')))
       .then(done, done.fail);
   });
 
@@ -25,29 +25,29 @@ describe("albums", () => {
     del(albumsDir);
   });
 
-  describe("updateImages", () => {
+  describe('updateImages', () => {
 
-    it("reports missing cover images", done => {
+    it('reports missing cover images', done => {
       Albums.updateImages()
-        .then(results => expect(results.missing).toContain(Path.join(albumsDir, "foo", "cover.jpg")))
+        .then(results => expect(results.missing).toContain(Path.join(albumsDir, 'foo', 'cover.jpg')))
         .then(done, done.fail);
     });
 
-    it("creates missing scaled images", done => {
+    it('creates missing scaled images', done => {
       Albums.updateImages()
-        .then(() => Fs.statAsync(Path.join(albumsDir, "bar", "cover-100.jpg")))
-        .then(() => Fs.statAsync(Path.join(albumsDir, "bar", "cover-250.jpg")))
+        .then(() => Fs.statAsync(Path.join(albumsDir, 'bar', 'cover-100.jpg')))
+        .then(() => Fs.statAsync(Path.join(albumsDir, 'bar', 'cover-250.jpg')))
         .then(done, done.fail);
     });
 
-    it("reports written scaled images", done => {
+    it('reports written scaled images', done => {
       Albums.updateImages().then(results => {
-        expect(results.written).toContain(Path.join(albumsDir, "bar", "cover-100.jpg"));
-        expect(results.written).toContain(Path.join(albumsDir, "bar", "cover-250.jpg"));
+        expect(results.written).toContain(Path.join(albumsDir, 'bar', 'cover-100.jpg'));
+        expect(results.written).toContain(Path.join(albumsDir, 'bar', 'cover-250.jpg'));
       }).then(done, done.fail);
     });
 
-    it("does not re-create existing scaled images", done => {
+    it('does not re-create existing scaled images', done => {
       Albums.updateImages()
         .then(() => Albums.updateImages())
         .then(results => expect(results.written).toEqual([]))
@@ -58,8 +58,8 @@ describe("albums", () => {
 
   function copy(srcPath, dstPath) {
     return new Promise((resolve, reject) => {
-      var srcStream = Fs.createReadStream(srcPath).on("error", reject);
-      var dstStream = Fs.createWriteStream(dstPath).on("error", reject).on("finish", resolve);
+      let srcStream = Fs.createReadStream(srcPath).on('error', reject);
+      let dstStream = Fs.createWriteStream(dstPath).on('error', reject).on('finish', resolve);
       srcStream.pipe(dstStream);
     });
   }

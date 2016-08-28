@@ -2,9 +2,9 @@
  * Utility methods for images.
  */
 
-var Promise = require("bluebird");
-var Magick = require("imagemagick");
-var magickResize = Promise.promisify(Magick.resize);
+let Promise = require('bluebird');
+let Magick = require('imagemagick');
+let magickResize = Promise.promisify(Magick.resize);
 
 exports.resizeImage = resizeImage;
 

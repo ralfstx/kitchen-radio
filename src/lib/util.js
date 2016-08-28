@@ -1,4 +1,4 @@
-var Fs = require("fs");
+let Fs = require('fs');
 
 exports.walk = walk;
 exports.readProps = readProps;
@@ -8,7 +8,7 @@ exports.toJson = toJson;
 function walk(list, fn, callback) {
   if (list.length > 0) {
     try {
-      fn(list[0], function(err) {
+      fn(list[0], (err) => {
         if (err) {
           callback(err);
         } else {
@@ -24,14 +24,14 @@ function walk(list, fn, callback) {
 }
 
 function readProps(data, fn) {
-  var props = {};
-  data.toString().split("\n").forEach(function(line, index) {
+  let props = {};
+  data.toString().split('\n').forEach((line, index) => {
     if (!/^\s*(#|$)/.test(line)) {
-      var match = /^\s*(\S+)\s*:\s*(.*?)\s*$/.exec(line);
+      let match = /^\s*(\S+)\s*:\s*(.*?)\s*$/.exec(line);
       if (!match) {
-        throw new Error("Syntax error in line " + (index + 1));
+        throw new Error('Syntax error in line ' + (index + 1));
       }
-      if (typeof fn === "function") {
+      if (typeof fn === 'function') {
         fn(match[1], match[2]);
       } else {
         props[match[1]] = match[2];
@@ -42,17 +42,17 @@ function readProps(data, fn) {
 }
 
 function readPropFile(path, callback) {
-  Fs.readFile(path, function(err, data) {
+  Fs.readFile(path, (err, data) => {
     if (err) return callback(err);
     try {
-      var props = readProps(data);
+      let props = readProps(data);
       callback(null, props);
     } catch (err2) {
-      callback(new Error(err2.message + " in file " + path));
+      callback(new Error(err2.message + ' in file ' + path));
     }
   });
 }
 
 function toJson(data) {
-  return JSON.stringify(data, null, " ");
+  return JSON.stringify(data, null, ' ');
 }

@@ -1,13 +1,13 @@
 
-var Path = require("path");
-var Winston = require("winston");
+let Path = require('path');
+let Winston = require('winston');
 
-var Config = require("./config");
+let Config = require('./config');
 
-var logger = new Winston.Logger({
+let logger = new Winston.Logger({
   transports: [
     new Winston.transports.Console({
-      level: Config.get("logLevel"),
+      level: Config.get('logLevel'),
       handleExceptions: true,
       prettyPrint: true,
       colorize: true,
@@ -15,10 +15,10 @@ var logger = new Winston.Logger({
       timestamp: false
     }),
     new Winston.transports.File({
-      filename: Path.join(Config.get("logDir"), "debug.log"),
+      filename: Path.join(Config.get('logDir'), 'debug.log'),
       maxsize: 40000,
       maxFiles: 10,
-      level: Config.get("logLevel"),
+      level: Config.get('logLevel'),
       handleExceptions: true,
       prettyPrint: false,
       colorize: false,
