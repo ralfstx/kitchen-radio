@@ -11,14 +11,12 @@
   "devDependencies": {
     "del": "^2.0.2",
     "eslint": "^3.4.0",
-    "grunt": "^0.4.5",
-    "grunt-contrib-clean": "^1.0.0",
-    "grunt-contrib-copy": "^0.8.1",
-    "grunt-rsync": "^1.0.0",
     "mkdirp": "^0.5.1"
   },
   "scripts": {
     "lint": "eslint .",
-    "start": "node src/main.js"
+    "build": "rm -rf build/ && mkdir build/ && cp -a src/* package.json build/",
+    "start": "node build/main.js",
+    "deploy": "rsync -rv --delete --exclude 'config.json' --exclude 'node_modules/' build/ pi@radio:/var/lib/node/"
   }
 }
