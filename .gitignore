@@ -1,5 +1,6 @@
 .idea/
 .settings/
 .project
+logs/
 build/
 node_modules/

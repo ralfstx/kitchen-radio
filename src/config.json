@@ -1,6 +1,6 @@
 {
-  "musicDir": "/media/music",
-  "logDir": "/var/log/node",
+  "musicDir": "/data/music",
+  "logDir": "./logs",
   "logLevel": "debug",
   "mpdHost": "localhost",
   "mpdPort": 6600,
