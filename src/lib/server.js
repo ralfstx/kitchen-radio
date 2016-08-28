@@ -59,7 +59,7 @@ function start() {
       let port = Config.get('port');
       server = Http.createServer(handleRequest);
       server.listen(port, () => {
-        resolve(port);
+        resolve(true);
         Logger.info('Server started on port %d', port);
       });
     }
@@ -99,7 +99,7 @@ function addHandler(prefix, handler) {
 }
 
 function handleRequest(request, response) {
-  return Promise.resolve().then(function() {
+  return Promise.resolve().then(() => {
     let urlpath = getUrlPath(request);
     Logger.debug('request %s', urlpath);
     let parts = splitPath(urlpath);
@@ -110,7 +110,7 @@ function handleRequest(request, response) {
       return handlers[''](request, response, urlpath);
     }
     throw createError(404, 'Not Found: ' + urlpath);
-  }).catch(function(err) {
+  }).catch((err) => {
     if (err.httpCode && err.httpCode < 500) {
       Logger.debug('HTTP ' + err.httpCode, err.message || err, request.url);
     } else {

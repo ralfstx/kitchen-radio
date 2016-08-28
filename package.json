@@ -9,12 +9,17 @@
     "winston": "^2.2.0"
   },
   "devDependencies": {
+    "chai": "^3.5.0",
     "del": "^2.0.2",
     "eslint": "^3.4.0",
-    "mkdirp": "^0.5.1"
+    "mkdirp": "^0.5.1",
+    "mocha": "^3.0.2",
+    "node-fetch": "^1.6.0",
+    "sinon": "^1.17.5"
   },
   "scripts": {
     "lint": "eslint .",
+    "test": "mocha 'spec/**/*.spec.js'",
     "build": "rm -rf build/ && mkdir build/ && cp -a src/* package.json build/",
     "start": "node build/main.js",
     "deploy": "rsync -rv --delete --exclude 'config.json' --exclude 'node_modules/' build/ pi@radio:/var/lib/node/"

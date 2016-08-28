@@ -1,103 +1,89 @@
-let Http = require('http');
+let expect = require('chai').expect;
+let stub = require('sinon').stub;
+let fetch = require('node-fetch');
 
+let Logger = require('../../src/lib/logger');
 let Config = require('../../src/lib/config');
 let Server = require('../../src/lib/server');
 
-describe('server', () => {
+describe('server', function() {
 
   let port = Config.get('port');
+  const PREFIX = 'http://localhost:' + port;
 
-  beforeEach(done => {
-    Server.clearHandlers();
-    Server.start().then(done, done.fail);
-  });
-
-  afterEach(done => {
-    Server.stop().then(done, done.fail);
+  beforeEach(function() {
+    stub(Logger, 'info');
+    stub(Logger, 'debug');
     Server.clearHandlers();
   });
 
-  describe('start', () => {
+  afterEach(function() {
+    return Server.stop().then(() => {
+      Server.clearHandlers();
+      Logger.info.restore();
+      Logger.debug.restore();
+    });
+  });
 
-    it('returns port when started', done => {
-      Server.stop()
-        .then(() => Server.start())
-        .then(result => expect(result).toBe(port))
-        .then(done, done.fail);
+  describe('start', function() {
+
+    it('returns true when started', function() {
+      return Server.start()
+        .then(result => expect(result).to.equal(true));
     });
 
-    it('returns false when already running', done => {
-      Server.start()
+    it('returns false when already running', function() {
+      return Server.start()
         .then(() => Server.start())
-        .then(result => expect(result).toBe(false))
-        .then(done, done.fail);
+        .then(result => expect(result).to.be.false);
     });
 
   });
 
-  describe('addHandler', () => {
+  describe('addHandler', function() {
 
-    it('ignores non-objects', () => {
+    it('ignores non-objects', function() {
       expect(() => {
         Server.addHandlers();
         Server.addHandlers(23);
         Server.addHandlers(false);
-      }).not.toThrow();
+      }).not.to.throw();
     });
 
   });
 
-  describe("added handler for 'foo'", () => {
+  describe("added handler for 'foo'", function() {
 
-    let handler;
-
-    beforeEach(() => {
-      handler = createSpyHandler();
+    beforeEach(function() {
       Server.addHandlers({
-        'foo': handler
+        'foo': (request, response) => Server.writeJson(response, 23)
       });
+      return Server.start();
     });
 
-    it("receives '/foo'", done => {
-      request('/foo').then(() => {
-        expect(handler).toHaveBeenCalled();
-      }).then(done, done.fail);
+    it("receives '/foo'", function() {
+      return fetch(PREFIX + '/foo')
+        .then(res => res.json())
+        .then(json => expect(json).to.equal(23));
     });
 
-    it("receives '/foo/'", done => {
-      request('/foo/').then(() => {
-        expect(handler).toHaveBeenCalled();
-      }).then(done, done.fail);
+    it("receives '/foo/'", function() {
+      return fetch(PREFIX + '/foo/')
+        .then(res => res.json())
+        .then(json => expect(json).to.equal(23));
     });
 
-    it("receives '/foo/bar'", done => {
-      request('/foo/bar').then(() => {
-        expect(handler).toHaveBeenCalled();
-      }).then(done, done.fail);
+    it("receives '/foo/bar'", function() {
+      return fetch(PREFIX + '/foo/bar')
+        .then(res => res.json())
+        .then(json => expect(json).to.equal(23));
     });
 
-  });
-
-  describe('request', () => {
-
-    it('without matching handler returns 404', done => {
-      request('/foo').then(response => {
-        expect(response.statusCode).toBe(404);
-      }).then(done, done.fail);
+    it('without matching handler returns 404', function() {
+      return fetch(PREFIX + '/bar')
+        .then(res => expect(res.status).to.equal(404));
     });
 
   });
-
-  function createSpyHandler() {
-    return jasmine.createSpy('handler').and.callFake((request, response) => {
-      Server.writeJson(response, {});
-    });
-  }
-
-  function request(path) {
-    return new Promise((resolve, reject) => {
-      Http.get('http://localhost:' + port + path, resolve).on('error', reject);
-    });
-  }
 
 });
