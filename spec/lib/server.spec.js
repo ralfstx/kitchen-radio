@@ -1,40 +1,40 @@
-let expect = require('chai').expect;
-let stub = require('sinon').stub;
-let fetch = require('node-fetch');
+import {expect} from 'chai';
+import {stub} from 'sinon';
+import fetch from 'node-fetch';
 
-let Logger = require('../../src/lib/logger');
-let Config = require('../../src/lib/config');
-let Server = require('../../src/lib/server');
+import config from '../../src/lib/config';
+import logger from '../../src/lib/logger';
+import * as server from '../../src/lib/server';
 
 describe('server', function() {
 
-  let port = Config.get('port');
+  let port = config.get('port');
   const PREFIX = 'http://localhost:' + port;
 
   beforeEach(function() {
-    stub(Logger, 'info');
-    stub(Logger, 'debug');
-    Server.clearHandlers();
+    stub(logger, 'info');
+    stub(logger, 'debug');
+    server.clearHandlers();
   });
 
   afterEach(function() {
-    return Server.stop().then(() => {
-      Server.clearHandlers();
-      Logger.info.restore();
-      Logger.debug.restore();
+    return server.stop().then(() => {
+      server.clearHandlers();
+      logger.info.restore();
+      logger.debug.restore();
     });
   });
 
   describe('start', function() {
 
     it('returns true when started', function() {
-      return Server.start()
+      return server.start()
         .then(result => expect(result).to.equal(true));
     });
 
     it('returns false when already running', function() {
-      return Server.start()
-        .then(() => Server.start())
+      return server.start()
+        .then(() => server.start())
         .then(result => expect(result).to.be.false);
     });
 
@@ -44,9 +44,9 @@ describe('server', function() {
 
     it('ignores non-objects', function() {
       expect(() => {
-        Server.addHandlers();
-        Server.addHandlers(23);
-        Server.addHandlers(false);
+        server.addHandlers();
+        server.addHandlers(23);
+        server.addHandlers(false);
       }).not.to.throw();
     });
 
@@ -55,10 +55,10 @@ describe('server', function() {
   describe("added handler for 'foo'", function() {
 
     beforeEach(function() {
-      Server.addHandlers({
-        'foo': (request, response) => Server.writeJson(response, 23)
+      server.addHandlers({
+        'foo': (request, response) => server.writeJson(response, 23)
       });
-      return Server.start();
+      return server.start();
     });
 
     it("receives '/foo'", function() {

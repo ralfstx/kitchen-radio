@@ -1,7 +1,4 @@
-exports.readProps = readProps;
-exports.toJson = toJson;
-
-function readProps(data) {
+export function readProps(data) {
   let props = {};
   if (typeof data === 'string') {
     data.split('\n').forEach((line, index) => {
@@ -17,7 +14,7 @@ function readProps(data) {
   return props;
 }
 
-function toJson(data) {
+export function toJson(data) {
   if (!arguments.length) return '';
   return JSON.stringify(data, null, ' ');
 }

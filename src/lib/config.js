@@ -1,5 +1,7 @@
-let values = require('../config.json');
+import values from '../config.json';
 
-exports.get = function(name) {
+function get(name) {
   return values[name];
-};
+}
+
+export default {get};

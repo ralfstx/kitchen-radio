@@ -1,20 +1,19 @@
-let Promise = require('bluebird');
-let Mpd = require('mpd');
+import mpd from 'mpd';
 
-let Util = require('./util');
-let Config = require('./config');
+import {readProps} from './util';
+import config from './config';
 
 let mpdClient;
 
 connectMpd();
 
 function connectMpd() {
-  let config = {
-    host: Config.get('mpdHost') || 'localhost',
-    port: Config.get('mpdPort') || 6600
+  let params = {
+    host: config.get('mpdHost') || 'localhost',
+    port: config.get('mpdPort') || 6600
   };
-  mpdClient = Mpd.connect(config)
-    .on('ready', () => console.log('Connected to mpd on ' + config.host + ', port ' + config.port))
+  mpdClient = mpd.connect(params)
+    .on('ready', () => console.log('Connected to mpd on ' + params.host + ', port ' + params.port))
     .on('error', (err) => { console.error('mpd error', err); })
     .on('system-playlist', () => { console.log('mpd playlist changed'); })
     .on('end', connectMpd);
@@ -44,16 +43,16 @@ function sendCommands(commands) {
   });
 }
 
-exports.status = function() {
-  return sendCommand(Mpd.cmd('status', []))
-    .then(msg => Util.readProps(msg));
-};
+export function status() {
+  return sendCommand(mpd.cmd('status', []))
+    .then(msg => readProps(msg));
+}
 
-exports.playlist = function() {
-  return sendCommand(Mpd.cmd('playlistinfo', [])).then((msg) => {
+export function playlist() {
+  return sendCommand(mpd.cmd('playlistinfo', [])).then((msg) => {
     let playlist = [];
     let entry = {};
-    Util.readProps(msg, (key, value) => {
+    readProps(msg, (key, value) => {
       if (key === 'file') {
         entry = {};
         playlist.push(entry);
@@ -62,9 +61,9 @@ exports.playlist = function() {
     });
     return playlist;
   });
-};
+}
 
-exports.play = function(url) {
+export function play(url) {
   let cmds = ['play'];
   if (url) {
     let ext = url.substr(-4).toLowerCase();
@@ -72,38 +71,38 @@ exports.play = function(url) {
     cmds = ['clear', (isPlaylist ? 'load ' : 'add ') + url, 'play'];
   }
   return sendCommands(cmds);
-};
+}
 
-exports.replace = function(urls) {
+export function replace(urls) {
   let cmds = ['clear'];
   urls.forEach((url) => {
     cmds.push('add "' + url + '"');
   });
   cmds.push('play');
   return sendCommands(cmds);
-};
+}
 
-exports.append = function(urls) {
+export function append(urls) {
   let cmds = [];
   urls.forEach((url) => {
     cmds.push('add "' + url + '"');
   });
   cmds.push('play');
   return sendCommands(cmds);
-};
+}
 
-exports.stop = function() {
+export function stop() {
   return sendCommand('stop');
-};
+}
 
-exports.pause = function() {
+export function pause() {
   return sendCommand('pause');
-};
+}
 
-exports.prev = function() {
+export function prev() {
   return sendCommand('previous');
-};
+}
 
-exports.next = function() {
+export function next() {
   return sendCommand('next');
-};
+}

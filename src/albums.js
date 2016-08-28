@@ -1,50 +1,47 @@
-let Promise = require('bluebird');
-let Fs = Promise.promisifyAll(require('fs'));
-let Path = require('path');
-let _ = require('underscore');
+import {join} from 'path';
+import Promise from 'bluebird';
+import _ from 'underscore';
 
-let Config = require('./lib/config');
-let Logger = require('./lib/logger');
-let Util = require('./lib/util');
-let Files = require('./lib/files');
-let Images = require('./lib/images');
-let Server = require('./lib/server');
+import config from './lib/config';
+import logger from './lib/logger';
+import {toJson} from './lib/util';
+import {getSubDirs, ensureIsFile, readJsonFile, statAsyncSafe, writeFileAsync} from './lib/files';
+import {resizeImage} from './lib/images';
+import * as server from './lib/server';
 
-let albumsDir = Path.join(Config.get('musicDir'), 'albums');
+const albumsDir = join(config.get('musicDir'), 'albums');
 
-exports.requestHandlers = {
+export let requestHandlers = {
   'albums': handleRequest
 };
 
-exports.updateImages = updateImages;
+export function updateIndex() {
+  let indexFile = join(albumsDir, 'index.json');
+  return buildIndex().then(index => writeFileAsync(indexFile, toJson(index)));
+}
 
 function handleRequest(request, response, path) {
   if (path === 'update') {
     return updateIndex()
-      .then(() => Server.writeJson(response, 'ok'));
+      .then(() => server.writeJson(response, 'ok'));
   }
   if (path === 'update-images') {
     return updateImages()
-      .then(results => Server.writeJson(response, _.extend({status: 'ok'}, results)));
+      .then(results => server.writeJson(response, _.extend({status: 'ok'}, results)));
   }
-  throw Server.createError(404, "Not found: '" + path + "'");
-}
-
-function updateIndex() {
-  let indexFile = Path.join(albumsDir, 'index.json');
-  return buildIndex().then(index => Fs.writeFileAsync(indexFile, Util.toJson(index)));
+  throw server.createError(404, "Not found: '" + path + "'");
 }
 
 function buildIndex() {
-  return Files.getSubDirs(albumsDir).map(subdir => getAlbumInfo(subdir));
+  return getSubDirs(albumsDir).map(subdir => getAlbumInfo(subdir));
 }
 
 function getAlbumInfo(subdir) {
-  let indexFile = Path.join(albumsDir, subdir, 'index.json');
-  return Files.ensureIsFile(indexFile).then(() => {
-    return Files.readJsonFile(indexFile).then(data => {
+  let indexFile = join(albumsDir, subdir, 'index.json');
+  return ensureIsFile(indexFile).then(() => {
+    return readJsonFile(indexFile).then(data => {
       if (!data.name) {
-        Logger.warn("Missing album name for '" + subdir + "'");
+        logger.warn("Missing album name for '" + subdir + "'");
       }
       return {
         path: subdir,
@@ -54,28 +51,28 @@ function getAlbumInfo(subdir) {
   });
 }
 
-function updateImages() {
+export function updateImages(baseDir = albumsDir) {
   let log = {missing: [], written: []};
-  return Files.getSubDirs(albumsDir)
-    .each(subdir => updateAlbumImages(Path.join(albumsDir, subdir), log))
+  return getSubDirs(baseDir)
+    .each(subdir => updateAlbumImages(join(baseDir, subdir), log))
     .then(() => log);
 }
 
 function updateAlbumImages(albumDir, log) {
-  let srcPath = Path.join(albumDir, 'cover.jpg');
-  return Files.statAsyncSafe(srcPath).then(origStats => {
+  let srcPath = join(albumDir, 'cover.jpg');
+  return statAsyncSafe(srcPath).then(origStats => {
     if (!origStats) {
-      Logger.error('Missing cover image: ' + srcPath);
+      logger.error('Missing cover image: ' + srcPath);
       log.missing.push(srcPath);
       return;
     }
     return Promise.resolve([100, 250]).map(size => {
-      let dstPath = Path.join(albumDir, 'cover-' + size + '.jpg');
-      return Files.statAsyncSafe(dstPath).then(stats => {
+      let dstPath = join(albumDir, 'cover-' + size + '.jpg');
+      return statAsyncSafe(dstPath).then(stats => {
         if (!stats || (stats.mtime < origStats.mtime)) {
-          Logger.info('writing ' + dstPath);
+          logger.info('writing ' + dstPath);
           log.written.push(dstPath);
-          return Images.resizeImage(srcPath, dstPath, size);
+          return resizeImage(srcPath, dstPath, size);
         }
       });
     });

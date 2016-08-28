@@ -1,24 +1,23 @@
+import {join} from 'path';
+import winston from 'winston';
 
-let Path = require('path');
-let Winston = require('winston');
+import config from './config';
 
-let Config = require('./config');
-
-let logger = new Winston.Logger({
+export default new winston.Logger({
   transports: [
-    new Winston.transports.Console({
-      level: Config.get('logLevel'),
+    new winston.transports.Console({
+      level: config.get('logLevel'),
       handleExceptions: true,
       prettyPrint: true,
       colorize: true,
       silent: false,
       timestamp: false
     }),
-    new Winston.transports.File({
-      filename: Path.join(Config.get('logDir'), 'debug.log'),
+    new winston.transports.File({
+      filename: join(config.get('logDir'), 'debug.log'),
       maxsize: 40000,
       maxFiles: 10,
-      level: Config.get('logLevel'),
+      level: config.get('logLevel'),
       handleExceptions: true,
       prettyPrint: false,
       colorize: false,
@@ -29,5 +28,3 @@ let logger = new Winston.Logger({
   ],
   exitOnError: false
 });
-
-module.exports = logger;

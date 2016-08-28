@@ -1,16 +1,13 @@
+import {join} from 'path';
 
-let Promise = require('bluebird');
-let Fs = Promise.promisifyAll(require('fs'));
-let Path = require('path');
+import config from './lib/config';
+import {toJson} from './lib/util';
+import {getSubDirs, ensureIsFile, readJsonFile, writeFileAsync} from './lib/files';
+import * as server from'./lib/server';
 
-let Config = require('./lib/config');
-let Util = require('./lib/util');
-let Files = require('./lib/files');
-let Server = require('./lib/server');
+let stationsDir = join(config.get('musicDir'), 'stations');
 
-let stationsDir = Path.join(Config.get('musicDir'), 'stations');
-
-exports.requestHandlers = {
+export let requestHandlers = {
   'stations': handleRequest
 };
 
@@ -18,24 +15,24 @@ function handleRequest(request, response, path) {
   console.log('stations', path);
   if (path === 'update') {
     return updateStations()
-      .then(() => Server.writeJson(response, 'ok'));
+      .then(() => server.writeJson(response, 'ok'));
   }
-  throw Server.createError(404, "Not found: '" + path + "'");
+  throw server.createError(404, "Not found: '" + path + "'");
 }
 
 function updateStations() {
-  let indexFile = Path.join(stationsDir, 'index.json');
+  let indexFile = join(stationsDir, 'index.json');
   return buildIndex()
-    .then(index => Fs.writeFileAsync(indexFile, Util.toJson(index)));
+    .then(index => writeFileAsync(indexFile, toJson(index)));
 }
 
 function buildIndex() {
-  return Files.getSubDirs(stationsDir)
+  return getSubDirs(stationsDir)
     .map(subdir => getStationInfo(subdir));
 }
 
 function getStationInfo(subdir) {
-  let indexFile = Path.join(stationsDir, subdir, 'index.json');
-  return Files.ensureIsFile(indexFile)
-    .then(() => Files.readJsonFile(indexFile));
+  let indexFile = join(stationsDir, subdir, 'index.json');
+  return ensureIsFile(indexFile)
+    .then(() => readJsonFile(indexFile));
 }

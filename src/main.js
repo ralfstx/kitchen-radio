@@ -1,77 +1,77 @@
-let Path = require('path');
-let Config = require('./lib/config');
-let Player = require('./lib/player');
-let Server = require('./lib/server');
+import {join} from 'path';
 
-let Albums = require('./albums');
-let Stations = require('./stations');
+import config from './lib/config';
+import * as player from './lib/player';
+import * as server from './lib/server';
+import * as albums from './albums';
+import * as stations from './stations';
 
-let webDir = Path.join(Path.dirname(module.filename), 'web');
+let webDir = join(__dirname, 'web');
 
-Server.addHandlers(Albums.requestHandlers);
-Server.addHandlers(Stations.requestHandlers);
-Server.addHandlers({
+server.addHandlers(albums.requestHandlers);
+server.addHandlers(stations.requestHandlers);
+server.addHandlers({
   status: function(request, response) {
-    Player.status().then((status) => {
-      Server.writeJson(response, status);
+    player.status().then((status) => {
+      server.writeJson(response, status);
     });
   },
   playlist: function(request, response) {
-    Player.playlist().then((status) => {
-      Server.writeJson(response, status);
+    player.playlist().then((status) => {
+      server.writeJson(response, status);
     });
   },
   play: function(request, response, path) {
-    Player.play(path).then(() => {
-      Server.writeJson(response, {});
+    player.play(path).then(() => {
+      server.writeJson(response, {});
     });
   },
   stop: function(request, response) {
-    Player.stop().then(() => {
-      Server.writeJson(response, {});
+    player.stop().then(() => {
+      server.writeJson(response, {});
     });
   },
   pause: function(request, response) {
-    Player.pause().then(() => {
-      Server.writeJson(response, {});
+    player.pause().then(() => {
+      server.writeJson(response, {});
     });
   },
   prev: function(request, response) {
-    Player.prev().then(() => {
-      Server.writeJson(response, {});
+    player.prev().then(() => {
+      server.writeJson(response, {});
     });
   },
   next: function(request, response) {
-    Player.next().then(() => {
-      Server.writeJson(response, {});
+    player.next().then(() => {
+      server.writeJson(response, {});
     });
   },
   replace: function(request, response) {
-    return Server.readBody(request)
+    return server.readBody(request)
       .then(body => JSON.parse(body))
-      .then(urls => Player.replace(urls))
+      .then(urls => player.replace(urls))
       .then(() => {
-        Server.writeJson(response, {});
+        server.writeJson(response, {});
       });
   },
   append: function(request, response) {
-    return Server.readBody(request)
+    return server.readBody(request)
       .then(body => JSON.parse(body))
-      .then(urls => Player.append(urls))
+      .then(urls => player.append(urls))
       .then(() => {
-        Server.writeJson(response, {});
+        server.writeJson(response, {});
       });
   }
 });
-Server.addHandlers({
-  'files': Server.createFileHandler(Config.get('musicDir'), {
+server.addHandlers({
+  'files': server.createFileHandler(config.get('musicDir'), {
     index: 'index.json'
   })
 });
-Server.addHandlers({
-  '': Server.createFileHandler(webDir, {
+server.addHandlers({
+  '': server.createFileHandler(webDir, {
     index: 'index.html'
   })
 });
 
-Server.start();
+server.start();
