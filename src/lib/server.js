@@ -4,7 +4,6 @@ import {createServer} from 'http';
 import {parse} from 'url';
 import _ from 'underscore';
 
-import config from './config';
 import logger from './logger';
 import {statAsyncSafe} from './files';
 
@@ -37,76 +36,81 @@ function getMimeType(filename) {
   return Promise.resolve(mimetypes[extname(filename)] || mimetypes.other);
 }
 
-let handlers = {};
-let server;
+export default class Server {
 
-export function start() {
-  return new Promise(resolve => {
-    if (server) {
-      resolve(false);
-    } else {
-      let port = config.get('port');
-      server = createServer(handleRequest);
-      server.listen(port, () => {
-        resolve(true);
-        logger.info('Server started on port %d', port);
-      });
-    }
-  });
-}
+  constructor() {
+    this._server = null;
+    this._handlers = {};
+  }
 
-export function stop() {
-  return new Promise(resolve => {
-    if (server) {
-      server.close(() => {
-        server = null;
-        resolve(true);
-        logger.info('Server stopped');
-      });
-    } else {
-      resolve(false);
-    }
-  });
-}
+  start(port) {
+    return new Promise(resolve => {
+      if (this._server) {
+        resolve(false);
+      } else {
+        this._server = createServer(this._handleRequest.bind(this));
+        this._server.listen(port, () => {
+          resolve(true);
+          logger.info('Server started on port %d', port);
+        });
+      }
+    });
+  }
 
-export function clearHandlers() {
-  handlers = {};
-}
+  stop() {
+    return new Promise(resolve => {
+      if (this._server) {
+        this._server.close(() => {
+          this._server = null;
+          resolve(true);
+          logger.info('Server stopped');
+        });
+      } else {
+        resolve(false);
+      }
+    });
+  }
 
-export function addHandlers(handlers) {
-  if (_.isObject(handlers)) {
-    for (let path in handlers) {
-      addHandler(path, handlers[path]);
+  clearHandlers() {
+    this._handlers = {};
+  }
+
+  addHandlers(handlers) {
+    if (_.isObject(handlers)) {
+      for (let path in handlers) {
+        this._addHandler(path, handlers[path]);
+      }
     }
   }
-}
 
-function addHandler(prefix, handler) {
-  let old = handlers[prefix];
-  handlers[prefix] = handler;
-  return old;
-}
+  _addHandler(prefix, handler) {
+    let old = this._handlers[prefix];
+    this._handlers[prefix] = handler;
+    return old;
+  }
 
-function handleRequest(request, response) {
-  return Promise.resolve().then(() => {
-    let urlpath = getUrlPath(request);
-    logger.debug('request %s', urlpath);
-    let parts = splitPath(urlpath);
-    if (parts[0] in handlers) {
-      return handlers[parts[0]](request, response, parts[1]);
-    }
-    if ('' in handlers) {
-      return handlers[''](request, response, urlpath);
-    }
-    throw createError(404, 'Not Found: ' + urlpath);
-  }).catch((err) => {
-    if (err.httpCode && err.httpCode < 500) {
-      logger.debug('HTTP ' + err.httpCode, err.message || err, request.url);
-    } else {
-      logger.error('HTTP ' + (err.httpCode || 500), err.stack || err.message || err);
-    }
-    writeJson(response, {error: err.message}, err.httpCode || 500);
-  });
+  _handleRequest(request, response) {
+    return Promise.resolve().then(() => {
+      let urlpath = getUrlPath(request);
+      logger.debug('request %s', urlpath);
+      let parts = splitPath(urlpath);
+      if (parts[0] in this._handlers) {
+        return this._handlers[parts[0]](request, response, parts[1]);
+      }
+      if ('' in this._handlers) {
+        return this._handlers[''](request, response, urlpath);
+      }
+      throw createError(404, 'Not Found: ' + urlpath);
+    }).catch((err) => {
+      if (err.httpCode && err.httpCode < 500) {
+        logger.debug('HTTP ' + err.httpCode, err.message || err, request.url);
+      } else {
+        logger.error('HTTP ' + (err.httpCode || 500), err.stack || err.message || err);
+      }
+      writeJson(response, {error: err.message}, err.httpCode || 500);
+    });
+  }
+
 }
 
 function getUrlPath(request) {

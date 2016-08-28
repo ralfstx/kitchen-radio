@@ -4,22 +4,22 @@ import fetch from 'node-fetch';
 
 import config from '../../src/lib/config';
 import logger from '../../src/lib/logger';
-import * as server from '../../src/lib/server';
+import Server, {writeJson} from '../../src/lib/server';
 
 describe('server', function() {
 
-  let port = config.get('port');
-  const PREFIX = 'http://localhost:' + port;
+  const PORT = config.get('port');
+  const PREFIX = 'http://localhost:' + PORT;
+  let server;
 
   beforeEach(function() {
     stub(logger, 'info');
     stub(logger, 'debug');
-    server.clearHandlers();
+    server = new Server();
   });
 
   afterEach(function() {
     return server.stop().then(() => {
-      server.clearHandlers();
       logger.info.restore();
       logger.debug.restore();
     });
@@ -28,13 +28,13 @@ describe('server', function() {
   describe('start', function() {
 
     it('returns true when started', function() {
-      return server.start()
+      return server.start(PORT)
         .then(result => expect(result).to.equal(true));
     });
 
     it('returns false when already running', function() {
-      return server.start()
-        .then(() => server.start())
+      return server.start(PORT)
+        .then(() => server.start(PORT))
         .then(result => expect(result).to.be.false);
     });
 
@@ -56,9 +56,9 @@ describe('server', function() {
 
     beforeEach(function() {
       server.addHandlers({
-        'foo': (request, response) => server.writeJson(response, 23)
+        'foo': (request, response) => writeJson(response, 23)
       });
-      return server.start();
+      return server.start(PORT);
     });
 
     it("receives '/foo'", function() {

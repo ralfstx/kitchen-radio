@@ -2,7 +2,7 @@ import {join} from 'path';
 
 import config from './lib/config';
 import Player from './lib/player';
-import * as server from './lib/server';
+import Server, {writeJson, readBody, createFileHandler} from './lib/server';
 import * as albums from './albums';
 import * as stations from './stations';
 
@@ -14,70 +14,71 @@ let port = config.get('mpdPort') || 6600;
 player.connectMpd(host, port);
 
 
+let server = new Server();
 server.addHandlers(albums.requestHandlers);
 server.addHandlers(stations.requestHandlers);
 server.addHandlers({
   status: function(request, response) {
     player.status().then((status) => {
-      server.writeJson(response, status);
+      writeJson(response, status);
     });
   },
   playlist: function(request, response) {
     player.playlist().then((status) => {
-      server.writeJson(response, status);
+      writeJson(response, status);
     });
   },
   play: function(request, response, path) {
     player.play(path).then(() => {
-      server.writeJson(response, {});
+      writeJson(response, {});
     });
   },
   stop: function(request, response) {
     player.stop().then(() => {
-      server.writeJson(response, {});
+      writeJson(response, {});
     });
   },
   pause: function(request, response) {
     player.pause().then(() => {
-      server.writeJson(response, {});
+      writeJson(response, {});
     });
   },
   prev: function(request, response) {
     player.prev().then(() => {
-      server.writeJson(response, {});
+      writeJson(response, {});
     });
   },
   next: function(request, response) {
     player.next().then(() => {
-      server.writeJson(response, {});
+      writeJson(response, {});
     });
   },
   replace: function(request, response) {
-    return server.readBody(request)
+    return readBody(request)
       .then(body => JSON.parse(body))
       .then(urls => player.replace(urls))
       .then(() => {
-        server.writeJson(response, {});
+        writeJson(response, {});
       });
   },
   append: function(request, response) {
-    return server.readBody(request)
+    return readBody(request)
       .then(body => JSON.parse(body))
       .then(urls => player.append(urls))
       .then(() => {
-        server.writeJson(response, {});
+        writeJson(response, {});
       });
   }
 });
 server.addHandlers({
-  'files': server.createFileHandler(config.get('musicDir'), {
+  'files': createFileHandler(config.get('musicDir'), {
     index: 'index.json'
   })
 });
 server.addHandlers({
-  '': server.createFileHandler(webDir, {
+  '': createFileHandler(webDir, {
     index: 'index.html'
   })
 });
 
-server.start();
+server.start(config.get('port'));

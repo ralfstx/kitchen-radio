@@ -3,7 +3,7 @@ import {join} from 'path';
 import config from './lib/config';
 import {toJson} from './lib/util';
 import {getSubDirs, ensureIsFile, readJsonFile, writeFileAsync} from './lib/files';
-import * as server from'./lib/server';
+import {writeJson, createError} from'./lib/server';
 
 let stationsDir = join(config.get('musicDir'), 'stations');
 
@@ -15,9 +15,9 @@ function handleRequest(request, response, path) {
   console.log('stations', path);
   if (path === 'update') {
     return updateStations()
-      .then(() => server.writeJson(response, 'ok'));
+      .then(() => writeJson(response, 'ok'));
   }
-  throw server.createError(404, "Not found: '" + path + "'");
+  throw createError(404, "Not found: '" + path + "'");
 }
 
 function updateStations() {

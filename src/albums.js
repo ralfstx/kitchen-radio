@@ -7,7 +7,7 @@ import logger from './lib/logger';
 import {toJson} from './lib/util';
 import {getSubDirs, ensureIsFile, readJsonFile, statAsyncSafe, writeFileAsync} from './lib/files';
 import {resizeImage} from './lib/images';
-import * as server from './lib/server';
+import {writeJson, createError} from './lib/server';
 
 const albumsDir = join(config.get('musicDir'), 'albums');
 
@@ -23,13 +23,13 @@ export function updateIndex() {
 function handleRequest(request, response, path) {
   if (path === 'update') {
     return updateIndex()
-      .then(() => server.writeJson(response, 'ok'));
+      .then(() => writeJson(response, 'ok'));
   }
   if (path === 'update-images') {
     return updateImages()
-      .then(results => server.writeJson(response, _.extend({status: 'ok'}, results)));
+      .then(results => writeJson(response, _.extend({status: 'ok'}, results)));
   }
-  throw server.createError(404, "Not found: '" + path + "'");
+  throw createError(404, "Not found: '" + path + "'");
 }
 
 function buildIndex() {
