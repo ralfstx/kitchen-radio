@@ -1,12 +1,18 @@
 import {join} from 'path';
 
 import config from './lib/config';
-import * as player from './lib/player';
+import Player from './lib/player';
 import * as server from './lib/server';
 import * as albums from './albums';
 import * as stations from './stations';
 
 let webDir = join(__dirname, 'web');
+
+let player = new Player();
+let host = config.get('mpdHost') || 'localhost';
+let port = config.get('mpdPort') || 6600;
+player.connectMpd(host, port);
+
 
 server.addHandlers(albums.requestHandlers);
 server.addHandlers(stations.requestHandlers);
