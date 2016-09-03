@@ -4,9 +4,9 @@ import {join} from 'path';
 import {statSync, mkdirSync} from 'fs';
 import del from 'del';
 
-import {copy} from '../src/lib/files';
-import logger from '../src/lib/logger';
-import {updateImages} from '../src/albums';
+import {copy} from '../../src/lib/files';
+import logger from '../../src/lib/logger';
+import {updateImages} from '../../src/routes/albums';
 
 describe('albums', function() {
 

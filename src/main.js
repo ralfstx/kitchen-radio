@@ -1,84 +1,63 @@
+/*eslint no-unused-vars: ["error", { "argsIgnorePattern": "next" }]*/
+
+import 'source-map-support/register';
+import express from 'express';
+import logger from 'morgan';
+import bodyParser from 'body-parser';
 import {join} from 'path';
+import {readFile} from 'fs';
 
 import config from './lib/config';
-import Player from './lib/player';
-import Server, {writeJson, readBody, createFileHandler} from './lib/server';
-import * as albums from './albums';
-import * as stations from './stations';
+import {router as albumsRouter} from './routes/albums';
+import {router as stationsRouter} from './routes/stations';
+import {router as playerRouter} from './routes/player';
 
-let webDir = join(__dirname, 'web');
+let webDir = join(__dirname, 'static');
 
-let player = new Player();
-let host = config.get('mpdHost') || 'localhost';
-let port = config.get('mpdPort') || 6600;
-player.connectMpd(host, port);
+let port = config.get('port') || 8080;
 
+let app = express();
+app.use(logger('dev'));
+app.use(bodyParser.json());
 
-let server = new Server();
-server.addHandlers(albums.requestHandlers);
-server.addHandlers(stations.requestHandlers);
-server.addHandlers({
-  status: function(request, response) {
-    player.status().then((status) => {
-      writeJson(response, status);
-    });
-  },
-  playlist: function(request, response) {
-    player.playlist().then((status) => {
-      writeJson(response, status);
-    });
-  },
-  play: function(request, response, path) {
-    player.play(path).then(() => {
-      writeJson(response, {});
-    });
-  },
-  stop: function(request, response) {
-    player.stop().then(() => {
-      writeJson(response, {});
-    });
-  },
-  pause: function(request, response) {
-    player.pause().then(() => {
-      writeJson(response, {});
-    });
-  },
-  prev: function(request, response) {
-    player.prev().then(() => {
-      writeJson(response, {});
-    });
-  },
-  next: function(request, response) {
-    player.next().then(() => {
-      writeJson(response, {});
-    });
-  },
-  replace: function(request, response) {
-    return readBody(request)
-      .then(body => JSON.parse(body))
-      .then(urls => player.replace(urls))
-      .then(() => {
-        writeJson(response, {});
-      });
-  },
-  append: function(request, response) {
-    return readBody(request)
-      .then(body => JSON.parse(body))
-      .then(urls => player.append(urls))
-      .then(() => {
-        writeJson(response, {});
-      });
-  }
+// ---
+app.engine('html', function (filePath, options, callback) {
+  readFile(filePath, function (err, content) {
+    if (err) return callback(new Error(err));
+    let rendered = content.toString().replace(/{{(.*?)}}/g, (m, m1) => options[m1] || '');
+    return callback(null, rendered);
+  });
 });
-server.addHandlers({
-  'files': createFileHandler(config.get('musicDir'), {
-    index: 'index.json'
-  })
-});
-server.addHandlers({
-  '': createFileHandler(webDir, {
-    index: 'index.html'
-  })
+// ---
+app.set('views', join(__dirname, 'views'));
+app.set('view engine', 'html');
+
+app.use(express.static(webDir));
+
+app.use('/api.html', (req, res) => res.render('api'));
+
+app.use('/files', express.static(config.get('musicDir'), {
+  index: 'index.json'
+}));
+
+app.use('/player', playerRouter());
+app.use('/albums', albumsRouter());
+app.use('/stations', stationsRouter());
+
+app.use((req, res, next) => {
+  let err = new Error('Not Found');
+  err.status = 404;
+  next(err);
 });
 
-server.start(config.get('port'));
+app.use((err, req, res, next) => {
+  res.status(err.status || 500);
+  res.render('error', {
+    title: err.message || 'Server Error',
+    message: "That's an error!"
+  });
+});
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}`);
+});

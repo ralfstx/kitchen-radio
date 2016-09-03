@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {stub} from 'sinon';
 
-import Player from '../../src/lib/player';
+import Player from '../../src/lib/Player';
 
 describe('player', function() {
 

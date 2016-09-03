@@ -1,35 +1,30 @@
+import {Router} from 'express';
 import {join} from 'path';
 import Promise from 'bluebird';
 import _ from 'underscore';
 
-import config from './lib/config';
-import logger from './lib/logger';
-import {toJson} from './lib/util';
-import {getSubDirs, ensureIsFile, readJsonFile, statAsyncSafe, writeFileAsync} from './lib/files';
-import {resizeImage} from './lib/images';
-import {writeJson, createError} from './lib/server';
+import config from '../lib/config';
+import logger from '../lib/logger';
+import {toJson} from '../lib/util';
+import {getSubDirs, ensureIsFile, readJsonFile, statAsyncSafe, writeFileAsync} from '../lib/files';
+import {resizeImage} from '../lib/images';
 
 const albumsDir = join(config.get('musicDir'), 'albums');
 
-export let requestHandlers = {
-  'albums': handleRequest
-};
+export function router() {
+  let router = Router();
+  router.get('/update', (req, res) => {
+    updateIndex().then(() => res.json('ok'));
+  });
+  router.get('/update-images', (req, res) => {
+    updateImages().then(results => res.json(_.extend({status: 'ok'}, results)));
+  });
+  return router;
+}
 
 export function updateIndex() {
   let indexFile = join(albumsDir, 'index.json');
   return buildIndex().then(index => writeFileAsync(indexFile, toJson(index)));
-}
-
-function handleRequest(request, response, path) {
-  if (path === 'update') {
-    return updateIndex()
-      .then(() => writeJson(response, 'ok'));
-  }
-  if (path === 'update-images') {
-    return updateImages()
-      .then(results => writeJson(response, _.extend({status: 'ok'}, results)));
-  }
-  throw createError(404, "Not found: '" + path + "'");
 }
 
 function buildIndex() {

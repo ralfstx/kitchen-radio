@@ -3,8 +3,12 @@
   "version": "0.1.0",
   "dependencies": {
     "bluebird": "^3.3.3",
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
     "imagemagick": "^0.1.3",
+    "morgan": "^1.7.0",
     "mpd": "^1.3.0",
+    "source-map-support": "^0.4.2",
     "underscore": "^1.7.0",
     "winston": "^2.2.0"
   },
@@ -21,9 +25,10 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "test": "mocha --compilers js:babel-core/register 'spec/**/*.spec.js'",
-    "build": "rm -rf build/ && mkdir build/ && babel --compact false -d build/ src/ && cp -r src/web src/config.json package.json build/",
-    "start": "node build/main.js",
+    "test": "mocha --compilers js:babel-core/register 'test/**/*.spec.js'",
+    "build": "rm -rf build/ && mkdir build/ && babel --compact false -d build/ src/ && cp -r src/static src/views src/config.json package.json build/",
+    "server": "node build/main.js",
+    "start": "npm run build && npm run server",
     "deploy": "rsync -rv --delete --exclude 'config.json' --exclude 'node_modules/' build/ pi@radio:/var/lib/node/"
   }
 }

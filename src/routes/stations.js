@@ -1,23 +1,18 @@
+import {Router} from 'express';
 import {join} from 'path';
 
-import config from './lib/config';
-import {toJson} from './lib/util';
-import {getSubDirs, ensureIsFile, readJsonFile, writeFileAsync} from './lib/files';
-import {writeJson, createError} from'./lib/server';
+import config from '../lib/config';
+import {toJson} from '../lib/util';
+import {getSubDirs, ensureIsFile, readJsonFile, writeFileAsync} from '../lib/files';
 
 let stationsDir = join(config.get('musicDir'), 'stations');
 
-export let requestHandlers = {
-  'stations': handleRequest
-};
-
-function handleRequest(request, response, path) {
-  console.log('stations', path);
-  if (path === 'update') {
-    return updateStations()
-      .then(() => writeJson(response, 'ok'));
-  }
-  throw createError(404, "Not found: '" + path + "'");
+export function router() {
+  let router = Router();
+  router.get('/update', (req, res) => {
+    updateStations().then(() => res.json('ok'));
+  });
+  return router;
 }
 
 function updateStations() {
