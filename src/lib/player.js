@@ -57,20 +57,14 @@ export default class Player {
     });
   }
 
-  play(url) {
-    let cmds = ['play'];
-    if (url) {
-      let ext = url.substr(-4).toLowerCase();
-      let isPlaylist = ext === '.m3u' || ext === '.pls' || ext === '.asx';
-      cmds = ['clear', (isPlaylist ? 'load ' : 'add ') + url, 'play'];
-    }
-    return this._sendCommands(cmds);
+  play() {
+    return this._sendCommand('play');
   }
 
   replace(urls) {
     let cmds = ['clear'];
     urls.forEach((url) => {
-      cmds.push('add "' + url + '"');
+      cmds.push((isPlaylist(url) ? 'load "' : 'add "') + url + '"');
     });
     cmds.push('play');
     return this._sendCommands(cmds);
@@ -79,7 +73,7 @@ export default class Player {
   append(urls) {
     let cmds = [];
     urls.forEach((url) => {
-      cmds.push('add "' + url + '"');
+      cmds.push((isPlaylist(url) ? 'load "' : 'add "') + url + '"');
     });
     cmds.push('play');
     return this._sendCommands(cmds);
@@ -101,4 +95,9 @@ export default class Player {
     return this._sendCommand('next');
   }
 
+}
+
+function isPlaylist(url) {
+  let ext = url.substr(-4).toLowerCase();
+  return ext === '.m3u' || ext === '.pls' || ext === '.asx';
 }
