@@ -14,8 +14,21 @@ export function router() {
   router.get('/', (req, res) => {
     res.json(db.getIndex());
   });
-  router.get('/:id', (req, res) => {
-    res.json(db.getAlbum(req.params.id).toObject());
+  router.get('/:id', (req, res, next) => {
+    let album = db.getAlbum(req.params.id);
+    if (album) {
+      res.json(db.getAlbum(req.params.id).toObject());
+    } else {
+      next();
+    }
+  });
+  router.get('/:id/cover', (req, res, next) => {
+    let album = db.getAlbum(req.params.id);
+    if (album) {
+      res.sendFile(join(albumsDir, album.path, selectCoverImage(req.query.size)));
+    } else {
+      next();
+    }
   });
   router.get('/update', (req, res) => {
     db.update().then(results => res.json(results));
@@ -24,4 +37,14 @@ export function router() {
     db.updateImages().then(results => res.json(results));
   });
   return router;
+}
+
+function selectCoverImage(size) {
+  if (size && parseInt(size) <= 100) {
+    return 'cover-100.jpg';
+  }
+  if (size && parseInt(size) <= 250) {
+    return 'cover-250.jpg';
+  }
+  return 'cover.jpg';
 }
