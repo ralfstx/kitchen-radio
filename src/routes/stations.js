@@ -2,32 +2,20 @@ import {Router} from 'express';
 import {join} from 'path';
 
 import config from '../lib/config';
-import {toJson} from '../lib/util';
-import {getSubDirs, ensureIsFile, readJsonFile, writeFileAsync} from '../lib/files';
+import StationDB from '../lib/StationDB';
 
-let stationsDir = join(config.get('musicDir'), 'stations');
+const stationsDir = join(config.get('musicDir'), 'stations');
+
+let db = new StationDB(stationsDir);
+db.update();
 
 export function router() {
   let router = new Router();
+  router.get('/', (req, res) => {
+    res.json(db.getIndex());
+  });
   router.get('/update', (req, res) => {
-    updateStations().then(() => res.json('ok'));
+    db.update().then(results => res.json(results));
   });
   return router;
-}
-
-function updateStations() {
-  let indexFile = join(stationsDir, 'index.json');
-  return buildIndex()
-    .then(index => writeFileAsync(indexFile, toJson(index)));
-}
-
-function buildIndex() {
-  return getSubDirs(stationsDir)
-    .map(subdir => getStationInfo(subdir));
-}
-
-function getStationInfo(subdir) {
-  let indexFile = join(stationsDir, subdir, 'index.json');
-  return ensureIsFile(indexFile)
-    .then(() => readJsonFile(indexFile));
 }
