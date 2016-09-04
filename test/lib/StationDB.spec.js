@@ -30,7 +30,7 @@ describe('StationDB', function() {
 
     it('fills db with stations', function() {
       expect(db.getIndex().length).to.be.above(1);
-      expect(db.getIndex()[0]).to.contain.all.keys(['name', 'icon', 'stream']);
+      expect(db.getIndex()[0]).to.contain.all.keys(['id', 'name', 'stream']);
     });
 
     it('does not append stations to existing when called twice', function() {
@@ -38,6 +38,24 @@ describe('StationDB', function() {
       return db.update().then(() => {
         expect(db.getIndex().length).to.equal(origLength);
       });
+    });
+
+  });
+
+  describe('getStation', function() {
+
+    beforeEach(function() {
+      return db.update();
+    });
+
+    it('returns station', function() {
+      expect(db.getStation('dlf')).to.contain.all.keys({name: 'Deutschlandfunk'});
+    });
+
+    it('returns null for unknown ids', function() {
+      expect(db.getStation()).to.be.null;
+      expect(db.getStation('')).to.be.null;
+      expect(db.getStation('foo')).to.be.null;
     });
 
   });
