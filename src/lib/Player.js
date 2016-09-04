@@ -13,6 +13,42 @@ export default class Player {
       .on('end', () => this.connectMpd());
   }
 
+  play() {
+    return this._sendCommand('play').then(() => null);
+  }
+
+  stop() {
+    return this._sendCommand('stop').then(() => null);
+  }
+
+  pause() {
+    return this._sendCommand('pause').then(() => null);
+  }
+
+  prev() {
+    return this._sendCommand('previous').then(() => null);
+  }
+
+  next() {
+    return this._sendCommand('next').then(() => null);
+  }
+
+  status() {
+    return this._sendCommand('status').then(readProps);
+  }
+
+  playlist() {
+    return this._sendCommand('playlistinfo').then(extractPlaylist);
+  }
+
+  append(urls) {
+    return this._sendCommands([...toCommands(urls), 'play']).then(() => null);
+  }
+
+  replace(urls) {
+    return this._sendCommands(['clear', ...toCommands(urls), 'play']).then(() => null);
+  }
+
   _sendCommand(command) {
     return new Promise((resolve, reject) => {
       this._mpdClient.sendCommand(command, (err, result) => {
@@ -37,67 +73,26 @@ export default class Player {
     });
   }
 
-  status() {
-    return this._sendCommand(mpd.cmd('status', []))
-      .then(msg => readProps(msg));
-  }
+}
 
-  playlist() {
-    return this._sendCommand(mpd.cmd('playlistinfo', [])).then((msg) => {
-      let playlist = [];
-      let entry = {};
-      readProps(msg, (key, value) => {
-        if (key === 'file') {
-          entry = {};
-          playlist.push(entry);
-        }
-        entry[key] = value;
-      });
-      return playlist;
-    });
-  }
-
-  play() {
-    return this._sendCommand('play');
-  }
-
-  replace(urls) {
-    let cmds = ['clear'];
-    urls.forEach((url) => {
-      cmds.push((isPlaylist(url) ? 'load "' : 'add "') + url + '"');
-    });
-    cmds.push('play');
-    return this._sendCommands(cmds);
-  }
-
-  append(urls) {
-    let cmds = [];
-    urls.forEach((url) => {
-      cmds.push((isPlaylist(url) ? 'load "' : 'add "') + url + '"');
-    });
-    cmds.push('play');
-    return this._sendCommands(cmds);
-  }
-
-  stop() {
-    return this._sendCommand('stop');
-  }
-
-  pause() {
-    return this._sendCommand('pause');
-  }
-
-  prev() {
-    return this._sendCommand('previous');
-  }
-
-  next() {
-    return this._sendCommand('next');
-  }
-
+function toCommands(urls) {
+  return urls.map(url => (isPlaylist(url) ? 'load "' : 'add "') + url + '"');
 }
 
 function isPlaylist(url) {
   let ext = url.substr(-4).toLowerCase();
   return ext === '.m3u' || ext === '.pls' || ext === '.asx';
+}
+
+function extractPlaylist(msg) {
+  let playlist = [];
+  let entry = {};
+  readProps(msg, (key, value) => {
+    if (key === 'file') {
+      entry = {};
+      playlist.push(entry);
+    }
+    entry[key] = value;
+  });
+  return playlist;
 }

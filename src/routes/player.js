@@ -13,7 +13,7 @@ player.connectMpd(mpdHost, mpdPort);
 export function router() {
   let router = Router();
   router.get('/status', (req, res) => {
-    player.status().then(status => res.json(status));
+    player.status().then(data => res.json(data));
   });
   router.get('/playlist', (req, res) => {
     player.playlist().then(data => res.json(data));

@@ -24,11 +24,16 @@ describe('util', function() {
       expect(readProps('\tfoo\t:\t23\t')).to.eql({foo: '23'});
     });
 
-    it('returns empty object for empty input', function() {
+    it('uses callback when provided', function() {
+      let callback = (key, value, props) => props[key.toUpperCase()] = value;
+      expect(readProps('foo: 23\nbar: 42', callback)).to.eql({FOO: '23', BAR: '42'});
+    });
+
+    it('returns empty object when called with empty input', function() {
       expect(readProps('')).to.eql({});
     });
 
-    it('returns empty object without argument', function() {
+    it('returns empty object when called without argument', function() {
       expect(readProps()).to.eql({});
     });
 

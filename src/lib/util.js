@@ -1,4 +1,4 @@
-export function readProps(data) {
+export function readProps(data, callback = (key, value, props) => props[key] = value) {
   let props = {};
   if (typeof data === 'string') {
     data.split('\n').forEach((line, index) => {
@@ -7,7 +7,7 @@ export function readProps(data) {
         if (!match) {
           throw new Error('Syntax error in line ' + (index + 1));
         }
-        props[match[1]] = match[2];
+        callback(match[1], match[2], props);
       }
     });
   }
