@@ -53,8 +53,9 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   res.status(err.status || 500);
   res.render('error', {
-    title: err.status === 404 ? 'Not Found' : err.message || 'Server Error',
-    message: "That's an error!"
+    title: err.status === 404 ? 'Not Found' : 'Server Error',
+    message: err.message,
+    stack: err.stack
   });
 });
 
