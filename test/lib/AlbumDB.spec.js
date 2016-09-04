@@ -1,5 +1,6 @@
 import {expect, tmpdir, copy, stub, restore} from '../test';
 import logger from '../../src/lib/logger';
+import {Album} from '../../src/lib/album-types';
 import AlbumDB from '../../src/lib/AlbumDB';
 import {statSync, unlinkSync} from 'fs';
 import {join} from 'path';
@@ -39,6 +40,19 @@ describe('AlbumDB', function() {
       return db.update().then(() => {
         expect(db.getIndex().length).to.equal(origLength);
       });
+    });
+
+  });
+
+  describe('getAlbum', function() {
+
+    beforeEach(function() {
+      return db.update();
+    });
+
+    it('returns album index data', function() {
+      expect(db.getAlbum('animals')).to.be.instanceof(Album);
+      expect(db.getAlbum('animals').artist).to.equal('Pink Floyd');
     });
 
   });

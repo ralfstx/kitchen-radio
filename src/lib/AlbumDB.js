@@ -9,11 +9,11 @@ export default class AlbumDB {
 
   constructor(albumsDir) {
     this._albumsDir = albumsDir;
-    this._albums = [];
+    this._albums = {};
   }
 
   async update() {
-    this._albums = [];
+    this._albums = {};
     logger.info('Updating albums in ' + this._albumsDir);
     let subdirs = await getSubDirs(this._albumsDir);
     for (let name of subdirs.filter(dir => !dir.startsWith('.'))) {
@@ -23,10 +23,10 @@ export default class AlbumDB {
       } else if (!album.name) {
         logger.warn('Missing album name in: ' + join(this._albumsDir, name));
       } else {
-        this._albums.push(album);
+        this._albums[album.path] = album;
       }
     }
-    return {count: this._albums.length};
+    return {count: Object.keys(this._albums).length};
   }
 
   async _readAlbum(path) {
@@ -40,8 +40,8 @@ export default class AlbumDB {
   async updateImages() {
     let log = {missing: [], written: []};
     logger.info('Updating album images in ' + this._albumsDir);
-    for (let album of this._albums) {
-      await this._updateAlbumImages(album, log);
+    for (let path in this._albums) {
+      await this._updateAlbumImages(this._albums[path], log);
     }
     return log;
   }
@@ -65,8 +65,14 @@ export default class AlbumDB {
     }
   }
 
+  getAlbum(path) {
+    return this._albums[path] || null;
+  }
+
   getIndex() {
-    return this._albums.map(album => ({path: album.path, name: album.name}));
+    return Object.keys(this._albums)
+      .map(path => this._albums[path])
+      .map(album => ({path: album.path, name: album.name}));
   }
 
 }

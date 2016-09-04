@@ -107,7 +107,7 @@ export class Track {
     return tags;
   }
 
-  _toJsonObj() {
+  toObject() {
     return Object.assign({}, this._data, {
       path: this._path
     });
@@ -163,10 +163,10 @@ export class TrackList {
     return this._parent ? join(this._parent.location, this._path) : this._path;
   }
 
-  _toJsonObj() {
+  toObject() {
     return Object.assign({}, this._data, {
       path: this._path,
-      tracks: this._tracks.map(track => track._toJsonObj())
+      tracks: this._tracks.map(track => track.toObject())
     });
   }
 }
@@ -245,12 +245,12 @@ export class Album {
   }
 
   toJson() {
-    return JSON.stringify(this._toJsonObj(), ALBUM_INDEX_KEYS, ' ');
+    return JSON.stringify(this.toObject(), ALBUM_INDEX_KEYS, ' ');
   }
 
-  _toJsonObj() {
+  toObject() {
     return Object.assign({}, this._data, {
-      discs: this._discs.map(disc => disc._toJsonObj())
+      discs: this._discs.map(disc => disc.toObject())
     });
   }
 

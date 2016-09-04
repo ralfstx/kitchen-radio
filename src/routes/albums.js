@@ -14,6 +14,9 @@ export function router() {
   router.get('/', (req, res) => {
     res.json(db.getIndex());
   });
+  router.get('/:id', (req, res) => {
+    res.json(db.getAlbum(req.params.id).toObject());
+  });
   router.get('/update', (req, res) => {
     db.update().then(results => res.json(results));
   });
