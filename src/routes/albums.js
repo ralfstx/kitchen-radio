@@ -26,9 +26,37 @@ export function router() {
     let album = db.getAlbum(req.params.id);
     if (album) {
       res.sendFile(join(albumsDir, album.path, selectCoverImage(req.query.size)));
-    } else {
-      next();
+      return;
     }
+    next();
+  });
+  router.get('/:id/tracks/:number', (req, res, next) => {
+    let album = db.getAlbum(req.params.id);
+    if (album) {
+      let number = parseInt(req.params.number);
+      let track = album.tracks[number];
+      if (track) {
+        res.sendFile(join(albumsDir, track.location));
+        return;
+      }
+    }
+    next();
+  });
+  router.get('/:id/discs/:dnr/tracks/:tnr', (req, res, next) => {
+    let album = db.getAlbum(req.params.id);
+    if (album) {
+      let dnr = parseInt(req.params.dnr);
+      let disc = album.discs[dnr - 1];
+      if (disc) {
+        let tnr = parseInt(req.params.tnr);
+        let track = disc.tracks[tnr - 1];
+        if (track) {
+          res.sendFile(join(albumsDir, track.location));
+          return;
+        }
+      }
+    }
+    next();
   });
   router.get('/update', (req, res) => {
     db.update().then(results => res.json(results));
