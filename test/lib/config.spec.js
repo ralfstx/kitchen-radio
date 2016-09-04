@@ -1,4 +1,4 @@
-import {expect} from 'chai';
+import {expect} from '../test';
 import config from '../../src/lib/config';
 
 describe('config', function() {

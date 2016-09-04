@@ -1,23 +1,18 @@
 import {join} from 'path';
-import {expect} from 'chai';
-import {spy} from 'sinon';
+import {expect, spy, tmpdir, restore} from '../test';
 import {mkdirSync, writeFileSync} from 'fs';
 
 import {callRecursive, ensureIsFile, ensureIsDir, getSubDirs, statAsyncSafe, readJsonFile} from '../../src/lib/files';
 
-import del from 'del';
-const tmpDir = 'mocha-tmp';
+let baseDir;
 
 describe('files', function() {
 
-
   beforeEach(function() {
-    mkdirSync(tmpDir);
+    baseDir = tmpdir();
   });
 
-  afterEach(function() {
-    return del(tmpDir);
-  });
+  afterEach(restore);
 
   describe('callRecursive', function() {
 
@@ -32,15 +27,15 @@ describe('files', function() {
         'A/1/a',
         'B'
       );
-      return callRecursive(tmpDir, callback).then(() => {
+      return callRecursive(baseDir, callback).then(() => {
         expect(callback.args.map(args => args[0])).to.eql([
-          tmpDir,
-          tmpDir + '/A',
-          tmpDir + '/A/1',
-          tmpDir + '/A/1/a',
-          tmpDir + '/A/1/b',
-          tmpDir + '/A/2',
-          tmpDir + '/B'
+          baseDir,
+          baseDir + '/A',
+          baseDir + '/A/1',
+          baseDir + '/A/1/a',
+          baseDir + '/A/1/b',
+          baseDir + '/A/2',
+          baseDir + '/B'
         ]);
       });
     });
@@ -49,7 +44,7 @@ describe('files', function() {
       createTmpDir('A/');
       createTmpFile('A/b');
       let callback = spy();
-      return callRecursive(tmpDir, callback).then(() => {
+      return callRecursive(baseDir, callback).then(() => {
         callback.args.forEach(args => expect('mtime' in args[1]));
       });
     });
@@ -60,18 +55,18 @@ describe('files', function() {
 
     it('does nothing on files', function() {
       createTmpFile('foo');
-      return ensureIsFile(join(tmpDir, 'foo'));
+      return ensureIsFile(join(baseDir, 'foo'));
     });
 
     it('throws on directories', function() {
       createTmpDir('foo');
-      return ensureIsFile(join(tmpDir, 'foo')).then(fail('Expected to throw'), err => {
+      return ensureIsFile(join(baseDir, 'foo')).then(fail('Expected to throw'), err => {
         expect(err.message).to.match(/Not a file: '/);
       });
     });
 
     it('throws on missing files', function() {
-      return ensureIsFile(join(tmpDir, 'missing')).then(fail('Expected to throw'), err => {
+      return ensureIsFile(join(baseDir, 'missing')).then(fail('Expected to throw'), err => {
         expect(err.message).to.match(/No such file: '/);
       });
     });
@@ -82,18 +77,18 @@ describe('files', function() {
 
     it('does nothing on directories', function() {
       createTmpDir('foo');
-      return ensureIsDir(join(tmpDir, 'foo'));
+      return ensureIsDir(join(baseDir, 'foo'));
     });
 
     it('throws on files', function() {
       createTmpFile('foo');
-      return ensureIsDir(join(tmpDir, 'foo')).then(fail('Expected to throw'), err => {
+      return ensureIsDir(join(baseDir, 'foo')).then(fail('Expected to throw'), err => {
         expect(err.message).to.match(/Not a directory: '/);
       });
     });
 
     it('throws on missing files', function() {
-      return ensureIsDir(join(tmpDir, 'missing')).then(fail('Expected to throw'), err => {
+      return ensureIsDir(join(baseDir, 'missing')).then(fail('Expected to throw'), err => {
         expect(err.message).to.match(/No such directory: '/);
       });
     });
@@ -112,21 +107,21 @@ describe('files', function() {
         'file-1',
         'file-2'
       );
-      return getSubDirs(tmpDir).then(result => {
+      return getSubDirs(baseDir).then(result => {
         expect(result).to.eql(['A', 'B', 'C']);
       });
     });
 
     it('throws on files', function() {
       createTmpFile('foo');
-      return getSubDirs(join(tmpDir, 'foo')).then(fail('Expected to throw'), err => {
-        expect(err.message).to.equal("Could not read directory: 'mocha-tmp/foo'");
+      return getSubDirs(join(baseDir, 'foo')).then(fail('Expected to throw'), err => {
+        expect(err.message).to.equal(`Could not read directory: '${baseDir}/foo'`);
       });
     });
 
     it('throws on missing files', function() {
-      return getSubDirs(join(tmpDir, 'missing')).then(fail('Expected to throw'), err => {
-        expect(err.message).to.equal("Could not read directory: 'mocha-tmp/missing'");
+      return getSubDirs(join(baseDir, 'missing')).then(fail('Expected to throw'), err => {
+        expect(err.message).to.equal(`Could not read directory: '${baseDir}/missing'`);
       });
     });
 
@@ -136,13 +131,13 @@ describe('files', function() {
 
     it('returns stats for file', function() {
       createTmpFile('foo');
-      return statAsyncSafe(join(tmpDir, 'foo')).then(stats => {
+      return statAsyncSafe(join(baseDir, 'foo')).then(stats => {
         expect(stats.isFile()).to.be.true;
       });
     });
 
     it('returns null for missing file', function() {
-      return statAsyncSafe(join(tmpDir, 'missing')).then(stats => {
+      return statAsyncSafe(join(baseDir, 'missing')).then(stats => {
         expect(stats).to.be.null;
       });
     });
@@ -153,13 +148,13 @@ describe('files', function() {
 
     it('reads JSON file', function() {
       createTmpFile('foo', '{"foo": 23}');
-      return readJsonFile(join(tmpDir, 'foo')).then(data => {
+      return readJsonFile(join(baseDir, 'foo')).then(data => {
         expect(data).to.eql({foo: 23});
       });
     });
 
     it('throws on missing files', function() {
-      return readJsonFile(join(tmpDir, 'missing')).then(fail('Expected to throw'), err => {
+      return readJsonFile(join(baseDir, 'missing')).then(fail('Expected to throw'), err => {
         expect(err.message).to.match(/Could not read JSON file/);
       });
     });
@@ -179,11 +174,11 @@ function createTmpFiles() {
 }
 
 function createTmpFile(name, content = 'content') {
-  writeFileSync(join(tmpDir, name), content);
+  writeFileSync(join(baseDir, name), content);
 }
 
 function createTmpDir(name) {
-  mkdirSync(join(tmpDir, name));
+  mkdirSync(join(baseDir, name));
 }
 
 function fail(message) {
