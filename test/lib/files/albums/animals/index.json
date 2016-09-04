@@ -1,0 +1,37 @@
+{
+ "name": "Pink Floyd - Animals",
+ "artist": "Pink Floyd",
+ "title": "Animals",
+ "discs": [
+  {
+   "path": ".",
+   "tracks": [
+    {
+     "path": "01.ogg",
+     "title": "Pigs On The Wing (Part One)",
+     "length": 85
+    },
+    {
+     "path": "02.ogg",
+     "title": "Dogs",
+     "length": 1024
+    },
+    {
+     "path": "03.ogg",
+     "title": "Pigs (Three Different Ones)",
+     "length": 682
+    },
+    {
+     "path": "04.ogg",
+     "title": "Sheep",
+     "length": 624
+    },
+    {
+     "path": "05.ogg",
+     "title": "Pigs On The Wing (Part Two)",
+     "length": 85
+    }
+   ]
+  }
+ ]
+}

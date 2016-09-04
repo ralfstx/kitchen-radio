@@ -8,7 +8,7 @@ import {getSubDirs, ensureIsFile, readJsonFile, writeFileAsync} from '../lib/fil
 let stationsDir = join(config.get('musicDir'), 'stations');
 
 export function router() {
-  let router = Router();
+  let router = new Router();
   router.get('/update', (req, res) => {
     updateStations().then(() => res.json('ok'));
   });
