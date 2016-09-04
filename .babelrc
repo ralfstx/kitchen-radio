@@ -1,6 +1,11 @@
 {
   "plugins": [
-    "transform-es2015-modules-commonjs"
+    "transform-es2015-modules-commonjs",
+    "syntax-async-functions",
+    ["transform-async-to-module-method", {
+      "module": "bluebird",
+      "method": "coroutine"
+    }]
   ],
   "sourceMaps": "both"
 }
