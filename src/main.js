@@ -36,10 +36,6 @@ app.use(express.static(webDir));
 
 app.use('/api.html', (req, res) => res.render('api'));
 
-app.use('/files', express.static(config.get('musicDir'), {
-  index: 'index.json'
-}));
-
 app.use('/player', playerRouter());
 app.use('/albums', albumsRouter());
 app.use('/stations', stationsRouter());
