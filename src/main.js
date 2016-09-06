@@ -41,18 +41,28 @@ app.use('/albums', albumsRouter());
 app.use('/stations', stationsRouter());
 
 app.use((req, res, next) => {
-  let err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+  if (req.accepts(['json', 'html']) === 'html') {
+    res.render('404', {});
+  } else {
+    res.json({error: 'Not Found'});
+  }
 });
 
 app.use((err, req, res, next) => {
   res.status(err.status || 500);
-  res.render('error', {
-    title: err.status === 404 ? 'Not Found' : 'Server Error',
-    message: err.message,
-    stack: err.stack
-  });
+  let title = err.status === 404 ? 'Not Found' : 'Server Error';
+  if (req.accepts(['json', 'html']) === 'html') {
+    res.render('error', {
+      title,
+      message: err.message,
+      stack: err.stack
+    });
+  } else {
+    res.json({
+      error: title,
+      message: err.message,
+    });
+  }
 });
 
 app.listen(port, () => {
