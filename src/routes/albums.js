@@ -9,15 +9,25 @@ const albumsDir = join(config.get('musicDir'), 'albums');
 let db = new AlbumDB(albumsDir);
 db.update();
 
+let isHtml = req => req.query.type !== 'json' && req.accepts(['json', 'html']) === 'html';
+
 export function router() {
   let router = new Router();
   router.get('/', (req, res) => {
-    res.json(db.getIndex());
+    if (isHtml(req)) {
+      res.render('albums', {title: 'Albums', url: '/albums'});
+    } else {
+      res.json(db.getIndex());
+    }
   });
   router.get('/:id', (req, res, next) => {
     let album = db.getAlbum(req.params.id);
     if (album) {
-      res.json(db.getAlbum(req.params.id).toObject());
+      if (isHtml(req)) {
+        res.render('album', {title: album.name, url: `/albums/${album.path}`});
+      } else {
+        res.json(db.getAlbum(req.params.id).toObject());
+      }
     } else {
       next();
     }
@@ -33,7 +43,7 @@ export function router() {
   router.get('/:id/tracks/:number', (req, res, next) => {
     let album = db.getAlbum(req.params.id);
     if (album) {
-      let number = parseInt(req.params.number);
+      let number = parseInt(req.params.number) - 1;
       let track = album.tracks[number];
       if (track) {
         res.sendFile(join(albumsDir, track.location));

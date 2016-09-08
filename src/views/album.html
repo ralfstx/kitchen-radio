@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Radio - ${title}</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+      .hidden {
+        visibility: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>${title}</h1>
+    <div id="app" class="hidden">
+      <div v-for="disc in album.discs">
+        <h2>Disc {{$index + 1}}</h2>
+        <div v-for="track in disc.tracks">
+          {{$index + 1}}.
+          <a href="${url}/tracks/{{$index + 1}}">{{track.title}}</a>
+        </div>
+      </div>
+    </div>
+
+    <script src=https://npmcdn.com/vue/dist/vue.js></script>
+    <script>
+      window.onload = function () {
+        new Vue({
+          el: '#app',
+          data: {
+            album: {}
+          },
+          ready: function() {
+            this.$el.classList.remove('hidden');
+            fetch('${url}?type=json').then(res => res.json()).then(album => this.album = album);
+          }
+        });
+      };
+    </script>
+
+  </body>
+</html>
