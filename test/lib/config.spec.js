@@ -11,7 +11,7 @@ describe('config', function() {
     });
 
     it('returns undefined for non-existing values', function() {
-      expect(config.get('not-existing')).not.to.be.defined;
+      expect(config.get('not-existing')).to.be.undefined;
     });
 
   });
