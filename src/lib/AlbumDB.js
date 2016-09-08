@@ -69,10 +69,15 @@ export default class AlbumDB {
     return this._albums[path] || null;
   }
 
+  getAlbums() {
+    return Object.keys(this._albums).map(id => this._albums[id]);
+  }
+
   getIndex() {
     return Object.keys(this._albums)
       .map(path => this._albums[path])
-      .map(album => ({path: album.path, name: album.name}));
+      .map(album => ({path: album.path, name: album.name}))
+      .sort((a1, a2) => (a1.name < a2.name ? -1 : a1.name > a2.name ? 1 : 0));
   }
 
 }

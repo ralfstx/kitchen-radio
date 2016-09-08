@@ -57,6 +57,37 @@ describe('AlbumDB', function() {
 
   });
 
+  describe('getAlbums', function() {
+
+    beforeEach(function() {
+      return db.update();
+    });
+
+    it('returns alls albums in sort order', function() {
+      expect(db.getAlbums().map(album => album.path)).to.eql(['animals', 'bluetrain']);
+      expect(db.getAlbums()[0]).to.equal(db.getAlbum('animals'));
+    });
+
+  });
+
+  describe('getIndex', function() {
+
+    beforeEach(function() {
+      return db.update();
+    });
+
+    it('returns path and name of all albums, sorted by name', function() {
+      expect(db.getIndex()).to.eql([{
+        name: 'John Coltrane - Blue Train',
+        path: 'bluetrain'
+      }, {
+        name: 'Pink Floyd - Animals',
+        path: 'animals'
+      }]);
+    });
+
+  });
+
   describe('updateImages', function() {
 
     beforeEach(function() {
