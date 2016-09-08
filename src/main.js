@@ -24,7 +24,7 @@ app.use(bodyParser.json());
 app.engine('html', function (filePath, options, callback) {
   readFile(filePath, function (err, content) {
     if (err) return callback(new Error(err));
-    let rendered = content.toString().replace(/{{\s*(.*?)\s*}}/g, (m, m1) => m1 in options ? options[m1] : m);
+    let rendered = content.toString().replace(/\${\s*(.*?)\s*}/g, (m, m1) => m1 in options ? options[m1] : '');
     return callback(null, rendered);
   });
 });
