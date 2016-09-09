@@ -18,9 +18,9 @@
     <div id="app" class="hidden">
       <input type="text" placeholder="search terms" v-model="query" debounce="500" />
       <div v-for="match in matches">
-        <a href="/albums/{{match.path}}">
+        <a href="/albums/{{match.id}}">
           <div class="match">
-            <img width="50" height="50" src="/albums/{{match.path}}/cover?size=50" align="center"/>
+            <img width="50" height="50" src="/albums/{{match.id}}/cover?size=50" align="center"/>
             <span>{{match.name}}</span>
             <span v-if="match.tracks.length">(Tracks {{match.tracks}})</span>
           </div>

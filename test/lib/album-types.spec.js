@@ -379,17 +379,12 @@ describe('media', function() {
           artist: 'Jimmy the Fish',
           title: 'Swimming',
           discs: [{
-            path: 'disc1',
             tracks: [{
-              path: '01.ogg'
             }, {
-              path: '02.ogg',
               title: 'Part Two'
             }]
           }, {
-            path: 'disc2',
             tracks: [{
-              path: '01.ogg',
               title: 'The End'
             }]
           }]

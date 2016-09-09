@@ -8,14 +8,18 @@
       .hidden {
         visibility: hidden;
       }
+      img {
+        margin-bottom: 10px
+      }
     </style>
   </head>
   <body>
-    <h1>${title}</h1>
     <div id="app" class="hidden">
+      <h1>${title}</h1>
+      <img width="250" height="250" src="/albums/{{album.id}}/cover?size=250" />
       <div v-for="(dn, disc) in album.discs">
         <h2 v-if="album.discs.length > 1">Disc {{$index + 1}}</h2>
-        <div v-for="(tn, track) in disc.tracks">
+        <div class="line" v-for="(tn, track) in disc.tracks">
           {{$index + 1}}.
           <a href="${url}/discs/{{dn + 1}}/tracks/{{tn + 1}}">{{track.title}}</a>
         </div>

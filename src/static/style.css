@@ -1,9 +1,13 @@
 body {
   padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  font: 18px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
 a {
   color: #004080;
   text-decoration: none;
+}
+
+div.line {
+  margin-top: 1px;
 }

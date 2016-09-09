@@ -17,7 +17,7 @@ export function router() {
     if (isHtml(req)) {
       res.render('albums', {});
     } else {
-      res.json(db.getAlbums().map(album => ({path: album.path, name: album.name})));
+      res.json(db.getAlbums().map(album => ({id: album.path, name: album.name})));
     }
   });
   router.get('/:id', (req, res, next) => {
@@ -75,7 +75,7 @@ export function router() {
       res.render('search', {query});
     } else {
       res.json(db.search(terms).map(match => ({
-        path: match.album.path,
+        id: match.album.path,
         name: match.album.name,
         tracks: match.tracks.map(track => track.number)
       })));

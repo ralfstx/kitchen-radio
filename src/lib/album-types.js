@@ -12,7 +12,7 @@ const DATA_KEYS = {
 };
 
 // defines the fields to include in the index and their order
-const ALBUM_INDEX_KEYS = ['path', 'name', 'artist', 'title', 'year', 'length', 'mbid', 'discs', 'tracks'];
+const ALBUM_INDEX_KEYS = ['name', 'artist', 'title', 'year', 'length', 'mbid', 'discs', 'tracks'];
 
 export class Track {
 
@@ -108,9 +108,7 @@ export class Track {
   }
 
   toObject() {
-    return Object.assign({}, this._data, {
-      path: this._path
-    });
+    return Object.assign({}, this._data);
   }
 
 }
@@ -165,7 +163,6 @@ export class TrackList {
 
   toObject() {
     return Object.assign({}, this._data, {
-      path: this._path,
       tracks: this._tracks.map(track => track.toObject())
     });
   }
@@ -250,6 +247,7 @@ export class Album {
 
   toObject() {
     return Object.assign({}, this._data, {
+      id: this.path,
       discs: this._discs.map(disc => disc.toObject())
     });
   }
