@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Radio - ${title}</title>
+    <title>Radio - Albums</title>
     <link rel="stylesheet" href="/style.css">
     <style>
       .hidden {
@@ -11,12 +11,12 @@
     </style>
   </head>
   <body>
-    <h1>${title}</h1>
+    <h1>Albums</h1>
     <div id="app" class="hidden">
       <div v-for="album in albums"><a href="/albums/{{album.path}}">{{album.name}}</a></div>
     </div>
 
-    <script src=https://npmcdn.com/vue/dist/vue.js></script>
+    <script src="https://npmcdn.com/vue/dist/vue.js"></script>
     <script>
       window.onload = function () {
         new Vue({
@@ -26,7 +26,7 @@
           },
           ready: function() {
             this.$el.classList.remove('hidden');
-            fetch('${url}?type=json').then(res => res.json()).then(albums => this.albums = albums);
+            fetch('/albums?type=json').then(res => res.json()).then(albums => this.albums = albums);
           }
         });
       };

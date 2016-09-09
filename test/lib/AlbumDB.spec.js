@@ -21,7 +21,7 @@ describe('AlbumDB', function() {
   afterEach(restore);
 
   it('is initially empty', function() {
-    expect(db.getIndex()).to.eql([]);
+    expect(db.getAlbums()).to.eql([]);
   });
 
   describe('update', function() {
@@ -31,14 +31,13 @@ describe('AlbumDB', function() {
     });
 
     it('fills db with albums', function() {
-      expect(db.getIndex().length).to.be.above(1);
-      expect(db.getIndex()[0]).to.contain.all.keys(['path', 'name']);
+      expect(db.getAlbums().length).to.be.above(1);
     });
 
     it('does not append albums to existing when called twice', function() {
-      let origLength = db.getIndex().length;
+      let origLength = db.getAlbums().length;
       return db.update().then(() => {
-        expect(db.getIndex().length).to.equal(origLength);
+        expect(db.getAlbums().length).to.equal(origLength);
       });
     });
 
@@ -50,9 +49,13 @@ describe('AlbumDB', function() {
       return db.update();
     });
 
-    it('returns album index data', function() {
+    it('returns requested album', function() {
       expect(db.getAlbum('animals')).to.be.instanceof(Album);
       expect(db.getAlbum('animals').artist).to.equal('Pink Floyd');
+    });
+
+    it('returns null when album not found', function() {
+      expect(db.getAlbum('missing')).to.be.null;
     });
 
   });
@@ -63,27 +66,41 @@ describe('AlbumDB', function() {
       return db.update();
     });
 
-    it('returns alls albums in sort order', function() {
-      expect(db.getAlbums().map(album => album.path)).to.eql(['animals', 'bluetrain']);
-      expect(db.getAlbums()[0]).to.equal(db.getAlbum('animals'));
+    it('returns alls albums', function() {
+      expect(db.getAlbums().map(album => album.path))
+        .to.contain('animals')
+        .to.contain('bluetrain');
+    });
+
+    it('returns albums sorted by name', function() {
+      expect(db.getAlbums().map(album => album.name)).to.eql([
+        'John Coltrane - Blue Train',
+        'Pink Floyd - Animals'
+      ]);
     });
 
   });
 
-  describe('getIndex', function() {
+  describe('search', function() {
 
     beforeEach(function() {
       return db.update();
     });
 
-    it('returns path and name of all albums, sorted by name', function() {
-      expect(db.getIndex()).to.eql([{
-        name: 'John Coltrane - Blue Train',
-        path: 'bluetrain'
-      }, {
-        name: 'Pink Floyd - Animals',
-        path: 'animals'
+    it('returns matching albums', function() {
+      expect(db.search(['colt'])).to.eql([{album: db.getAlbum('bluetrain'), tracks: []}]);
+    });
+
+    it('returns matching tracks', function() {
+      expect(db.search(['pig', 'wing'])).to.eql([{
+        album: db.getAlbum('animals'),
+        tracks: [db.getAlbum('animals').tracks[0], db.getAlbum('animals').tracks[4]]
       }]);
+    });
+
+    it('respects limit', function() {
+      expect(db.search(['']).length).to.be.above(1);
+      expect(db.search([''], 1).length).to.equal(1);
     });
 
   });

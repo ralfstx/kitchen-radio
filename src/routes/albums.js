@@ -15,9 +15,9 @@ export function router() {
   let router = new Router();
   router.get('/', (req, res) => {
     if (isHtml(req)) {
-      res.render('albums', {title: 'Albums', url: '/albums'});
+      res.render('albums', {});
     } else {
-      res.json(db.getIndex());
+      res.json(db.getAlbums().map(album => ({path: album.path, name: album.name})));
     }
   });
   router.get('/:id', (req, res, next) => {
@@ -67,6 +67,19 @@ export function router() {
       }
     }
     next();
+  });
+  router.get('/search', (req, res) => {
+    let query = req.query.q || '';
+    let terms = query.split(/\s+/);
+    if (isHtml(req)) {
+      res.render('search', {query});
+    } else {
+      res.json(db.search(terms).map(match => ({
+        path: match.album.path,
+        name: match.album.name,
+        tracks: match.tracks.map(track => track.number)
+      })));
+    }
   });
   router.get('/update', (req, res) => {
     db.update().then(results => res.json(results));

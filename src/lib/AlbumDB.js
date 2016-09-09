@@ -70,14 +70,42 @@ export default class AlbumDB {
   }
 
   getAlbums() {
-    return Object.keys(this._albums).map(id => this._albums[id]);
-  }
-
-  getIndex() {
     return Object.keys(this._albums)
-      .map(path => this._albums[path])
-      .map(album => ({path: album.path, name: album.name}))
+      .map(id => this._albums[id])
       .sort((a1, a2) => (a1.name < a2.name ? -1 : a1.name > a2.name ? 1 : 0));
   }
 
+  search(terms, limit = 20) {
+    let result = [];
+    for (let id in this._albums) {
+      let album = this._albums[id];
+      let tracks = album.tracks.filter(track => matches(track.title, terms));
+      if (tracks.length || matches(album.name, terms)) {
+        result.push({album, tracks});
+        if (result.length >= limit) return result;
+      }
+    }
+    return result;
+  }
+
+}
+
+function matches(string, terms) {
+  if (!terms || !string) {
+    return false;
+  }
+  let stringParts = string.toLowerCase().split(/\s/);
+  for (let i = 0; i < terms.length; i++) {
+    let found = false;
+    for (let j = 0; j < stringParts.length; j++) {
+      if (stringParts[j].indexOf(terms[i].toLowerCase()) === 0) {
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      return false;
+    }
+  }
+  return true;
 }

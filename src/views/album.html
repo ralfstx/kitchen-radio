@@ -13,16 +13,16 @@
   <body>
     <h1>${title}</h1>
     <div id="app" class="hidden">
-      <div v-for="disc in album.discs">
-        <h2>Disc {{$index + 1}}</h2>
-        <div v-for="track in disc.tracks">
+      <div v-for="(dn, disc) in album.discs">
+        <h2 v-if="album.discs.length > 1">Disc {{$index + 1}}</h2>
+        <div v-for="(tn, track) in disc.tracks">
           {{$index + 1}}.
-          <a href="${url}/tracks/{{$index + 1}}">{{track.title}}</a>
+          <a href="${url}/discs/{{dn + 1}}/tracks/{{tn + 1}}">{{track.title}}</a>
         </div>
       </div>
     </div>
 
-    <script src=https://npmcdn.com/vue/dist/vue.js></script>
+    <script src="https://npmcdn.com/vue/dist/vue.js"></script>
     <script>
       window.onload = function () {
         new Vue({
