@@ -1,15 +1,17 @@
-import {expect, stub, restore} from '../test';
+import {expect, spy, stub, restore} from '../test';
 
+import {Album} from '../../src/lib/album-types';
+import Context from '../../src/lib/Context';
 import Player from '../../src/lib/Player';
 
 const EXAMPLE_PLAYLIST_RESULT = `
-file: http://example.org/01.ogg
+file: http://localhost:8080/albums/aaa/tracks/1
 Pos: 1
 Id: 23
-file: http://example.org/02.ogg
+file: http://localhost:8080/albums/aaa/tracks/2
 Pos: 2
 Id: 24
-file: http://example.org/03.ogg
+file: http://localhost:8080/albums/aaa/discs/2/tracks/1
 Pos: 3
 Id: 25`;
 
@@ -18,7 +20,41 @@ describe('player', function() {
   let player, mpdClient;
 
   beforeEach(function() {
-    player = new Player();
+    let logger = {info: spy(), warn: spy()};
+    player = new Player(new Context({
+      logger,
+      port: 8080,
+      mpdHost: 'localhost',
+      mpdPort: 6600,
+      'instance:AlbumDB': {
+        getAlbum: () => Album.fromJson('foo', {
+          name: 'Foo',
+          discs: [{
+            path: '01',
+            tracks: [{
+              path: '01.ogg',
+              title: 'title-1-1',
+              length: 100
+            }, {
+              path: '02.ogg',
+              title: 'title-1-2',
+              length: 200
+            }]
+          }, {
+            path: '02',
+            tracks: [{
+              path: '01.ogg',
+              title: 'title-2-1',
+              length: 300
+            }, {
+              path: '02.ogg',
+              title: 'title-2-2',
+              length: 400
+            }]
+          }]
+        })
+      }
+    }));
     mpdClient = player._mpdClient = {
       sendCommand: stub(),
       sendCommands: stub()
@@ -102,19 +138,28 @@ describe('player', function() {
         expect(mpdClient.sendCommand).to.have.been.calledWith('playlistinfo');
         expect(result).to.eql([
           {
-            file: 'http://example.org/01.ogg',
-            Pos: '1',
-            Id: '23'
+            file: '/albums/aaa/tracks/1',
+            album: 'aaa',
+            disc: 1,
+            track: 1,
+            name: 'title-1-1',
+            time: 100
           },
           {
-            file: 'http://example.org/02.ogg',
-            Pos: '2',
-            Id: '24'
+            file: '/albums/aaa/tracks/2',
+            album: 'aaa',
+            disc: 1,
+            track: 2,
+            name: 'title-1-2',
+            time: 200
           },
           {
-            file: 'http://example.org/03.ogg',
-            Id: '25',
-            Pos: '3'
+            file: '/albums/aaa/discs/2/tracks/1',
+            album: 'aaa',
+            disc: 2,
+            track: 1,
+            name: 'title-2-1',
+            time: 300
           }
         ]);
       });

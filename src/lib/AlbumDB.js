@@ -1,27 +1,27 @@
 import {join} from 'path';
 
-import logger from './logger';
 import {getSubDirs, readJsonFile, statAsyncSafe} from './files';
 import {Album} from './album-types';
 import {resizeImage} from '../lib/images';
 
 export default class AlbumDB {
 
-  constructor(albumsDir) {
-    this._albumsDir = albumsDir;
+  constructor(context) {
+    this.logger = context.get('logger');
+    this._albumsDir = context.get('albumsDir');
     this._albums = {};
   }
 
   async update() {
     this._albums = {};
-    logger.info('Updating albums in ' + this._albumsDir);
+    this.logger.info('Updating albums in ' + this._albumsDir);
     let subdirs = await getSubDirs(this._albumsDir);
     for (let name of subdirs.filter(dir => !dir.startsWith('.'))) {
       let album = await this._readAlbum(name);
       if (!album) {
-        logger.warn('Not an album: ' + join(this._albumsDir, name));
+        this.logger.warn('Not an album: ' + join(this._albumsDir, name));
       } else if (!album.name) {
-        logger.warn('Missing album name in: ' + join(this._albumsDir, name));
+        this.logger.warn('Missing album name in: ' + join(this._albumsDir, name));
       } else {
         this._albums[album.path] = album;
       }
@@ -39,7 +39,7 @@ export default class AlbumDB {
 
   async updateImages() {
     let log = {missing: [], written: []};
-    logger.info('Updating album images in ' + this._albumsDir);
+    this.logger.info('Updating album images in ' + this._albumsDir);
     for (let path in this._albums) {
       await this._updateAlbumImages(this._albums[path], log);
     }
@@ -50,7 +50,7 @@ export default class AlbumDB {
     let origImage = join(this._albumsDir, album.path, 'cover.jpg');
     let origStats = await statAsyncSafe(origImage);
     if (!origStats) {
-      logger.warn('Missing cover image: ' + origImage);
+      this.logger.warn('Missing cover image: ' + origImage);
       log.missing.push(origImage);
       return;
     }
@@ -58,7 +58,7 @@ export default class AlbumDB {
       let dstPath = join(this._albumsDir, album.path, `cover-${size}.jpg`);
       let stats = await statAsyncSafe(dstPath);
       if (!stats || (stats.mtime < origStats.mtime)) {
-        logger.info('writing ' + dstPath);
+        this.logger.info('writing ' + dstPath);
         log.written.push(dstPath);
         await resizeImage(origImage, dstPath, size);
       }

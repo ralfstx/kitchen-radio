@@ -1,11 +1,10 @@
 import {Router} from 'express';
 import {join} from 'path';
-import config from '../lib/config';
 import {isHtml} from '../lib/Server';
 
-export function router() {
-  let db = config.get('instance:AlbumDB');
-  let albumsDir = join(config.get('musicDir'), 'albums');
+export function router(context) {
+  let db = context.get('instance:AlbumDB');
+  let albumsDir = context.get('albumsDir');
   let router = new Router();
   router.get('/', (req, res) => {
     if (isHtml(req)) {

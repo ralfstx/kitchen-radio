@@ -1,7 +1,7 @@
 /*eslint no-unused-vars: ["error", { "argsIgnorePattern": "next" }]*/
 import 'source-map-support/register';
 import express from 'express';
-import logger from 'morgan';
+import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import {join} from 'path';
 import {readFile} from 'fs';
@@ -15,9 +15,11 @@ const viewsDir = join(__dirname, '../views');
 
 export default class Server {
 
-  constructor() {
+  constructor(context) {
+    this.logger = context.get('logger');
+    this._port = context.get('port');
     this.app = express();
-    this.app.use(logger('dev'));
+    this.app.use(morgan('dev'/*, {stream: this.logger.stream}*/));
     this.app.use(bodyParser.json());
     // setup template engine
     this.app.engine('html', engine);
@@ -25,15 +27,16 @@ export default class Server {
     this.app.set('view engine', 'html');
     // setup resources
     this.app.use(express.static(staticDir));
-    this.app.use('/player', playerRouter());
-    this.app.use('/albums', albumsRouter());
-    this.app.use('/stations', stationsRouter());
+    this.app.use('/player', playerRouter(context));
+    this.app.use('/albums', albumsRouter(context));
+    this.app.use('/stations', stationsRouter(context));
     // handle errors
     this.app.use(handleNotFound);
     this.app.use(handleError);
   }
 
-  start(port) {
+  start() {
+    let port = this._port;
     this.app.listen(port, () => {
       console.log(`Example app listening on port ${port}`);
     });
@@ -54,6 +57,7 @@ function handleNotFound(req, res, next) {
 }
 
 function handleError(err, req, res, next) {
+  console.error(err);
   res.status(err.status || 500);
   let title = err.status === 404 ? 'Not Found' : 'Server Error';
   if (isHtml(req)) {

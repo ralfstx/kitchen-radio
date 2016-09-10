@@ -1,6 +1,6 @@
-import {expect, tmpdir, copy, stub, restore} from '../test';
-import logger from '../../src/lib/logger';
+import {expect, tmpdir, copy, spy, restore} from '../test';
 import {Album} from '../../src/lib/album-types';
+import Context from '../../src/lib/Context';
 import AlbumDB from '../../src/lib/AlbumDB';
 import {statSync, unlinkSync} from 'fs';
 import {join} from 'path';
@@ -10,12 +10,11 @@ describe('AlbumDB', function() {
   let db, albumsDir;
 
   beforeEach(function() {
-    stub(logger, 'info');
-    stub(logger, 'warn');
     let tmp = tmpdir();
     albumsDir = join(tmp, 'albums');
     copy(join(__dirname, 'files', 'albums'), albumsDir);
-    db = new AlbumDB(albumsDir);
+    let logger = {info: spy(), warn: spy()};
+    db = new AlbumDB(new Context({logger, albumsDir}));
   });
 
   afterEach(restore);

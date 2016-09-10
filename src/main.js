@@ -2,32 +2,40 @@
 import 'source-map-support/register';
 import {join} from 'path';
 
-import config from './lib/config';
+import Context from './lib/Context';
+import Logger from './lib/Logger';
 import AlbumDB from './lib/AlbumDB';
 import StationDB from './lib/StationDB';
 import Player from './lib/Player';
 import Server from './lib/Server';
+import config from './config.json';
 
-const port = config.get('port') || 8080;
+const defaults = {
+  port: 8080,
+  mpdHost: 'localhost',
+  mpdPort: 6600
+};
 
-const mpdHost = config.get('mpdHost') || 'localhost';
-const mpdPort = config.get('mpdPort') || 6600;
+let context = new Context(Object.assign({}, defaults, config, {
+  albumsDir: join(config.musicDir, 'albums'),
+  stationsDir: join(config.musicDir, 'stations')
+}));
 
-const albumsDir = join(config.get('musicDir'), 'albums');
-const stationsDir = join(config.get('musicDir'), 'stations');
+let logger = new Logger(context);
+context.set('logger', logger);
 
-let albumDB = new AlbumDB(albumsDir);
+let albumDB = new AlbumDB(context);
 albumDB.update();
-config.set('instance:AlbumDB', albumDB);
+context.set('instance:AlbumDB', albumDB);
 
-let stationDB = new StationDB(stationsDir);
+let stationDB = new StationDB(context);
 stationDB.update();
-config.set('instance:StationDB', stationDB);
+context.set('instance:StationDB', stationDB);
 
-let player = new Player();
-player.connectMpd(mpdHost, mpdPort);
-config.set('instance:Player', player);
+let player = new Player(context);
+player.connectMpd();
+context.set('instance:Player', player);
 
-let server = new Server();
-server.start(port);
-config.set('instance:Server', server);
+let server = new Server(context);
+server.start();
+context.set('instance:Server', server);

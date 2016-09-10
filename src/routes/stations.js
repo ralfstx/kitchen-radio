@@ -1,10 +1,9 @@
 import {Router} from 'express';
 import {join} from 'path';
-import config from '../lib/config';
 
-export function router() {
-  let db = config.get('instance:StationDB');
-  let stationsDir = join(config.get('musicDir'), 'stations');
+export function router(context) {
+  let db = context.get('instance:StationDB');
+  let stationsDir = context.get('stationsDir');
   let router = new Router();
   router.get('/', (req, res) => {
     res.json(db.getIndex());

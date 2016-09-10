@@ -1,5 +1,5 @@
-import {expect, tmpdir, copy, stub, restore} from '../test';
-import logger from '../../src/lib/logger';
+import {expect, tmpdir, copy, spy, restore} from '../test';
+import Context from '../../src/lib/Context';
 import StationDB from '../../src/lib/StationDB';
 import {join} from 'path';
 
@@ -8,12 +8,11 @@ describe('StationDB', function() {
   let db, stationsDir;
 
   beforeEach(function() {
-    stub(logger, 'info');
-    stub(logger, 'warn');
     let tmp = tmpdir();
     stationsDir = join(tmp, 'stations');
     copy(join(__dirname, 'files', 'stations'), stationsDir);
-    db = new StationDB(stationsDir);
+    let logger = {info: spy(), warn: spy()};
+    db = new StationDB(new Context({logger, stationsDir}));
   });
 
   afterEach(restore);

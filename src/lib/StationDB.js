@@ -1,12 +1,12 @@
 import {join} from 'path';
 
-import logger from './logger';
 import {getSubDirs, readJsonFile, statAsyncSafe} from './files';
 
 export default class StationDB {
 
-  constructor(stationsDir) {
-    this._stationsDir = stationsDir;
+  constructor(context) {
+    this.logger = context.get('logger');
+    this._stationsDir = context.get('stationsDir');
     this._ids = [];
     this._stations = {};
   }
@@ -14,14 +14,14 @@ export default class StationDB {
   async update() {
     this._ids = [];
     this._stations = {};
-    logger.info('Updating stations in ' + this._stationsDir);
+    this.logger.info('Updating stations in ' + this._stationsDir);
     let subdirs = await getSubDirs(this._stationsDir);
     for (let name of subdirs.filter(dir => !dir.startsWith('.'))) {
       let station = await this._readStation(name);
       if (!station) {
-        logger.warn('Not a station: ' + join(this._stationsDir, name));
+        this.logger.warn('Not a station: ' + join(this._stationsDir, name));
       } else if (!station.name) {
-        logger.warn('Missing station name in: ' + join(this._stationsDir, name));
+        this.logger.warn('Missing station name in: ' + join(this._stationsDir, name));
       } else {
         this._ids.push(name);
         this._stations[name] = station;
