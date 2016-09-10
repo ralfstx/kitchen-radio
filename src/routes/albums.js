@@ -1,17 +1,11 @@
 import {Router} from 'express';
 import {join} from 'path';
-
 import config from '../lib/config';
-import AlbumDB from '../lib/AlbumDB';
-
-const albumsDir = join(config.get('musicDir'), 'albums');
-
-let db = new AlbumDB(albumsDir);
-db.update();
-
-let isHtml = req => req.query.type !== 'json' && req.accepts(['json', 'html']) === 'html';
+import {isHtml} from '../lib/Server';
 
 export function router() {
+  let db = config.get('instance:AlbumDB');
+  let albumsDir = join(config.get('musicDir'), 'albums');
   let router = new Router();
   router.get('/', (req, res) => {
     if (isHtml(req)) {

@@ -1,16 +1,8 @@
 import {Router} from 'express';
-
 import config from '../lib/config';
-import Player from '../lib/Player';
-
-let mpdHost = config.get('mpdHost') || 'localhost';
-let mpdPort = config.get('mpdPort') || 6600;
-
-let player = new Player();
-
-player.connectMpd(mpdHost, mpdPort);
 
 export function router() {
+  let player = config.get('instance:Player');
   let router = new Router();
   router.get('/status', (req, res) => {
     player.status().then(data => res.json(data));

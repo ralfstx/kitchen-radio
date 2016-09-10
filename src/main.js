@@ -1,70 +1,33 @@
 /*eslint no-unused-vars: ["error", { "argsIgnorePattern": "next" }]*/
-
 import 'source-map-support/register';
-import express from 'express';
-import logger from 'morgan';
-import bodyParser from 'body-parser';
 import {join} from 'path';
-import {readFile} from 'fs';
 
 import config from './lib/config';
-import {router as albumsRouter} from './routes/albums';
-import {router as stationsRouter} from './routes/stations';
-import {router as playerRouter} from './routes/player';
+import AlbumDB from './lib/AlbumDB';
+import StationDB from './lib/StationDB';
+import Player from './lib/Player';
+import Server from './lib/Server';
 
-let webDir = join(__dirname, 'static');
+const port = config.get('port') || 8080;
 
-let port = config.get('port') || 8080;
+const mpdHost = config.get('mpdHost') || 'localhost';
+const mpdPort = config.get('mpdPort') || 6600;
 
-let app = express();
-app.use(logger('dev'));
-app.use(bodyParser.json());
+const albumsDir = join(config.get('musicDir'), 'albums');
+const stationsDir = join(config.get('musicDir'), 'stations');
 
-// ---
-app.engine('html', function (filePath, options, callback) {
-  readFile(filePath, function (err, content) {
-    if (err) return callback(new Error(err));
-    let rendered = content.toString().replace(/\${\s*(.*?)\s*}/g, (m, m1) => m1 in options ? options[m1] : '');
-    return callback(null, rendered);
-  });
-});
-// ---
-app.set('views', join(__dirname, 'views'));
-app.set('view engine', 'html');
+let albumDB = new AlbumDB(albumsDir);
+albumDB.update();
+config.set('instance:AlbumDB', albumDB);
 
-app.use(express.static(webDir));
+let stationDB = new StationDB(stationsDir);
+stationDB.update();
+config.set('instance:StationDB', stationDB);
 
-app.use('/api.html', (req, res) => res.render('api'));
+let player = new Player();
+player.connectMpd(mpdHost, mpdPort);
+config.set('instance:Player', player);
 
-app.use('/player', playerRouter());
-app.use('/albums', albumsRouter());
-app.use('/stations', stationsRouter());
-
-app.use((req, res, next) => {
-  if (req.accepts(['json', 'html']) === 'html') {
-    res.render('404', {});
-  } else {
-    res.json({error: 'Not Found'});
-  }
-});
-
-app.use((err, req, res, next) => {
-  res.status(err.status || 500);
-  let title = err.status === 404 ? 'Not Found' : 'Server Error';
-  if (req.accepts(['json', 'html']) === 'html') {
-    res.render('error', {
-      title,
-      message: err.message,
-      stack: err.stack
-    });
-  } else {
-    res.json({
-      error: title,
-      message: err.message,
-    });
-  }
-});
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+let server = new Server();
+server.start(port);
+config.set('instance:Server', server);
