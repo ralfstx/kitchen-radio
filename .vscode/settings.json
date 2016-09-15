@@ -4,7 +4,8 @@
   // Configure glob patterns for excluding files and folders.
   "files.exclude": {
     "**/.git": true,
-    "build/": true
+    "build/": true,
+    "logs/":true
   }
 
 }
