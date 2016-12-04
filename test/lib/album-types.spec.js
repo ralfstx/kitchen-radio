@@ -352,9 +352,11 @@ describe('media', function() {
         let tracks = album.tracks;
 
         expect(tracks).not.to.equal(album.tracks);
-        expect(tracks.map(track => track.location)).to.eql(['test/disc1/01.ogg',
-                                                            'test/disc1/02.ogg',
-                                                            'test/disc2/01.ogg']);
+        expect(tracks.map(track => track.location)).to.eql([
+          'test/disc1/01.ogg',
+          'test/disc1/02.ogg',
+          'test/disc2/01.ogg'
+        ]);
       });
 
       it('returns [] when there ain\'t no tracks', function() {

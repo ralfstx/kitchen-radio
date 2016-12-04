@@ -1,5 +1,6 @@
 .idea/
 .settings/
+.history/
 .project
 logs/
 build/
