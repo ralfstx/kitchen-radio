@@ -94,18 +94,6 @@ function matches(string, terms) {
   if (!terms || !string) {
     return false;
   }
-  let stringParts = string.toLowerCase().split(/\s/);
-  for (let i = 0; i < terms.length; i++) {
-    let found = false;
-    for (let j = 0; j < stringParts.length; j++) {
-      if (stringParts[j].indexOf(terms[i].toLowerCase()) === 0) {
-        found = true;
-        break;
-      }
-    }
-    if (!found) {
-      return false;
-    }
-  }
-  return true;
+  let parts = string.toLowerCase().split(/\s/);
+  return terms.every(term => parts.some(part => !part.indexOf(term.toLowerCase())));
 }
