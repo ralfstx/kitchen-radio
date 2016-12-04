@@ -15,12 +15,12 @@
   </head>
   <body>
     <h1>Search</h1>
-    <div id="app" class="hidden">
+    <div id="app">
       <input type="text" placeholder="search terms" v-model="query" debounce="500" />
       <div v-for="match in matches">
-        <a href="/albums/{{match.id}}">
+        <a v-bind:href="'/albums/' + match.id">
           <div class="match">
-            <img width="50" height="50" src="/albums/{{match.id}}/cover?size=50" align="center"/>
+            <img width="50" height="50" v-bind:src="'/albums/' + match.id + '/cover?size=50'" align="center"/>
             <span>{{match.name}}</span>
             <span v-if="match.tracks.length">(Tracks {{match.tracks}})</span>
           </div>
@@ -28,33 +28,30 @@
       </div>
     </div>
 
-    <script src="https://npmcdn.com/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue@^2.1.0/dist/vue.js"></script>
     <script>
-window.onload = function () {
-  var vm = new Vue({
-    el: '#app',
-    data: {
-      query: '${query}',
-      matches: []
-    },
-    methods: {
-      search: function(val) {
-        console.log('search', val);
-        fetch('/albums/search?q=' + val + '&type=json').then(res => res.json()).then(matches => this.matches = matches);
-      }
-    },
-    watch: {
-      query: function(val) {
-        console.log('new: %s', val);
-        this.search(val);
-      }
-    },
-    ready: function() {
-      this.$el.classList.remove('hidden');
-      this.search(this.query);
-    }
-  });
-};
+      window.onload = function () {
+        var vm = new Vue({
+          el: '#app',
+          data: {
+            query: '${query}',
+            matches: []
+          },
+          methods: {
+            search: function(val) {
+              fetch('/albums/search?q=' + val + '&type=json').then(res => res.json()).then(matches => this.matches = matches);
+            }
+          },
+          watch: {
+            query: function(val) {
+              this.search(val);
+            }
+          },
+          created: function() {
+            this.search(this.query);
+          }
+        });
+      };
     </script>
   </body>
 </html>

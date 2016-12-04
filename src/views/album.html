@@ -16,27 +16,30 @@
   <body>
     <div id="app" class="hidden">
       <h1>${title}</h1>
-      <img width="250" height="250" src="/albums/{{album.id}}/cover?size=250" />
-      <div v-for="(dn, disc) in album.discs">
-        <h2 v-if="album.discs.length > 1">Disc {{$index + 1}}</h2>
-        <div class="line" v-for="(tn, track) in disc.tracks">
-          {{$index + 1}}.
-          <a href="${url}/discs/{{dn + 1}}/tracks/{{tn + 1}}">{{track.title}}</a>
+      <img width="250" height="250" v-bind:src="'/albums/' + album.id + '/cover?size=250'" />
+      <div v-for="(disc, dn) in album.discs">
+        <h2 v-if="album.discs.length > 1">Disc {{dn + 1}}</h2>
+        <div class="line" v-for="(track, tn) in disc.tracks">
+          {{tn + 1}}.
+          <a v-bind:href="'${url}/discs/' + (dn + 1) + '/tracks/' + (tn + 1)">{{track.title}}</a>
         </div>
       </div>
     </div>
 
-    <script src="https://npmcdn.com/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue@^2.1.0/dist/vue.js"></script>
     <script>
-      window.onload = function () {
+      window.onload = function() {
         new Vue({
           el: '#app',
           data: {
             album: {}
           },
-          ready: function() {
-            this.$el.classList.remove('hidden');
+          created: function() {
             fetch('${url}?type=json').then(res => res.json()).then(album => this.album = album);
+          },
+          updated: function() {
+            let empty = !this.$data.album.id;
+            this.$el.classList.toggle('hidden', empty);
           }
         });
       };

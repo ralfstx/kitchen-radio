@@ -13,20 +13,24 @@
   <body>
     <h1>Albums</h1>
     <div id="app" class="hidden">
-      <div v-for="album in albums"><a href="/albums/{{album.id}}">{{album.name}}</a></div>
+      <div v-for="album in albums"><a v-bind:href="'/albums/' + album.id">{{album.name}}</a></div>
     </div>
 
-    <script src="https://npmcdn.com/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue@^2.1.0/dist/vue.js"></script>
     <script>
-      window.onload = function () {
+      window.onload = function() {
         new Vue({
           el: '#app',
           data: {
             albums: []
           },
-          ready: function() {
-            this.$el.classList.remove('hidden');
-            fetch('/albums?type=json').then(res => res.json()).then(albums => this.albums = albums);
+          created: function() {
+            fetch('/albums?type=json').then(res => res.json())
+              .then(albums => this.albums = albums);
+          },
+          updated: function() {
+            let empty = !this.$data.albums.length;
+            this.$el.classList.toggle('hidden', empty);
           }
         });
       };
