@@ -1,9 +1,10 @@
 /*
  * Utility methods for images.
  */
-import Promise from 'bluebird';
 import magick from 'imagemagick';
-let magickResize = Promise.promisify(magick.resize);
+import {promisify} from './util';
+
+let magickResize = promisify(magick.resize);
 
 export function resizeImage(srcPath, dstPath, size) {
   return magickResize({

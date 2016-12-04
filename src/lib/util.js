@@ -18,3 +18,18 @@ export function toJson(data) {
   if (!arguments.length) return '';
   return JSON.stringify(data, null, ' ');
 }
+
+export function promisify(fn) {
+  return function() {
+    return new Promise((resolve, reject) => {
+      let params = Array.prototype.slice.call(arguments).concat((err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result);
+        }
+      });
+      fn.apply(this, params);
+    });
+  };
+}

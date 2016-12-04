@@ -1,14 +1,11 @@
 import chai, {expect} from 'chai';
 import * as sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import Promise from 'bluebird';
 import {dirSync} from 'tmp';
 import {statSync, mkdirSync, readdirSync, createReadStream, createWriteStream} from 'fs';
 import {join} from 'path';
 
 chai.use(sinonChai);
-
-Promise.longStackTraces();
 
 let sandbox = sinon.sandbox.create();
 let spy = sandbox.spy.bind(sandbox);

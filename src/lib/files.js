@@ -4,21 +4,22 @@
 import {join} from 'path';
 import {createReadStream, createWriteStream} from 'fs';
 import _fs from 'fs';
-import Promise from 'bluebird';
+import {promisify} from './util';
 
-export let statAsync = Promise.promisify(_fs.stat);
-export let readdirAsync = Promise.promisify(_fs.readdir);
-export let readFileAsync = Promise.promisify(_fs.readFile);
-export let writeFileAsync = Promise.promisify(_fs.writeFile);
+export let statAsync = promisify(_fs.stat);
+export let readdirAsync = promisify(_fs.readdir);
+export let readFileAsync = promisify(_fs.readFile);
+export let writeFileAsync = promisify(_fs.writeFile);
 
-export function callRecursive(path, fn) {
-  return statAsync(path).then((stats) => {
-    return Promise.resolve(fn(path, stats)).then(() => {
-      if (stats.isDirectory()) {
-        return readdirAsync(path).each(file => callRecursive(join(path, file), fn));
-      }
-    });
-  });
+export async function callRecursive(path, fn) {
+  let stats = await statAsync(path);
+  await fn(path, stats);
+  if (stats.isDirectory()) {
+    let files = await readdirAsync(path);
+    for (let file of files) {
+      await callRecursive(join(path, file), fn);
+    }
+  }
 }
 
 export function ensureIsFile(file) {
@@ -41,13 +42,25 @@ export function ensureIsDir(dir) {
   });
 }
 
-export function getSubDirs(dir) {
-  return readdirAsync(dir)
-    .filter(file => statAsync(join(dir, file))
-      .then(stats => stats.isDirectory()))
-    .catch(() => {
-      throw new Error(`Could not read directory: '${dir}'`);
-    });
+export async function getSubDirs(dir) {
+  let files = await readdirAsyncWrapped(dir);
+  let result = [];
+  for (let file of files) {
+    let stats = await statAsync(join(dir, file));
+    if (stats.isDirectory()) {
+      result.push(file);
+    }
+  }
+  return result;
+}
+
+function readdirAsyncWrapped(dir) {
+  return readdirAsync(dir).catch(err => {
+    if (err.code === 'ENOTDIR' || err.code === 'ENOENT') {
+      throw Object.assign(new Error(`Could not read directory: '${dir}'`), {cause: err});
+    }
+    throw err;
+  });
 }
 
 export function statAsyncSafe(file) {
