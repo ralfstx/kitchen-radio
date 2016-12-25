@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Radio</title>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <h1>Radio</h1>
+
+    <h2>Player</h2>
+    <div id="player">
+      <div id="controls" class="row">
+        <div class="button prev" v-on:click="send('prev')">⏮</div>
+        <div class="button play" v-if="state !== 'play'" v-on:click="send('play')">️️️▶️</div>
+        <div class="button pause" v-if="state === 'play'" v-on:click="send('pause')">️️️⏸</div>
+        <div class="button stop" v-on:click="send('stop')">⏹</div>
+        <div class="button next" v-on:click="send('next')">⏭</div>
+      </div>
+    </div>
+
+    <div>
+      <div><a href="./albums/">albums/</a></div>
+    </div>
+
+    <div>
+      <div><a href="./stations/">stations/</a></div>
+    </div>
+
+    <div>
+      <div><a href="./api.html">api</a></div>
+    </div>
+
+    <script src="https://unpkg.com/vue@^2.1.0/dist/vue.js"></script>
+    <script>
+      window.onload = function() {
+        let player = new Vue({
+          el: '#player',
+          data: {
+            state: 'stop'
+          },
+          created: function() {
+            this.update();
+          },
+          methods: {
+            send: function (action) {
+              fetch('./player/' + action).then(() => player.update());
+            },
+            update: function () {
+              fetch('./player/status').then(res => res.json()).then(res => {
+                this.state = res.state;
+              });
+            }
+          }
+        });
+      };
+    </script>
+
+  </body>
+</html>

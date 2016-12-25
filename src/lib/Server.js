@@ -27,6 +27,7 @@ export default class Server {
     this.app.set('view engine', 'html');
     // setup resources
     this.app.use(express.static(staticDir));
+    this.app.get('/', (req, res) => res.render('index', {}));
     this.app.use('/player', playerRouter(context));
     this.app.use('/albums', albumsRouter(context));
     this.app.use('/stations', stationsRouter(context));

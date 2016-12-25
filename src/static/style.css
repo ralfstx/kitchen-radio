@@ -8,6 +8,23 @@ a {
   text-decoration: none;
 }
 
+div.row {
+  display: table;
+  border-spacing: 1px;
+}
+
+div.button {
+  display: table-cell;
+  color: white;
+  background: #666;
+  cursor: pointer;
+  padding: 4px 12px;
+}
+
+div.button:hover {
+  background: #333;
+}
+
 div.line {
   margin-top: 1px;
 }
