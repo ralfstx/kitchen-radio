@@ -18,7 +18,7 @@ export default class Player {
       .on('ready', () => this.logger.info(`Connected to mpd on ${host}, port ${port}`))
       .on('error', (err) => this.logger.error('mpd error', err))
       .on('system-playlist', () => this.logger.info('mpd playlist changed'))
-      .on('end', () => this.connectMpd());
+      .on('end', () => setTimeout(() => this.connectMpd(), 2000));
   }
 
   play() {
@@ -50,10 +50,12 @@ export default class Player {
   }
 
   append(urls) {
+    // TODO keep track of changes to playlist
     return this._sendCommands([...this._toCommands(urls), 'play']).then(() => null);
   }
 
   replace(urls) {
+    // TODO keep track of changes to playlist
     return this._sendCommands(['clear', ...this._toCommands(urls), 'play']).then(() => null);
   }
 
