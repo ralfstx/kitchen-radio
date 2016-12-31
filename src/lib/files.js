@@ -2,14 +2,7 @@
  * Utility methods for files.
  */
 import {join} from 'path';
-import {createReadStream, createWriteStream} from 'fs';
-import _fs from 'fs';
-import {promisify} from './util';
-
-export let statAsync = promisify(_fs.stat);
-export let readdirAsync = promisify(_fs.readdir);
-export let readFileAsync = promisify(_fs.readFile);
-export let writeFileAsync = promisify(_fs.writeFile);
+import {createReadStream, createWriteStream, statAsync, readdirAsync, readFileAsync} from './fs-async';
 
 export async function walk(path, fn, _base) {
   let base = _base || path;
@@ -26,7 +19,7 @@ export async function walk(path, fn, _base) {
 }
 
 export function ensureIsFile(file) {
-  return statAsyncSafe(file).then((stats) => {
+  return statSafe(file).then((stats) => {
     if (!stats) {
       throw new Error(`No such file: '${file}'`);
     } else if (!stats.isFile()) {
@@ -36,7 +29,7 @@ export function ensureIsFile(file) {
 }
 
 export function ensureIsDir(dir) {
-  return statAsyncSafe(dir).then((stats) => {
+  return statSafe(dir).then((stats) => {
     if (!stats) {
       throw new Error(`No such directory: '${dir}'`);
     } else if (!stats.isDirectory()) {
@@ -66,7 +59,7 @@ function readdirAsyncWrapped(dir) {
   });
 }
 
-export function statAsyncSafe(file) {
+export function statSafe(file) {
   return statAsync(file).catch(() => null);
 }
 

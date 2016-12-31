@@ -1,6 +1,6 @@
 import {join} from 'path';
 
-import {getSubDirs, readJsonFile, statAsyncSafe} from './files';
+import {getSubDirs, readJsonFile, statSafe} from './files';
 import {Album} from './album-types';
 import {resizeImage} from '../lib/images';
 
@@ -31,7 +31,7 @@ export default class AlbumDB {
 
   async _readAlbum(path) {
     let indexFile = join(this._albumsDir, path, 'index.json');
-    let stats = await statAsyncSafe(indexFile);
+    let stats = await statSafe(indexFile);
     if (!stats || !stats.isFile()) return null;
     let data = await readJsonFile(indexFile);
     return Album.fromJson(path, data);
@@ -48,7 +48,7 @@ export default class AlbumDB {
 
   async _updateAlbumImages(album, log) {
     let origImage = join(this._albumsDir, album.path, 'cover.jpg');
-    let origStats = await statAsyncSafe(origImage);
+    let origStats = await statSafe(origImage);
     if (!origStats) {
       this.logger.warn('Missing cover image: ' + origImage);
       log.missing.push(origImage);
@@ -56,7 +56,7 @@ export default class AlbumDB {
     }
     for (let size of [100, 250]) {
       let dstPath = join(this._albumsDir, album.path, `cover-${size}.jpg`);
-      let stats = await statAsyncSafe(dstPath);
+      let stats = await statSafe(dstPath);
       if (!stats || (stats.mtime < origStats.mtime)) {
         this.logger.info('writing ' + dstPath);
         log.written.push(dstPath);

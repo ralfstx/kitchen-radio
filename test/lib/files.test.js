@@ -2,7 +2,7 @@ import {join} from 'path';
 import {expect, spy, tmpdir, restore} from '../test';
 import {mkdirSync, writeFileSync} from 'fs';
 
-import {walk, ensureIsFile, ensureIsDir, getSubDirs, statAsyncSafe, readJsonFile} from '../../src/lib/files';
+import {walk, ensureIsFile, ensureIsDir, getSubDirs, statSafe, readJsonFile} from '../../src/lib/files';
 
 let baseDir;
 
@@ -150,17 +150,17 @@ describe('files', function() {
 
   });
 
-  describe('statAsyncSafe', function() {
+  describe('statSafe', function() {
 
     it('returns stats for file', function() {
       createTmpFile('foo');
-      return statAsyncSafe(join(baseDir, 'foo')).then(stats => {
+      return statSafe(join(baseDir, 'foo')).then(stats => {
         expect(stats.isFile()).to.be.true;
       });
     });
 
     it('returns null for missing file', function() {
-      return statAsyncSafe(join(baseDir, 'missing')).then(stats => {
+      return statSafe(join(baseDir, 'missing')).then(stats => {
         expect(stats).to.be.null;
       });
     });

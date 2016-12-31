@@ -1,6 +1,6 @@
 import {join} from 'path';
 
-import {getSubDirs, readJsonFile, statAsyncSafe} from './files';
+import {getSubDirs, readJsonFile, statSafe} from './files';
 
 export default class StationDB {
 
@@ -32,7 +32,7 @@ export default class StationDB {
 
   async _readStation(path) {
     let indexFile = join(this._stationsDir, path, 'index.json');
-    let stats = await statAsyncSafe(indexFile);
+    let stats = await statSafe(indexFile);
     if (!stats || !stats.isFile()) return null;
     let data = await readJsonFile(indexFile);
     return data; // TODO wrap in Album instance?
