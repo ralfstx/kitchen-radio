@@ -25,7 +25,8 @@
   },
   "scripts": {
     "lint": "eslint .",
-    "test": "mocha --compilers js:babel-core/register 'test/**/*.spec.js'",
+    "mocha": "mocha --compilers js:babel-core/register",
+    "test": "npm run mocha -- 'test/**/*.test.js'",
     "build": "rm -rf build/ && mkdir build/ && babel --compact false -d build/ src/ && cp -r src/static src/views src/config.json package.json build/",
     "server": "node build/main.js",
     "start": "npm run build && npm run server",

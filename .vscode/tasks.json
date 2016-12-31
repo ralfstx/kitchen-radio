@@ -11,7 +11,7 @@
     },
     {
       "taskName": "test (file)",
-      "args": ["test", "${file}"],
+      "args": ["run", "mocha", "--", "${file}"],
       "isTestCommand": true
     },
     {
