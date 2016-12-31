@@ -1,7 +1,7 @@
 import {expect} from '../test';
 import {Track, TrackList, Album} from '../../src/lib/album-types';
 
-describe('media', function() {
+describe('album-types', function() {
 
   let album, disc, track;
 
@@ -27,7 +27,7 @@ describe('media', function() {
         }).not.to.throw();
       });
 
-      it('succeeds with minimal data', function() {
+      it('succeeds with minimal metadata', function() {
         expect(() => {
           new Track(disc, '01.ogg');
         }).not.to.throw();
@@ -90,12 +90,12 @@ describe('media', function() {
     describe('artist', function() {
 
       it('is taken from track if present', function() {
-        track.data = {artist: 'Pink Floyd'};
+        track.metadata = {artist: 'Pink Floyd'};
         expect(track.artist).to.equal('Pink Floyd');
       });
 
       it('is derived from album if not present', function() {
-        album.data = {artist: 'Pink Floyd'};
+        album.metadata = {artist: 'Pink Floyd'};
 
         expect(track.artist).to.equal('Pink Floyd');
       });
@@ -112,35 +112,35 @@ describe('media', function() {
 
     });
 
-    describe('data', function() {
+    describe('metadata', function() {
 
       it('is empty by default', function() {
-        expect(track.data).to.eql({});
+        expect(track.metadata).to.eql({});
       });
 
       it('can be get and set', function() {
-        track.data = {artist: 'Jack Who', title: 'Who is it?'};
-        expect(track.data).to.eql({artist: 'Jack Who', title: 'Who is it?'});
+        track.metadata = {artist: 'Jack Who', title: 'Who is it?'};
+        expect(track.metadata).to.eql({artist: 'Jack Who', title: 'Who is it?'});
       });
 
       it('filters unsupported attributes', function() {
-        track.data = {artist: 'Jack Who', foo: 'bar'};
-        expect(track.data).to.eql({artist: 'Jack Who'});
+        track.metadata = {artist: 'Jack Who', foo: 'bar'};
+        expect(track.metadata).to.eql({artist: 'Jack Who'});
       });
 
     });
 
     describe('tags', function() {
 
-      it('empty if no data found', function() {
+      it('empty if no metadata found', function() {
         track = new Track(null, '01.ogg');
 
         expect(track.tags()).to.eql({
         });
       });
 
-      it('contains track data if no album', function() {
-        track.data = {title: 'Money', artist: 'Pink Floyd', length: 23};
+      it('contains track metadata if no album', function() {
+        track.metadata = {title: 'Money', artist: 'Pink Floyd', length: 23};
 
         expect(track.tags()).to.eql({
           artist: 'Pink Floyd',
@@ -177,8 +177,8 @@ describe('media', function() {
       });
 
       it('contains albumartist if different from track artist', function() {
-        album.data = {name: 'Test Album', title: 'Animals', artist: 'Pink Floyd'};
-        track.data = {title: 'Money', artist: 'Jesus Moriarty'};
+        album.metadata = {name: 'Test Album', title: 'Animals', artist: 'Pink Floyd'};
+        track.metadata = {title: 'Money', artist: 'Jesus Moriarty'};
         let disc2 = new TrackList(album, 'disc');
         new Track(disc, '02.ogg');
         new Track(disc2, '01.ogg');
@@ -207,7 +207,7 @@ describe('media', function() {
         }).not.to.throw();
       });
 
-      it('succeeds with minimal data', function() {
+      it('succeeds with minimal metadata', function() {
         expect(() => {
           new TrackList(null, '01');
         }).not.to.throw();
@@ -234,20 +234,20 @@ describe('media', function() {
 
     });
 
-    describe('data', function() {
+    describe('metadata', function() {
 
       it('is empty by default', function() {
-        expect(disc.data).to.eql({});
+        expect(disc.metadata).to.eql({});
       });
 
       it('can be get and set', function() {
-        disc.data = {artist: 'Jack Who', title: 'Who the f*#!?'};
-        expect(disc.data).to.eql({artist: 'Jack Who', title: 'Who the f*#!?'});
+        disc.metadata = {artist: 'Jack Who', title: 'Who the f*#!?'};
+        expect(disc.metadata).to.eql({artist: 'Jack Who', title: 'Who the f*#!?'});
       });
 
       it('filters unsupported attributes', function() {
-        disc.data = {artist: 'Jack Who', foo: 'bar'};
-        expect(disc.data).to.eql({artist: 'Jack Who'});
+        disc.metadata = {artist: 'Jack Who', foo: 'bar'};
+        expect(disc.metadata).to.eql({artist: 'Jack Who'});
       });
 
     });
@@ -291,20 +291,20 @@ describe('media', function() {
 
     });
 
-    describe('data', function() {
+    describe('metadata', function() {
 
       it('is empty by default', function() {
-        expect(album.data).to.eql({});
+        expect(album.metadata).to.eql({});
       });
 
       it('can be get and set', function() {
-        album.data = {artist: 'Jack Who', title: 'Who the f*#!?'};
-        expect(album.data).to.eql({artist: 'Jack Who', title: 'Who the f*#!?'});
+        album.metadata = {artist: 'Jack Who', title: 'Who the f*#!?'};
+        expect(album.metadata).to.eql({artist: 'Jack Who', title: 'Who the f*#!?'});
       });
 
       it('filters unsupported attributes', function() {
-        album.data = {artist: 'Jack Who', foo: 'bar'};
-        expect(album.data).to.eql({artist: 'Jack Who'});
+        album.metadata = {artist: 'Jack Who', foo: 'bar'};
+        expect(album.metadata).to.eql({artist: 'Jack Who'});
       });
 
     });
@@ -319,12 +319,12 @@ describe('media', function() {
 
     describe('artist', function() {
 
-      it('returns artist from data', function() {
-        album.data = {artist: 'Pink Floyd'};
+      it('returns artist from metadata', function() {
+        album.metadata = {artist: 'Pink Floyd'};
         expect(album.artist).to.equal('Pink Floyd');
       });
 
-      it('returns null if missing in data', function() {
+      it('returns null if missing in metadata', function() {
         expect(album.artist).to.be.null;
       });
 
@@ -332,12 +332,12 @@ describe('media', function() {
 
     describe('title', function() {
 
-      it('returns title from data', function() {
-        album.data = {name: 'Test Album', title: 'Animals'};
+      it('returns title from metadata', function() {
+        album.metadata = {name: 'Test Album', title: 'Animals'};
         expect(album.title).to.equal('Animals');
       });
 
-      it('returns null if missing in data', function() {
+      it('returns null if missing in metadata', function() {
         expect(album.title).to.be.null;
       });
 
@@ -370,10 +370,10 @@ describe('media', function() {
     describe('toJson', function() {
 
       it('returns JSON equivalent to input', function() {
-        album.data = {name: 'Test Album', artist: 'Jimmy the Fish', title: 'Swimming'};
+        album.metadata = {name: 'Test Album', artist: 'Jimmy the Fish', title: 'Swimming'};
         let disc2 = new TrackList(album, 'disc2');
-        new Track(disc, '02.ogg').data = {title: 'Part Two'};
-        new Track(disc2, '01.ogg').data = {title: 'The End'};
+        new Track(disc, '02.ogg').metadata = {title: 'Part Two'};
+        new Track(disc2, '01.ogg').metadata = {title: 'The End'};
         let json = album.toJson();
 
         expect(JSON.parse(json)).to.eql({
@@ -381,12 +381,17 @@ describe('media', function() {
           artist: 'Jimmy the Fish',
           title: 'Swimming',
           discs: [{
+            path: 'disc1',
             tracks: [{
+              path: '01.ogg'
             }, {
+              path: '02.ogg',
               title: 'Part Two'
             }]
           }, {
+            path: 'disc2',
             tracks: [{
+              path: '01.ogg',
               title: 'The End'
             }]
           }]
@@ -407,6 +412,24 @@ describe('media', function() {
 
         expect(jsonData.foo).to.be.undefined;
         expect(jsonData.discs[0].tracks[0].foo).to.be.undefined;
+      });
+
+      it('does not contain track artist if same as album artist', function() {
+        album = Album.fromJson('foo', {
+          name: 'Foo',
+          artist: 'album artist',
+          title: 'album title',
+          tracks: [{
+            path: 'bar',
+            artist: 'album artist',
+            track: 'track title'
+          }]
+        });
+
+        let jsonData = JSON.parse(album.toJson());
+
+        expect(jsonData.artist).to.equal('album artist');
+        expect(jsonData.discs[0].tracks[0].artist).to.be.undefined;
       });
 
     });

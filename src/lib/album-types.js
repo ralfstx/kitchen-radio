@@ -3,16 +3,12 @@
  */
 import {join, normalize} from 'path';
 
-const DATA_KEYS = {
-  name: true,
-  artist: true,
-  title: true,
-  length: true,
-  mbid: true
-};
+/** The metadata keys to copy */
+const META_DATA_KEYS = ['name', 'artist', 'title', 'length', 'mbid', 'dcid', 'wikipedia'];
 
-// defines the fields to include in the index and their order
-const ALBUM_INDEX_KEYS = ['name', 'artist', 'title', 'year', 'length', 'mbid', 'discs', 'tracks'];
+/** The fields to include in the index file and their order */
+const ALBUM_INDEX_KEYS = ['path', 'name', 'artist', 'title', 'year', 'length', 'mbid', 'dcid',
+  'wikipedia', 'discs', 'tracks'];
 
 export class Track {
 
@@ -21,7 +17,7 @@ export class Track {
       throw new Error('path missing');
     }
     this._path = path;
-    this._data = {};
+    this._metadata = {};
     if (parent && !(parent instanceof TrackList)) {
       throw new TypeError('parent must be a TrackList');
     }
@@ -31,12 +27,12 @@ export class Track {
     }
   }
 
-  get data() {
-    return this._data;
+  get metadata() {
+    return this._metadata;
   }
 
-  set data(data) {
-    this._data = filterData(data);
+  set metadata(metadata) {
+    this._metadata = filterMetaData(metadata);
   }
 
   get number() {
@@ -48,19 +44,31 @@ export class Track {
   }
 
   get artist() {
-    if (this._data.artist) {
-      return this._data.artist;
+    if (this._metadata.artist) {
+      return this._metadata.artist;
     }
     let album = this.album;
     return album ? album.artist : null;
   }
 
+  set artist(artist) {
+    this._metadata.artist = artist;
+  }
+
   get title() {
-    return this._data.title || null;
+    return this._metadata.title || null;
+  }
+
+  set title(title) {
+    this._metadata.title = title;
   }
 
   get length() {
-    return this._data.length || 0;
+    return this._metadata.length || 0;
+  }
+
+  set length(length) {
+    return this._metadata.length = length;
   }
 
   get path() {
@@ -73,6 +81,14 @@ export class Track {
 
   get location() {
     return this._parent ? join(this._parent.location, this._path) : this._path;
+  }
+
+  get mbid() {
+    return this._metadata.mbid;
+  }
+
+  set mbid(id) {
+    this._metadata.mbid = id;
   }
 
   tags() {
@@ -90,11 +106,11 @@ export class Track {
         tags.albumartist = albumArtist;
       }
     }
-    if (this._data.title) {
-      tags.title = this._data.title;
+    if (this._metadata.title) {
+      tags.title = this._metadata.title;
     }
-    if (this._data.length) {
-      tags.length = this._data.length;
+    if (this._metadata.length) {
+      tags.length = this._metadata.length;
     }
     if (this._parent && this._parent._tracks.length > 1) {
       tags.totaltracks = this._parent._tracks.length;
@@ -107,8 +123,10 @@ export class Track {
     return tags;
   }
 
-  toObject() {
-    return Object.assign({}, this._data);
+  toJSON() {
+    return Object.assign({}, this._metadata, {
+      path: this._path
+    });
   }
 
 }
@@ -121,7 +139,7 @@ export class TrackList {
     }
     this._path = path;
     this._parent = parent;
-    this._data = {};
+    this._metadata = {};
     this._tracks = [];
     let album = this.album;
     if (album) {
@@ -129,12 +147,12 @@ export class TrackList {
     }
   }
 
-  get data() {
-    return this._data;
+  get metadata() {
+    return this._metadata;
   }
 
-  set data(data) {
-    this._data = filterData(data);
+  set metadata(metadata) {
+    this._metadata = filterMetaData(metadata);
   }
 
   get album() {
@@ -142,7 +160,7 @@ export class TrackList {
   }
 
   get name() {
-    return this._data.name || this._path;
+    return this._metadata.name || this._path;
   }
 
   get tracks() {
@@ -161,31 +179,32 @@ export class TrackList {
     return this._parent ? join(this._parent.location, this._path) : this._path;
   }
 
-  toObject() {
-    return Object.assign({}, this._data, {
-      tracks: this._tracks.map(track => track.toObject())
+  toJSON() {
+    return Object.assign({}, this._metadata, {
+      path: this._path,
+      tracks: this._tracks.map(track => track.toJSON())
     });
   }
 }
 
 export class Album {
 
-  static fromJson(path, data) {
+  static fromJson(path, metadata) {
     let album = new Album(path);
-    album._data = filterData(data);
-    if (data.tracks && data.tracks.length) {
+    album._metadata = filterMetaData(metadata);
+    if (metadata.tracks && metadata.tracks.length) {
       let disc = new TrackList(album, '.');
-      data.tracks.forEach(trackData => {
+      metadata.tracks.forEach(trackData => {
         let track = new Track(disc, trackData.path);
-        track.data = trackData;
+        track.metadata = trackData;
       });
     }
-    if (data.discs) {
-      data.discs.forEach(discData => {
+    if (metadata.discs) {
+      metadata.discs.forEach(discData => {
         let disc = new TrackList(album, discData.path);
-        disc.data = discData;
+        disc.metadata = discData;
         if (discData.tracks && discData.tracks.length) {
-          discData.tracks.forEach(track => new Track(disc, track.path).data = track);
+          discData.tracks.forEach(track => new Track(disc, track.path).metadata = track);
         }
       });
     }
@@ -198,15 +217,15 @@ export class Album {
     }
     this._path = normalize(path);
     this._discs = [];
-    this._data = {};
+    this._metadata = {};
   }
 
-  get data() {
-    return this._data;
+  get metadata() {
+    return this._metadata;
   }
 
-  set data(data) {
-    this._data = filterData(data);
+  set metadata(metadata) {
+    this._metadata = filterMetaData(metadata);
   }
 
   get album() {
@@ -214,7 +233,11 @@ export class Album {
   }
 
   get name() {
-    return this._data.name;
+    return this._metadata.name || [this.artist, this.title].filter(s => !!s).join(' - ');
+  }
+
+  set name(name) {
+    this._metadata.name = name;
   }
 
   get path() {
@@ -226,11 +249,19 @@ export class Album {
   }
 
   get artist() {
-    return this._data.artist || null;
+    return this._metadata.artist || null;
+  }
+
+  set artist(artist) {
+    this._metadata.artist  = artist;
   }
 
   get title() {
-    return this._data.title || null;
+    return this._metadata.title || null;
+  }
+
+  set title(title) {
+    this._metadata.title = title;
   }
 
   get discs() {
@@ -241,23 +272,45 @@ export class Album {
     return this._discs.reduce((prev, curr) => prev.concat(curr.tracks), []);
   }
 
-  toJson() {
-    return JSON.stringify(this.toObject(), ALBUM_INDEX_KEYS, ' ');
+  get dcid() {
+    return this._metadata.dcid;
   }
 
-  toObject() {
-    return Object.assign({}, this._data, {
-      id: this.path,
-      discs: this._discs.map(disc => disc.toObject())
+  set dcid(id) {
+    this._metadata.dcid = id;
+  }
+
+  get mbid() {
+    return this._metadata.mbid;
+  }
+
+  set mbid(id) {
+    this._metadata.mbid = id;
+  }
+
+  toJson() {
+    return JSON.stringify(this, ALBUM_INDEX_KEYS, ' ') + '\n';
+  }
+
+  toJSON() {
+    let data = Object.assign({}, this._metadata, {
+      discs: this._discs.map(disc => disc.toJSON())
     });
+    let sameArtist = this.tracks.every(track => track.artist === this.artist);
+    if (sameArtist) {
+      data.discs.forEach(disc => disc.tracks.forEach(track => delete track.artist));
+    }
+    return data;
   }
 
 }
 
-function filterData(data) {
+function filterMetaData(metadata) {
   let res = {};
-  Object.keys(data).filter(key => DATA_KEYS[key]).forEach(key => {
-    res[key] = data[key];
-  });
+  for (let key of META_DATA_KEYS) {
+    if (key in metadata) {
+      res[key] = metadata[key];
+    }
+  }
   return res;
 }
