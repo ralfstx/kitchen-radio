@@ -2,7 +2,7 @@ import {join} from 'path';
 import {expect, spy, tmpdir, restore} from '../test';
 import {mkdirSync, writeFileSync} from 'fs';
 
-import {callRecursive, ensureIsFile, ensureIsDir, getSubDirs, statAsyncSafe, readJsonFile} from '../../src/lib/files';
+import {walk, ensureIsFile, ensureIsDir, getSubDirs, statAsyncSafe, readJsonFile} from '../../src/lib/files';
 
 let baseDir;
 
@@ -14,28 +14,29 @@ describe('files', function() {
 
   afterEach(restore);
 
-  describe('callRecursive', function() {
+  describe('walk', function() {
 
-    it('calls callback for every file and directory with absolute path', function() {
-      let callback = spy();
+    it('calls callback for every file and directory with relative path', function() {
+      let callback = spy(() => true);
       createTmpFiles(
         'A/',
+        'A/a',
         'A/1/',
         'A/1/a',
         'A/1/b',
-        'A/2',
-        'A/1/a',
-        'B'
+        'A/2/',
+        'b'
       );
-      return callRecursive(baseDir, callback).then(() => {
-        expect(callback.args.map(args => args[0])).to.eql([
-          baseDir,
-          baseDir + '/A',
-          baseDir + '/A/1',
-          baseDir + '/A/1/a',
-          baseDir + '/A/1/b',
-          baseDir + '/A/2',
-          baseDir + '/B'
+      return walk(baseDir, callback).then(() => {
+        expect(callback.args.map(args => args[0])).to.deep.equal([
+          '',
+          'A',
+          'A/1',
+          'A/1/a',
+          'A/1/b',
+          'A/2',
+          'A/a',
+          'b'
         ]);
       });
     });
@@ -44,8 +45,30 @@ describe('files', function() {
       createTmpDir('A/');
       createTmpFile('A/b');
       let callback = spy();
-      return callRecursive(baseDir, callback).then(() => {
+      return walk(baseDir, callback).then(() => {
         callback.args.forEach(args => expect('mtime' in args[1]));
+      });
+    });
+
+    it('recurses only if callback returns truthy', function() {
+      let callback = spy(path => path !== 'B');
+      createTmpFiles(
+        'A/',
+        'A/a',
+        'B/',
+        'B/b',
+        'C/',
+        'C/c'
+      );
+      return walk(baseDir, callback).then(() => {
+        expect(callback.args.map(args => args[0])).to.deep.equal([
+          '',
+          'A',
+          'A/a',
+          'B',
+          'C',
+          'C/c'
+        ]);
       });
     });
 

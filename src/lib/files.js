@@ -11,13 +11,16 @@ export let readdirAsync = promisify(_fs.readdir);
 export let readFileAsync = promisify(_fs.readFile);
 export let writeFileAsync = promisify(_fs.writeFile);
 
-export async function callRecursive(path, fn) {
-  let stats = await statAsync(path);
-  await fn(path, stats);
-  if (stats.isDirectory()) {
-    let files = await readdirAsync(path);
+export async function walk(path, fn, _base) {
+  let base = _base || path;
+  let relpath = _base ? path : '';
+  let abspath = join(base, relpath);
+  let stats = await statAsync(abspath);
+  let recurse = await fn(relpath, stats);
+  if (stats.isDirectory() && recurse) {
+    let files = await readdirAsync(abspath);
     for (let file of files) {
-      await callRecursive(join(path, file), fn);
+      await walk(join(relpath, file), fn, base);
     }
   }
 }
