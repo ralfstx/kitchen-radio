@@ -51,9 +51,9 @@ export function isHtml(req) {
 
 function handleNotFound(req, res, next) {
   if (isHtml(req)) {
-    res.render('404', {});
+    res.status(404).render('404', {});
   } else {
-    res.json({error: 'Not Found'});
+    res.status(404).json({error: 'Not Found'});
   }
 }
 
