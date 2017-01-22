@@ -5,9 +5,6 @@
     <title>Radio - Search</title>
     <link rel="stylesheet" href="/style.css">
     <style>
-      .hidden {
-        visibility: hidden;
-      }
       .match {
         margin-top: 1px;
       }
@@ -17,14 +14,14 @@
     <h1>Search</h1>
     <div id="app">
       <input type="text" placeholder="search terms" v-model="query" debounce="500" />
-      <div v-for="match in matches">
-        <a v-bind:href="'/albums/' + match.id">
-          <div class="match">
+      <div v-for="match in matches" v-cloak>
+        <div class="match">
+          <a v-bind:href="'/albums/' + match.id">
             <img width="50" height="50" v-bind:src="'/albums/' + match.id + '/cover?size=50'" align="center"/>
             <span>{{match.name}}</span>
-            <span v-if="match.tracks.length">(Tracks {{match.tracks}})</span>
-          </div>
-        </a>
+          </a>
+          <span v-if="match.tracks.length">({{match.tracks.length}} Tracks)</span>
+        </div>
       </div>
     </div>
 

@@ -5,16 +5,13 @@
     <title>Radio - ${title}</title>
     <link rel="stylesheet" href="/style.css">
     <style>
-      .hidden {
-        visibility: hidden;
-      }
       img {
         margin-bottom: 10px
       }
     </style>
   </head>
   <body>
-    <div id="app" class="hidden">
+    <div id="app" v-cloak>
       <h1>${title}</h1>
       <img width="250" height="250" v-bind:src="'/albums/' + album.id + '/cover?size=250'" />
       <div v-for="(disc, dn) in album.discs">
@@ -36,10 +33,6 @@
           },
           created: function() {
             fetch('${url}?type=json').then(res => res.json()).then(album => this.album = album);
-          },
-          updated: function() {
-            let empty = !this.$data.album.id;
-            this.$el.classList.toggle('hidden', empty);
           }
         });
       };

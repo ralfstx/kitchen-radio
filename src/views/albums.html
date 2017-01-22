@@ -4,16 +4,13 @@
     <meta charset="UTF-8" />
     <title>Radio - Albums</title>
     <link rel="stylesheet" href="/style.css">
-    <style>
-      .hidden {
-        visibility: hidden;
-      }
-    </style>
   </head>
   <body>
     <h1>Albums</h1>
-    <div id="app" class="hidden">
-      <div v-for="album in albums"><a v-bind:href="'/albums/' + album.id">{{album.name}}</a></div>
+    <div id="app" v-cloak>
+      <div v-for="album in albums">
+        <a v-bind:href="'/albums/' + album.id">{{album.name}}</a>
+      </div>
     </div>
 
     <script src="https://unpkg.com/vue@^2.1.0/dist/vue.js"></script>
@@ -27,10 +24,6 @@
           created: function() {
             fetch('/albums?type=json').then(res => res.json())
               .then(albums => this.albums = albums);
-          },
-          updated: function() {
-            let empty = !this.$data.albums.length;
-            this.$el.classList.toggle('hidden', empty);
           }
         });
       };
