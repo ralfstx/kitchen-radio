@@ -18,7 +18,9 @@
         <h2 v-if="album.discs.length > 1">Disc {{dn + 1}}</h2>
         <div class="line" v-for="(track, tn) in disc.tracks">
           {{tn + 1}}.
-          <a v-bind:href="'${url}/discs/' + (dn + 1) + '/tracks/' + (tn + 1)">{{track.title}}</a>
+          <span>{{track.title}}</span>
+          <a v-bind:href="'${url}/discs/' + (dn + 1) + '/tracks/' + (tn + 1)">⭳</a>
+          <a href="" v-on:click.prevent="play('${url}/discs/' + (dn + 1) + '/tracks/' + (tn + 1))">️️️▶️</a>
         </div>
       </div>
     </div>
@@ -33,6 +35,18 @@
           },
           created: function() {
             fetch('${url}?type=json').then(res => res.json()).then(album => this.album = album);
+          },
+          methods: {
+            play(track) {
+              fetch('/player/replace', {
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+                },
+                method: 'POST',
+                body: JSON.stringify([track])
+              });
+            }
           }
         });
       };

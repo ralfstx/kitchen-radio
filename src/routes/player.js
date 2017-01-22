@@ -25,10 +25,18 @@ export function router(context) {
     player.next().then(() => res.json({})).catch(err => next(err));
   });
   router.post('/replace', (req, res, next) => {
-    player.replace(req.body).then(() => res.json({})).catch(err => next(err));
+    if (!Array.isArray(req.body)) {
+      res.status(400).json({error: 'Not an array'});
+    } else {
+      player.replace(req.body).then(() => res.json({})).catch(err => next(err));
+    }
   });
   router.post('/append', (req, res, next) => {
-    player.append(req.body).then(() => res.json({})).catch(err => next(err));
+    if (!Array.isArray(req.body)) {
+      res.status(400).json({error: 'Not an array'});
+    } else {
+      player.append(req.body).then(() => res.json({})).catch(err => next(err));
+    }
   });
   return router;
 }
