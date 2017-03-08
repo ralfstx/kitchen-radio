@@ -19,7 +19,7 @@ export function router(context) {
       if (isHtml(req)) {
         res.render('album', {title: album.name, url: `/albums/${album.path}`});
       } else {
-        res.json(db.getAlbum(req.params.id).toObject());
+        res.json(db.getAlbum(req.params.id).toJSON());
       }
     } else {
       next();

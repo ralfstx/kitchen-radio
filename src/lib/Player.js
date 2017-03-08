@@ -17,7 +17,8 @@ export default class Player {
     this._mpdClient = mpd.connect({host, port})
       .on('ready', () => this.logger.info(`Connected to mpd on ${host}, port ${port}`))
       .on('error', (err) => this.logger.error('mpd error', err))
-      .on('system-playlist', () => this.logger.info('mpd playlist changed'))
+      .on('system-player', () => this._notifyStatusChange())
+      .on('system-playlist', () => this._notifyPlaylistChange())
       .on('end', () => setTimeout(() => this.connectMpd(), 2000));
   }
 
@@ -57,6 +58,28 @@ export default class Player {
   replace(urls) {
     // TODO keep track of changes to playlist
     return this._sendCommands(['clear', ...this._toCommands(urls), 'play']).then(() => null);
+  }
+
+  _notifyPlaylistChange() {
+    this.logger.info('mpd playlist changed');
+    this._sendCommand('playlistinfo')
+      .then(res => this._extractPlaylist(res))
+      .then(playlist => this._notify('onPlaylistChange', playlist))
+      .catch(err => console.error(err));
+  }
+
+  _notifyStatusChange() {
+    this.logger.info('mpd status changed');
+    this._sendCommand('status')
+      .then(readProps)
+      .then(status => this._notify('onStatusChange', status))
+      .catch(err => console.error(err));
+  }
+
+  _notify(name, event) {
+    if (name in this) {
+      this[name](event);
+    }
   }
 
   _sendCommand(command) {

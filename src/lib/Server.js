@@ -37,9 +37,8 @@ export default class Server {
   }
 
   start() {
-    let port = this._port;
-    this.app.listen(port, () => {
-      console.log(`Example app listening on port ${port}`);
+    return this.app.listen(this._port, () => {
+      this.logger.info(`Server listening on port ${this._port}`);
     });
   }
 

@@ -8,6 +8,7 @@ import AlbumDB from './lib/AlbumDB';
 import StationDB from './lib/StationDB';
 import Player from './lib/Player';
 import Server from './lib/Server';
+import WSServer from './lib/WSServer';
 import config from './config.json';
 
 const defaults = {
@@ -37,5 +38,10 @@ player.connectMpd();
 context.set('instance:Player', player);
 
 let server = new Server(context);
-server.start();
+let httpServer = server.start();
+context.set('instance:HttpServer', httpServer);
 context.set('instance:Server', server);
+
+let wsServer = new WSServer(context);
+wsServer.start();
+context.set('instance:WSServer', wsServer);
