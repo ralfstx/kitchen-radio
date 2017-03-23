@@ -42,6 +42,8 @@ export default class Player {
     return this._sendCommand('next').then(() => null);
   }
 
+  // UPDATE REQUESTS
+
   status() {
     return this._sendCommand('status').then(readProps);
   }
@@ -49,6 +51,8 @@ export default class Player {
   playlist() {
     return this._sendCommand('playlistinfo').then(res => this._extractPlaylist(res));
   }
+
+  // PLAYLIST MODIFICATION
 
   append(urls) {
     // TODO keep track of changes to playlist
@@ -58,6 +62,10 @@ export default class Player {
   replace(urls) {
     // TODO keep track of changes to playlist
     return this._sendCommands(['clear', ...this._toCommands(urls), 'play']).then(() => null);
+  }
+
+  remove(index) {
+    return this._sendCommands(['delete ' + index, 'play']).then(() => null);
   }
 
   _notifyPlaylistChange() {

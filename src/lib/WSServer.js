@@ -37,6 +37,7 @@ export default class WSServer {
   _handleMessage(message) {
     if (message.type === 'utf8') {
       let data = JSON.parse(message.utf8Data);
+      console.log(data);
       let command = data.command;
       if (command === 'play') {
         this._player.play();
@@ -50,6 +51,8 @@ export default class WSServer {
         this._player.append(data.args);
       } else if (command === 'replace') {
         this._player.replace(data.args);
+      } else if (command === 'remove') {
+        this._player.remove(data.args);
       } else if (command === 'status') {
         this._player.status();
       } else if (command === 'playlist') {
