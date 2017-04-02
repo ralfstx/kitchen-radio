@@ -80,7 +80,15 @@ describe('player', function() {
     it('calls play and returns null', function() {
       mpdClient.sendCommand.callsArgWith(1, null, '');
       return player.play().then(result => {
-        expect(mpdClient.sendCommand).to.have.been.calledWith('play');
+        expect(mpdClient.sendCommand).to.have.been.calledWith('play 0');
+        expect(result).to.be.null;
+      });
+    });
+
+    it('calls play with position', function() {
+      mpdClient.sendCommand.callsArgWith(1, null, '');
+      return player.play(3).then(result => {
+        expect(mpdClient.sendCommand).to.have.been.calledWith('play 3');
         expect(result).to.be.null;
       });
     });
@@ -125,6 +133,18 @@ describe('player', function() {
       mpdClient.sendCommands.callsArgWith(1, null, '');
       return player.append(['foo.m3u']).then(() => {
         expect(mpdClient.sendCommands).to.have.been.calledWith(['load "foo.m3u"', 'play']);
+      });
+    });
+
+  });
+
+  describe('remove', function() {
+
+    it('calls remove with position', function() {
+      mpdClient.sendCommand.callsArgWith(1, null, '');
+      return player.remove(3).then(result => {
+        expect(mpdClient.sendCommand).to.have.been.calledWith('delete 3');
+        expect(result).to.be.null;
       });
     });
 

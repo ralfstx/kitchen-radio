@@ -22,8 +22,8 @@ export default class Player {
       .on('end', () => setTimeout(() => this.connectMpd(), 2000));
   }
 
-  play() {
-    return this._sendCommand('play').then(() => null);
+  play(pos = 0) {
+    return this._sendCommand('play ' + pos).then(() => null);
   }
 
   stop() {
@@ -65,7 +65,7 @@ export default class Player {
   }
 
   remove(index) {
-    return this._sendCommands(['delete ' + index, 'play']).then(() => null);
+    return this._sendCommand('delete ' + index).then(() => null);
   }
 
   _notifyPlaylistChange() {

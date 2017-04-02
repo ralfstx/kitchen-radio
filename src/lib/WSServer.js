@@ -37,26 +37,19 @@ export default class WSServer {
   _handleMessage(message, connection) {
     if (message.type === 'utf8') {
       let data = JSON.parse(message.utf8Data);
-      console.log(data);
-      let command = data.command;
-      if (command === 'play') {
-        this._player.play();
-      } else if (command === 'pause') {
-        this._player.pause();
-      } else if (command === 'prev') {
-        this._player.prev();
-      } else if (command === 'next') {
-        this._player.next();
-      } else if (command === 'append') {
-        this._player.append(data.args);
-      } else if (command === 'replace') {
-        this._player.replace(data.args);
-      } else if (command === 'remove') {
-        this._player.remove(data.args);
-      } else if (command === 'status') {
-        this._player.status().then(status => this._send(connection, 'status', status));
-      } else if (command === 'playlist') {
-        this._player.playlist().then(playlist => this._send(connection, 'playlist', playlist));
+      let handlers = {
+        play: (args) => this._player.play(args.pos || 0),
+        pause: () => this._player.pause(),
+        prev: () => this._player.prev(),
+        next: () => this._player.next(),
+        append: (args) => this._player.append(args),
+        replace: (args) => this._player.replace(args),
+        remove: (args) => this._player.remove(args.pos),
+        status: () => this._player.status().then(status => this._send(connection, 'status', status)),
+        playlist: () => this._player.playlist().then(playlist => this._send(connection, 'playlist', playlist)),
+      };
+      if (data.command in handlers) {
+        handlers[data.command](data.args || {});
       }
     }
   }

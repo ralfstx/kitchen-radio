@@ -10,7 +10,7 @@ export function router(context) {
     player.playlist().then(data => res.json(data)).catch(err => next(err));
   });
   router.get('/play', (req, res, next) => {
-    player.play().then(() => res.json({})).catch(err => next(err));
+    player.play(req.query.pos || 0).then(() => res.json({})).catch(err => next(err));
   });
   router.get('/stop', (req, res, next) => {
     player.stop().then(() => res.json({})).catch(err => next(err));
