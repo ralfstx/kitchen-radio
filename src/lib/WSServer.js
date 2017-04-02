@@ -26,7 +26,7 @@ export default class WSServer {
   _handleConnect(connection) {
     this.logger.info(`Connection accepted from ${connection.remoteAddress}`);
     this._connections.add(connection);
-    connection.on('message', message => this._handleMessage(message));
+    connection.on('message', message => this._handleMessage(message, connection));
   }
 
   _handleDisconnect(connection, reason, description) {
@@ -34,7 +34,7 @@ export default class WSServer {
     this._connections.remove(connection);
   }
 
-  _handleMessage(message) {
+  _handleMessage(message, connection) {
     if (message.type === 'utf8') {
       let data = JSON.parse(message.utf8Data);
       console.log(data);
@@ -54,15 +54,19 @@ export default class WSServer {
       } else if (command === 'remove') {
         this._player.remove(data.args);
       } else if (command === 'status') {
-        this._player.status();
+        this._player.status().then(status => this._send(connection, 'status', status));
       } else if (command === 'playlist') {
-        this._player.playlist();
+        this._player.playlist().then(playlist => this._send(connection, 'playlist', playlist));
       }
     }
   }
 
   broadcast(topic, args) {
-    this._connections.forEach(connection => connection.sendUTF(JSON.stringify({topic, args})));
+    this._connections.forEach(connection => this._send(connection, topic, args));
+  }
+
+  _send(connection, topic, args) {
+    connection.sendUTF(JSON.stringify({topic, args}));
   }
 
 }

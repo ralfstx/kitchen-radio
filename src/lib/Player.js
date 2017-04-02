@@ -42,7 +42,7 @@ export default class Player {
     return this._sendCommand('next').then(() => null);
   }
 
-  // UPDATE REQUESTS
+  // STATUS REQUESTS
 
   status() {
     return this._sendCommand('status').then(readProps);
