@@ -42,6 +42,7 @@ export default class WSServer {
         pause: () => this._player.pause(),
         prev: () => this._player.prev(),
         next: () => this._player.next(),
+        stop: () => this._player.stop(),
         append: (args) => this._player.append(args),
         replace: (args) => this._player.replace(args),
         remove: (args) => this._player.remove(args.pos),
