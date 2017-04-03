@@ -7,7 +7,6 @@ export default class WSServer {
     this._player = context.get('instance:Player');
     this._httpServer = context.get('instance:HttpServer');
     this._connections = new Connections();
-    this._player.onPlaylistChange = playlist => this.broadcast('playlist', playlist);
     this._player.onStatusChange = status => this.broadcast('status', status);
   }
 

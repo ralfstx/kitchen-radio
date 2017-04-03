@@ -18,7 +18,7 @@ export default class Player {
       .on('ready', () => this.logger.info(`Connected to mpd on ${host}, port ${port}`))
       .on('error', (err) => this.logger.error('mpd error', err))
       .on('system-player', () => this._notifyStatusChange())
-      .on('system-playlist', () => this._notifyPlaylistChange())
+      .on('system-playlist', () => this._notifyStatusChange())
       .on('end', () => setTimeout(() => this.connectMpd(), 2000));
   }
 
@@ -66,14 +66,6 @@ export default class Player {
 
   remove(index) {
     return this._sendCommand('delete ' + index).then(() => null);
-  }
-
-  _notifyPlaylistChange() {
-    this.logger.info('mpd playlist changed');
-    this._sendCommand('playlistinfo')
-      .then(res => this._extractPlaylist(res))
-      .then(playlist => this._notify('onPlaylistChange', playlist))
-      .catch(err => console.error(err));
   }
 
   _notifyStatusChange() {
