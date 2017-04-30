@@ -3,8 +3,8 @@ import {join} from 'path';
 import {isHtml} from '../lib/Server';
 
 export function router(context) {
-  let db = context.get('instance:AlbumDB');
-  let musicDir = context.get('musicDir');
+  let db = context.albumDB;
+  let musicDir = context.musicDir;
   let router = new Router();
   router.get('/', (req, res) => {
     if (isHtml(req)) {

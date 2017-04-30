@@ -5,11 +5,11 @@ import {readProps} from './util';
 export default class Player {
 
   constructor(context) {
-    this.logger = context.get('logger');
-    this._port = context.get('port');
-    this._mpdPort = context.get('mpdPort');
-    this._mpdHost = context.get('mpdHost');
-    this._albumDb = context.get('instance:AlbumDB');
+    this.logger = context.logger;
+    this._port = context.port;
+    this._mpdPort = context.mpdPort;
+    this._mpdHost = context.mpdHost;
+    this._albumDb = context.albumDB;
   }
 
   connectMpd() {

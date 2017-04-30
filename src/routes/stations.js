@@ -2,8 +2,8 @@ import {Router} from 'express';
 import {join} from 'path';
 
 export function router(context) {
-  let db = context.get('instance:StationDB');
-  let stationsDir = context.get('stationsDir');
+  let db = context.stationDB;
+  let stationsDir = context.stationsDir;
   let router = new Router();
   router.get('/', (req, res) => {
     res.json(db.getIndex());

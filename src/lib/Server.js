@@ -16,8 +16,8 @@ const viewsDir = join(__dirname, '../views');
 export default class Server {
 
   constructor(context) {
-    this.logger = context.get('logger');
-    this._port = context.get('port');
+    this.logger = context.logger;
+    this._port = context.port;
     this.app = express();
     this.app.use(morgan('dev'/*, {stream: this.logger.stream}*/));
     this.app.use(bodyParser.json());

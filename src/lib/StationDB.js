@@ -5,8 +5,8 @@ import {getSubDirs, readJsonFile, statSafe} from './files';
 export default class StationDB {
 
   constructor(context) {
-    this.logger = context.get('logger');
-    this._stationsDir = context.get('stationsDir');
+    this.logger = context.logger;
+    this._stationsDir = context.stationsDir;
     this._ids = [];
     this._stations = {};
   }

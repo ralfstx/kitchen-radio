@@ -7,8 +7,8 @@ import {crc32Str} from '../lib/hash';
 export default class AlbumDB {
 
   constructor(context) {
-    this.logger = context.get('logger');
-    this._musicDir = context.get('musicDir');
+    this.logger = context.logger;
+    this._musicDir = context.musicDir;
     this._albums = {};
   }
 

@@ -26,21 +26,20 @@ context.set('logger', logger);
 
 let albumDB = new AlbumDB(context);
 albumDB.update();
-context.set('instance:AlbumDB', albumDB);
+context.set('albumDB', albumDB);
 
 let stationDB = new StationDB(context);
 stationDB.update();
-context.set('instance:StationDB', stationDB);
+context.set('stationDB', stationDB);
 
 let player = new Player(context);
 player.connectMpd();
-context.set('instance:Player', player);
+context.set('player', player);
 
 let server = new Server(context);
 let httpServer = server.start();
-context.set('instance:HttpServer', httpServer);
-context.set('instance:Server', server);
+context.set('httpServer', httpServer);
 
 let wsServer = new WSServer(context);
 wsServer.start();
-context.set('instance:WSServer', wsServer);
+context.set('wsServer', wsServer);

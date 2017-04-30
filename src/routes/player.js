@@ -1,7 +1,7 @@
 import {Router} from 'express';
 
 export function router(context) {
-  let player = context.get('instance:Player');
+  let player = context.player;
   let router = new Router();
   router.get('/status', (req, res, next) => {
     player.status().then(data => res.json(data)).catch(err => next(err));

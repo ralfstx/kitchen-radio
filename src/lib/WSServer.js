@@ -3,9 +3,9 @@ import websocket from 'websocket';
 export default class WSServer {
 
   constructor(context) {
-    this.logger = context.get('logger');
-    this._player = context.get('instance:Player');
-    this._httpServer = context.get('instance:HttpServer');
+    this.logger = context.logger;
+    this._player = context.player;
+    this._httpServer = context.httpServer;
     this._connections = new Connections();
     this._player.onStatusChange = status => this.broadcast('status', status);
   }

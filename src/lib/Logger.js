@@ -7,7 +7,7 @@ export default class Logger extends winston.Logger {
     super({
       transports: [
         new winston.transports.Console({
-          level: context.get('logLevel'),
+          level: context.logLevel,
           handleExceptions: true,
           prettyPrint: true,
           colorize: true,
@@ -15,10 +15,10 @@ export default class Logger extends winston.Logger {
           timestamp: false
         }),
         new winston.transports.File({
-          filename: join(context.get('logDir'), 'debug.log'),
+          filename: join(context.logDir, 'debug.log'),
           maxsize: 40000,
           maxFiles: 10,
-          level: context.get('logLevel'),
+          level: context.logLevel,
           handleExceptions: true,
           prettyPrint: false,
           colorize: false,

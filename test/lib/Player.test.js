@@ -26,7 +26,7 @@ describe('player', function() {
       port: 8080,
       mpdHost: 'localhost',
       mpdPort: 6600,
-      'instance:AlbumDB': {
+      albumDB: {
         getAlbum: () => Album.fromJson('foo', {
           name: 'Foo',
           discs: [{
