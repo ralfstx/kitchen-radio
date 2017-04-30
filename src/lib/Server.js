@@ -37,7 +37,7 @@ export default class Server {
   }
 
   start() {
-    return this.app.listen(this._port, () => {
+    this.httpServer = this.app.listen(this._port, () => {
       this.logger.info(`Server listening on port ${this._port}`);
     });
   }

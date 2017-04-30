@@ -1,17 +1,17 @@
-import websocket from 'websocket';
+import {server as WebSocketServer} from 'websocket';
 
 export default class WSServer {
 
   constructor(context) {
     this.logger = context.logger;
     this._player = context.player;
-    this._httpServer = context.httpServer;
+    this._server = context.server;
     this._connections = new Connections();
     this._player.onStatusChange = status => this.broadcast('status', status);
   }
 
   start() {
-    let wsServer = new websocket.server({httpServer: this._httpServer});
+    let wsServer = new WebSocketServer({httpServer: this._server.httpServer});
     wsServer.on('request', request => this._handleRequest(request));
     wsServer.on('connect', connection => this._handleConnect(connection));
     wsServer.on('close', (connection, reason, desc) => this._handleDisconnect(connection, reason, desc));

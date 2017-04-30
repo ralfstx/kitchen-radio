@@ -12,14 +12,24 @@ export default class Player {
     this._albumDb = context.albumDB;
   }
 
-  connectMpd() {
-    let host = this._mpdHost, port = this._mpdPort;
-    this._mpdClient = mpd.connect({host, port})
-      .on('ready', () => this.logger.info(`Connected to mpd on ${host}, port ${port}`))
-      .on('error', (err) => this.logger.error('mpd error', err))
-      .on('system-player', () => this._notifyStatusChange())
-      .on('system-playlist', () => this._notifyStatusChange())
-      .on('end', () => setTimeout(() => this.connectMpd(), 2000));
+  async connectMpd() {
+    return new Promise((resolve, reject) => {
+      let host = this._mpdHost, port = this._mpdPort;
+      this._mpdClient = mpd.connect({host, port})
+        .on('ready', () => {
+          this.logger.info(`Connected to mpd on ${host}, port ${port}`);
+          resolve();
+        })
+        .on('error', (err) => {
+          this.logger.error('mpd error', err);
+          reject(err);
+        })
+        .on('end', () => {
+          this.logger.error('mpd disconnected');
+        })
+        .on('system-player', () => this._notifyStatusChange())
+        .on('system-playlist', () => this._notifyStatusChange());
+    });
   }
 
   play(pos = 0) {

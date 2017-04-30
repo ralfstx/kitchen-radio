@@ -22,28 +22,22 @@ let context = new Context(Object.assign({}, defaults, config, {
   stationsDir: join(config.musicDir, 'stations')
 }));
 
-let logger = new Logger(context);
-context.set('logger', logger);
+context.set('logger', new Logger(context));
+context.set('albumDB', new AlbumDB(context));
+context.set('stationDB', new StationDB(context));
+context.set('coverDB', new CoverDB(context));
+context.set('player', new Player(context));
+context.set('server', new Server(context));
+context.set('wsServer', new WSServer(context));
 
-let albumDB = new AlbumDB(context);
-albumDB.update();
-context.set('albumDB', albumDB);
+start(context).catch(err => {
+  throw new Error(err);
+});
 
-let stationDB = new StationDB(context);
-stationDB.update();
-context.set('stationDB', stationDB);
-
-let coverDB = new CoverDB(context);
-context.set('coverDB', coverDB);
-
-let player = new Player(context);
-player.connectMpd();
-context.set('player', player);
-
-let server = new Server(context);
-let httpServer = server.start();
-context.set('httpServer', httpServer);
-
-let wsServer = new WSServer(context);
-wsServer.start();
-context.set('wsServer', wsServer);
+async function start(context) {
+  await context.albumDB.update();
+  await context.stationDB.update();
+  await context.player.connectMpd();
+  await context.server.start();
+  await context.wsServer.start();
+}
