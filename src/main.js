@@ -18,7 +18,6 @@ const defaults = {
 };
 
 let context = new Context(Object.assign({}, defaults, config, {
-  albumsDir: join(config.musicDir, 'albums'),
   stationsDir: join(config.musicDir, 'stations')
 }));
 

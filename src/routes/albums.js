@@ -4,31 +4,31 @@ import {isHtml} from '../lib/Server';
 
 export function router(context) {
   let db = context.get('instance:AlbumDB');
-  let albumsDir = context.get('albumsDir');
+  let musicDir = context.get('musicDir');
   let router = new Router();
   router.get('/', (req, res) => {
     if (isHtml(req)) {
       res.render('albums', {});
     } else {
-      res.json(db.getAlbums().map(album => ({id: album.path, name: album.name})));
+      res.json(db.getAlbums().map(album => ({id: album.id, name: album.name})));
     }
   });
   router.get('/:id', (req, res, next) => {
     let album = db.getAlbum(req.params.id);
     if (album) {
       if (isHtml(req)) {
-        res.render('album', {title: album.name, url: `/albums/${album.path}`});
+        res.render('album', {title: album.name, url: `/albums/${album.id}`});
       } else {
-        res.json(db.getAlbum(req.params.id).toJSON());
+        res.json(album);
       }
     } else {
       next();
     }
   });
-  router.get('/:id/cover', (req, res, next) => {
+  router.get('/:id/cover', async (req, res, next) => {
     let album = db.getAlbum(req.params.id);
     if (album) {
-      res.sendFile(join(albumsDir, album.path, selectCoverImage(req.query.size)));
+      res.sendFile(join(musicDir, album.path, selectCoverImage(req.query.size)));
       return;
     }
     next();
@@ -39,7 +39,7 @@ export function router(context) {
       let number = parseInt(req.params.number) - 1;
       let track = album.tracks[number];
       if (track) {
-        res.sendFile(join(albumsDir, track.location));
+        res.sendFile(join(musicDir, track.location));
         return;
       }
     }
@@ -54,7 +54,7 @@ export function router(context) {
         let tnr = parseInt(req.params.tnr);
         let track = disc.tracks[tnr - 1];
         if (track) {
-          res.sendFile(join(albumsDir, track.location));
+          res.sendFile(join(musicDir, track.location));
           return;
         }
       }
@@ -68,7 +68,7 @@ export function router(context) {
       res.render('search', {query});
     } else {
       res.json(db.search(terms).map(match => ({
-        id: match.album.path,
+        id: match.album.id,
         name: match.album.name,
         tracks: match.tracks.map(track => track.number)
       })));

@@ -1,20 +1,20 @@
+import {statSync, unlinkSync} from 'fs';
+import {join} from 'path';
 import {expect, tmpdir, copy, spy, restore} from '../test';
 import {Album} from '../../src/lib/album-types';
 import Context from '../../src/lib/Context';
 import AlbumDB from '../../src/lib/AlbumDB';
-import {statSync, unlinkSync} from 'fs';
-import {join} from 'path';
 
 describe('AlbumDB', function() {
 
-  let db, albumsDir;
+  let db, musicDir;
 
   beforeEach(function() {
     let tmp = tmpdir();
-    albumsDir = join(tmp, 'albums');
-    copy(join(__dirname, 'files', 'albums'), albumsDir);
+    musicDir = join(tmp);
+    copy(join(__dirname, 'files', 'albums'), join(musicDir, 'albums'));
     let logger = {info: spy(), warn: spy()};
-    db = new AlbumDB(new Context({logger, albumsDir}));
+    db = new AlbumDB(new Context({logger, musicDir}));
   });
 
   afterEach(restore);
@@ -40,6 +40,20 @@ describe('AlbumDB', function() {
       });
     });
 
+    it('creates ids for albums', function() {
+      return db.update().then(() => {
+        let album = db.getAlbums()[0];
+        expect(album.id).to.match(/^[0-9a-z]{8}$/);
+      });
+    });
+
+    it('creates unique ids', function() {
+      return db.update().then(() => {
+        let albums = db.getAlbums();
+        expect(albums[0].id).not.to.equal(albums[1].id);
+      });
+    });
+
   });
 
   describe('getAlbum', function() {
@@ -49,8 +63,8 @@ describe('AlbumDB', function() {
     });
 
     it('returns requested album', function() {
-      expect(db.getAlbum('animals')).to.be.instanceof(Album);
-      expect(db.getAlbum('animals').artist).to.equal('Pink Floyd');
+      expect(db.getAlbum('966c69dd')).to.be.instanceof(Album);
+      expect(db.getAlbum('966c69dd').artist).to.equal('Pink Floyd');
     });
 
     it('returns null when album not found', function() {
@@ -66,9 +80,9 @@ describe('AlbumDB', function() {
     });
 
     it('returns alls albums', function() {
-      expect(db.getAlbums().map(album => album.path))
-        .to.contain('animals')
-        .to.contain('bluetrain');
+      expect(db.getAlbums().map(album => album.title))
+        .to.contain('Animals')
+        .to.contain('Blue Train');
     });
 
     it('returns albums sorted by name', function() {
@@ -87,13 +101,13 @@ describe('AlbumDB', function() {
     });
 
     it('returns matching albums', function() {
-      expect(db.search(['colt'])).to.eql([{album: db.getAlbum('bluetrain'), tracks: []}]);
+      expect(db.search(['colt'])).to.eql([{album: db.getAlbum('6ff57aa3'), tracks: []}]);
     });
 
     it('returns matching tracks', function() {
       expect(db.search(['pig', 'wing'])).to.eql([{
-        album: db.getAlbum('animals'),
-        tracks: [db.getAlbum('animals').tracks[0], db.getAlbum('animals').tracks[4]]
+        album: db.getAlbum('966c69dd'),
+        tracks: [db.getAlbum('966c69dd').tracks[0], db.getAlbum('966c69dd').tracks[4]]
       }]);
     });
 
@@ -111,23 +125,23 @@ describe('AlbumDB', function() {
     });
 
     it('reports missing cover images', function() {
-      unlinkSync(join(albumsDir, 'animals', 'cover.jpg'));
-      return db.updateImages(albumsDir).then(results => {
-        expect(results.missing).to.contain(join(albumsDir, 'animals', 'cover.jpg'));
+      unlinkSync(join(musicDir, 'albums/animals', 'cover.jpg'));
+      return db.updateImages().then(results => {
+        expect(results.missing).to.contain(join(musicDir, 'albums/animals', 'cover.jpg'));
       });
     });
 
     it('creates missing scaled images', function() {
-      return db.updateImages(albumsDir).then(() => {
-        statSync(join(albumsDir, 'animals', 'cover-100.jpg'));
-        statSync(join(albumsDir, 'animals', 'cover-250.jpg'));
+      return db.updateImages(musicDir).then(() => {
+        statSync(join(musicDir, 'albums/animals', 'cover-100.jpg'));
+        statSync(join(musicDir, 'albums/animals', 'cover-250.jpg'));
       });
     });
 
     it('reports written scaled images', function() {
-      return db.updateImages(albumsDir).then(results => {
-        expect(results.written).to.contain(join(albumsDir, 'animals', 'cover-100.jpg'));
-        expect(results.written).to.contain(join(albumsDir, 'animals', 'cover-250.jpg'));
+      return db.updateImages(musicDir).then(results => {
+        expect(results.written).to.contain(join(musicDir, 'albums/animals', 'cover-100.jpg'));
+        expect(results.written).to.contain(join(musicDir, 'albums/animals', 'cover-250.jpg'));
       });
     });
 

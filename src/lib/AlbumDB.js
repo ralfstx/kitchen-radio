@@ -1,36 +1,38 @@
 import {join} from 'path';
-
 import {getSubDirs, readJsonFile, statSafe} from './files';
 import {Album} from './album-types';
 import {resizeImage} from '../lib/images';
+import {crc32Str} from '../lib/hash';
 
 export default class AlbumDB {
 
   constructor(context) {
     this.logger = context.get('logger');
-    this._albumsDir = context.get('albumsDir');
+    this._musicDir = context.get('musicDir');
     this._albums = {};
   }
 
   async update() {
     this._albums = {};
-    this.logger.info('Updating albums in ' + this._albumsDir);
-    let subdirs = await getSubDirs(this._albumsDir);
+    this.logger.info('Updating albums in ' + this._musicDir);
+    let parent = join(this._musicDir, 'albums');
+    let subdirs = await getSubDirs(parent);
     for (let name of subdirs.filter(dir => !dir.startsWith('.'))) {
-      let album = await this._readAlbum(name);
+      let album = await this._readAlbum(join('albums', name));
+      album.id = crc32Str(name);
       if (!album) {
-        this.logger.warn('Not an album: ' + join(this._albumsDir, name));
+        this.logger.warn('Not an album: ' + join(parent, name));
       } else if (!album.name) {
-        this.logger.warn('Missing album name in: ' + join(this._albumsDir, name));
+        this.logger.warn('Missing album name in: ' + join(parent, name));
       } else {
-        this._albums[album.path] = album;
+        this._albums[album.id] = album;
       }
     }
     return {count: Object.keys(this._albums).length};
   }
 
   async _readAlbum(path) {
-    let indexFile = join(this._albumsDir, path, 'index.json');
+    let indexFile = join(this._musicDir, path, 'index.json');
     let stats = await statSafe(indexFile);
     if (!stats || !stats.isFile()) return null;
     let data = await readJsonFile(indexFile);
@@ -39,15 +41,15 @@ export default class AlbumDB {
 
   async updateImages() {
     let log = {missing: [], written: []};
-    this.logger.info('Updating album images in ' + this._albumsDir);
-    for (let path in this._albums) {
-      await this._updateAlbumImages(this._albums[path], log);
+    this.logger.info('Updating album images');
+    for (let id in this._albums) {
+      await this._updateAlbumImages(this._albums[id], log);
     }
     return log;
   }
 
   async _updateAlbumImages(album, log) {
-    let origImage = join(this._albumsDir, album.path, 'cover.jpg');
+    let origImage = join(this._musicDir, album.path, 'cover.jpg');
     let origStats = await statSafe(origImage);
     if (!origStats) {
       this.logger.warn('Missing cover image: ' + origImage);
@@ -55,7 +57,7 @@ export default class AlbumDB {
       return;
     }
     for (let size of [100, 250]) {
-      let dstPath = join(this._albumsDir, album.path, `cover-${size}.jpg`);
+      let dstPath = join(this._musicDir, album.path, `cover-${size}.jpg`);
       let stats = await statSafe(dstPath);
       if (!stats || (stats.mtime < origStats.mtime)) {
         this.logger.info('writing ' + dstPath);
@@ -65,8 +67,8 @@ export default class AlbumDB {
     }
   }
 
-  getAlbum(path) {
-    return this._albums[path] || null;
+  getAlbum(id) {
+    return this._albums[id] || null;
   }
 
   getAlbums() {

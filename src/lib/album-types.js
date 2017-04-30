@@ -4,7 +4,7 @@
 import {join, normalize} from 'path';
 
 /** The metadata keys to copy */
-const META_DATA_KEYS = ['name', 'artist', 'title', 'length', 'mbid', 'dcid', 'wikipedia'];
+const META_DATA_KEYS = ['name', 'artist', 'title', 'album', 'albumartist', 'length', 'mbid', 'dcid'];
 
 /** The fields to include in the index file and their order */
 const ALBUM_INDEX_KEYS = ['path', 'name', 'artist', 'title', 'year', 'length', 'mbid', 'dcid',
@@ -233,7 +233,7 @@ export class Album {
   }
 
   get name() {
-    return this._metadata.name || [this.artist, this.title].filter(s => !!s).join(' - ');
+    return this._metadata.name || [this.artist, this.title].filter(s => !!s).join(' - ') || this.path;
   }
 
   set name(name) {
@@ -294,6 +294,8 @@ export class Album {
 
   toJSON() {
     let data = Object.assign({}, this._metadata, {
+      id: this.id,
+      name: this.name,
       discs: this._discs.map(disc => disc.toJSON())
     });
     let sameArtist = this.tracks.every(track => track.artist === this.artist);
