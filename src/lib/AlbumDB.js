@@ -1,7 +1,6 @@
 import {join} from 'path';
 import {getSubDirs, readJsonFile, statSafe} from './files';
 import {Album} from './album-types';
-import {resizeImage} from '../lib/images';
 import {crc32Str} from '../lib/hash';
 
 export default class AlbumDB {
@@ -37,34 +36,6 @@ export default class AlbumDB {
     if (!stats || !stats.isFile()) return null;
     let data = await readJsonFile(indexFile);
     return Album.fromJson(path, data);
-  }
-
-  async updateImages() {
-    let log = {missing: [], written: []};
-    this.logger.info('Updating album images');
-    for (let id in this._albums) {
-      await this._updateAlbumImages(this._albums[id], log);
-    }
-    return log;
-  }
-
-  async _updateAlbumImages(album, log) {
-    let origImage = join(this._musicDir, album.path, 'cover.jpg');
-    let origStats = await statSafe(origImage);
-    if (!origStats) {
-      this.logger.warn('Missing cover image: ' + origImage);
-      log.missing.push(origImage);
-      return;
-    }
-    for (let size of [100, 250]) {
-      let dstPath = join(this._musicDir, album.path, `cover-${size}.jpg`);
-      let stats = await statSafe(dstPath);
-      if (!stats || (stats.mtime < origStats.mtime)) {
-        this.logger.info('writing ' + dstPath);
-        log.written.push(dstPath);
-        await resizeImage(origImage, dstPath, size);
-      }
-    }
   }
 
   getAlbum(id) {

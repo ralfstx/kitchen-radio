@@ -2,14 +2,14 @@
  * Provides a copy of the original 'fs' module with promisified versions of async functions added.
  * For every function 'x' that has an 'xSync' version, an 'xAsync' version is added that returns a Promise.
  */
-import fs from 'fs';
+import fs from 'fs-extra';
 
 module.exports = Object.assign({}, fs);
 
 let members = Object.keys(fs).filter(name => typeof fs[name] === 'function');
 
 for (let name of members) {
-  if (!name.endsWith('Sync') && members.indexOf(name + 'Sync') !== -1) {
+  if (!name.endsWith('Sync') && members.includes(name + 'Sync')) {
     module.exports[name + 'Async'] = promisify(fs[name]);
   }
 }

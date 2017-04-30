@@ -4,6 +4,7 @@ import {isHtml} from '../lib/Server';
 
 export function router(context) {
   let db = context.albumDB;
+  let coverDB = context.coverDB;
   let musicDir = context.musicDir;
   let router = new Router();
   router.get('/', (req, res) => {
@@ -26,9 +27,16 @@ export function router(context) {
     }
   });
   router.get('/:id/cover', async (req, res, next) => {
-    let album = db.getAlbum(req.params.id);
-    if (album) {
-      res.sendFile(join(musicDir, album.path, selectCoverImage(req.query.size)));
+    try {
+      let size = req.query.size ? parseInt(req.query.size) : 0;
+      let file = await coverDB.getAlbumCover(req.params.id, size);
+      if (file) {
+        res.sendFile(file);
+        return;
+      }
+    } catch(err) {
+      console.error(err);
+      res.status(500).json({error: err});
       return;
     }
     next();
@@ -77,18 +85,5 @@ export function router(context) {
   router.get('/update', (req, res) => {
     db.update().then(results => res.json(results));
   });
-  router.get('/update-images', (req, res) => {
-    db.updateImages().then(results => res.json(results));
-  });
   return router;
-}
-
-function selectCoverImage(size) {
-  if (size && parseInt(size) <= 100) {
-    return 'cover-100.jpg';
-  }
-  if (size && parseInt(size) <= 250) {
-    return 'cover-250.jpg';
-  }
-  return 'cover.jpg';
 }
