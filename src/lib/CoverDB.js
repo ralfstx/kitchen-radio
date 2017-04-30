@@ -1,7 +1,7 @@
 import {resolve} from 'path';
+import {mkdirs, copy} from 'fs-extra';
 import {resizeImage} from '../lib/images';
 import {statSafe} from './files';
-import {mkdirsAsync, copyAsync} from './fs-async';
 
 const SIZE_CLASSES = [100, 250];
 
@@ -21,7 +21,7 @@ export default class CoverDB {
   }
 
   async _getCoverFile(album, size) {
-    await mkdirsAsync(resolve(this._cacheDir, 'cover'));
+    await mkdirs(resolve(this._cacheDir, 'cover'));
     let cacheFile = resolve(this._cacheDir, 'cover', album.id + '-' + size);
     let origFile = resolve(this._musicDir, album.location, 'cover.jpg');
     await this._createCopy(origFile, cacheFile, size);
@@ -36,7 +36,7 @@ export default class CoverDB {
         if (size) {
           await resizeImage(srcPath, dstPath, size);
         } else {
-          await copyAsync(srcPath, dstPath);
+          await copy(srcPath, dstPath);
         }
       } catch (err) {
         console.error(err);

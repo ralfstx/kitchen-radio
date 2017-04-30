@@ -1,8 +1,8 @@
 import {join} from 'path';
 import {expect, spy, tmpdir, restore} from '../test';
-import {mkdirSync, writeFileSync} from 'fs';
+import {mkdirSync, writeFileSync} from 'fs-extra';
 
-import {walk, ensureIsFile, ensureIsDir, getSubDirs, statSafe, readJsonFile} from '../../src/lib/files';
+import {walk, getSubDirs, statSafe} from '../../src/lib/files';
 
 let baseDir;
 
@@ -74,50 +74,6 @@ describe('files', function() {
 
   });
 
-  describe('ensureIsFile', function() {
-
-    it('does nothing on files', function() {
-      createTmpFile('foo');
-      return ensureIsFile(join(baseDir, 'foo'));
-    });
-
-    it('throws on directories', function() {
-      createTmpDir('foo');
-      return ensureIsFile(join(baseDir, 'foo')).then(fail('Expected to throw'), err => {
-        expect(err.message).to.match(/Not a file: '/);
-      });
-    });
-
-    it('throws on missing files', function() {
-      return ensureIsFile(join(baseDir, 'missing')).then(fail('Expected to throw'), err => {
-        expect(err.message).to.match(/No such file: '/);
-      });
-    });
-
-  });
-
-  describe('ensureIsDir', function() {
-
-    it('does nothing on directories', function() {
-      createTmpDir('foo');
-      return ensureIsDir(join(baseDir, 'foo'));
-    });
-
-    it('throws on files', function() {
-      createTmpFile('foo');
-      return ensureIsDir(join(baseDir, 'foo')).then(fail('Expected to throw'), err => {
-        expect(err.message).to.match(/Not a directory: '/);
-      });
-    });
-
-    it('throws on missing files', function() {
-      return ensureIsDir(join(baseDir, 'missing')).then(fail('Expected to throw'), err => {
-        expect(err.message).to.match(/No such directory: '/);
-      });
-    });
-
-  });
-
   describe('getSubDirs', function() {
 
     it('returns all sub directories', function() {
@@ -162,23 +118,6 @@ describe('files', function() {
     it('returns null for missing file', function() {
       return statSafe(join(baseDir, 'missing')).then(stats => {
         expect(stats).to.be.null;
-      });
-    });
-
-  });
-
-  describe('readJsonFile', function() {
-
-    it('reads JSON file', function() {
-      createTmpFile('foo', '{"foo": 23}');
-      return readJsonFile(join(baseDir, 'foo')).then(data => {
-        expect(data).to.eql({foo: 23});
-      });
-    });
-
-    it('throws on missing files', function() {
-      return readJsonFile(join(baseDir, 'missing')).then(fail('Expected to throw'), err => {
-        expect(err.message).to.match(/Could not read JSON file/);
       });
     });
 

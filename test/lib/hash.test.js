@@ -1,5 +1,5 @@
 import {expect, tmpdir, restore} from '../test';
-import {writeFileSync} from 'fs';
+import {writeFile} from 'fs-extra';
 import {join} from 'path';
 import {sha1Str, sha1File, crc32Str, crc32File} from '../../src/lib/hash';
 
@@ -47,16 +47,15 @@ describe('hash', function() {
 
   describe('sha1File', function() {
 
-    it('succeeds on file', function() {
+    it('succeeds on file', async function() {
       let filename = join(dirname, 'foo');
-      writeFileSync(filename, TEST_STR);
+      await writeFile(filename, TEST_STR);
 
-      return sha1File(filename).then(result => {
-        expect(result).to.equal(TEST_STR_SHA1);
-      });
+      let result = await sha1File(filename);
+      expect(result).to.equal(TEST_STR_SHA1);
     });
 
-    it('throws on missing file', function() {
+    it('throws on missing file', async function() {
       let filename = join(dirname, 'foo');
 
       return sha1File(filename).then(expectedToFail, err => {
@@ -74,13 +73,12 @@ describe('hash', function() {
 
   describe('crc32File', function() {
 
-    it('succeeds on file', function() {
+    it('succeeds on file', async function() {
       let filename = join(dirname, 'foo');
-      writeFileSync(filename, TEST_STR);
+      await writeFile(filename, TEST_STR);
 
-      return crc32File(filename).then(result => {
-        expect(result).to.equal(TEST_STR_CRC32);
-      });
+      let result = await crc32File(filename);
+      expect(result).to.equal(TEST_STR_CRC32);
     });
 
     it('throws on missing file', function() {

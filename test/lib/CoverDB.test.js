@@ -1,6 +1,6 @@
 import {join} from 'path';
+import {copy, statSync} from 'fs-extra';
 import {expect, tmpdir, spy, restore} from '../test';
-import {copySync, statSync} from '../../src/lib/fs-async';
 import Context from '../../src/lib/Context';
 import CoverDB from '../../src/lib/CoverDB';
 
@@ -8,11 +8,11 @@ describe('CoverDB', function() {
 
   let coverDB, cacheDir;
 
-  beforeEach(function() {
+  beforeEach(async function() {
     let tmpDir = tmpdir();
     let musicDir = join(tmpDir, 'music');
     cacheDir = join(tmpDir, 'cache');
-    copySync(join(__dirname,'files/albums/animals'), join(musicDir, 'animals'));
+    await copy(join(__dirname,'files/albums/animals'), join(musicDir, 'animals'));
     let logger = {info: spy(), warn: spy()};
     let albumDB = {
       getAlbum(id) {

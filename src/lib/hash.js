@@ -3,7 +3,7 @@
  */
 import Crypto from 'crypto';
 import CRC32 from 'crc-32';
-import {createReadStream} from '../lib/fs-async';
+import {createReadStream} from 'fs-extra';
 
 export function sha1Str(string) {
   if (!(typeof string === 'string')) {

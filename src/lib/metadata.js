@@ -1,5 +1,5 @@
 import musicmeta from 'musicmetadata';
-import {createReadStream} from './fs-async';
+import {createReadStream} from 'fs-extra';
 
 export async function getTrackMetadata(file) {
   let fileMetadata = await readMetaDataFromFile(file);

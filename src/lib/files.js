@@ -2,47 +2,27 @@
  * Utility methods for files.
  */
 import {join} from 'path';
-import {createReadStream, createWriteStream, statAsync, readdirAsync, readFileAsync} from './fs-async';
+import {stat, readdir} from 'fs-extra';
 
 export async function walk(path, fn, _base) {
   let base = _base || path;
   let relpath = _base ? path : '';
   let abspath = join(base, relpath);
-  let stats = await statAsync(abspath);
+  let stats = await stat(abspath);
   let recurse = await fn(relpath, stats);
   if (stats.isDirectory() && recurse) {
-    let files = await readdirAsync(abspath);
+    let files = await readdir(abspath);
     for (let file of files) {
       await walk(join(relpath, file), fn, base);
     }
   }
 }
 
-export function ensureIsFile(file) {
-  return statSafe(file).then((stats) => {
-    if (!stats) {
-      throw new Error(`No such file: '${file}'`);
-    } else if (!stats.isFile()) {
-      throw new Error(`Not a file: '${file}'`);
-    }
-  });
-}
-
-export function ensureIsDir(dir) {
-  return statSafe(dir).then((stats) => {
-    if (!stats) {
-      throw new Error(`No such directory: '${dir}'`);
-    } else if (!stats.isDirectory()) {
-      throw new Error(`Not a directory: '${dir}'`);
-    }
-  });
-}
-
 export async function getSubDirs(dir) {
   let files = await readdirAsyncWrapped(dir);
   let result = [];
   for (let file of files) {
-    let stats = await statAsync(join(dir, file));
+    let stats = await stat(join(dir, file));
     if (stats.isDirectory()) {
       result.push(file);
     }
@@ -51,7 +31,7 @@ export async function getSubDirs(dir) {
 }
 
 function readdirAsyncWrapped(dir) {
-  return readdirAsync(dir).catch(err => {
+  return readdir(dir).catch(err => {
     if (err.code === 'ENOTDIR' || err.code === 'ENOENT') {
       throw Object.assign(new Error(`Could not read directory: '${dir}'`), {cause: err});
     }
@@ -60,21 +40,5 @@ function readdirAsyncWrapped(dir) {
 }
 
 export function statSafe(file) {
-  return statAsync(file).catch(() => null);
-}
-
-export function readJsonFile(file) {
-  return readFileAsync(file, {encoding: 'utf8'})
-    .then(data => JSON.parse(data))
-    .catch((err) => {
-      throw new Error(`Could not read JSON file '${file}': ${err.message}`);
-    });
-}
-
-export function copy(srcPath, dstPath) {
-  return new Promise((resolve, reject) => {
-    let srcStream = createReadStream(srcPath).on('error', reject);
-    let dstStream = createWriteStream(dstPath).on('error', reject).on('finish', resolve);
-    srcStream.pipe(dstStream);
-  });
+  return stat(file).catch(() => null);
 }

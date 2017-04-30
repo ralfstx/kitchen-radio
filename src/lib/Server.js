@@ -4,7 +4,7 @@ import express from 'express';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import {join} from 'path';
-import {readFile} from 'fs';
+import {readFile} from 'fs-extra';
 
 import {router as albumsRouter} from '../routes/albums';
 import {router as stationsRouter} from '../routes/stations';

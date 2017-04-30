@@ -1,6 +1,7 @@
 import {join} from 'path';
+import {readJson} from 'fs-extra';
 
-import {getSubDirs, readJsonFile, statSafe} from './files';
+import {getSubDirs, statSafe} from './files';
 
 export default class StationDB {
 
@@ -34,7 +35,7 @@ export default class StationDB {
     let indexFile = join(this._stationsDir, path, 'index.json');
     let stats = await statSafe(indexFile);
     if (!stats || !stats.isFile()) return null;
-    let data = await readJsonFile(indexFile);
+    let data = await readJson(indexFile);
     return data; // TODO wrap in Album instance?
   }
 

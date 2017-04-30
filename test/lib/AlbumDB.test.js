@@ -1,5 +1,6 @@
 import {join} from 'path';
-import {expect, tmpdir, copy, spy, restore} from '../test';
+import {copy} from 'fs-extra';
+import {expect, tmpdir, spy, restore} from '../test';
 import {Album} from '../../src/lib/album-types';
 import Context from '../../src/lib/Context';
 import AlbumDB from '../../src/lib/AlbumDB';
@@ -8,9 +9,9 @@ describe('AlbumDB', function() {
 
   let albumDB, musicDir;
 
-  beforeEach(function() {
+  beforeEach(async function() {
     musicDir = tmpdir();
-    copy(join(__dirname, 'files', 'albums'), join(musicDir, 'albums'));
+    await copy(join(__dirname, 'files', 'albums'), join(musicDir, 'albums'));
     let logger = {info: spy(), warn: spy()};
     albumDB = new AlbumDB(new Context({logger, musicDir}));
   });

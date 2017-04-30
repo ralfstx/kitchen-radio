@@ -1,16 +1,17 @@
-import {expect, tmpdir, copy, spy, restore} from '../test';
+import {join} from 'path';
+import {copy} from 'fs-extra';
+import {expect, tmpdir, spy, restore} from '../test';
 import Context from '../../src/lib/Context';
 import StationDB from '../../src/lib/StationDB';
-import {join} from 'path';
 
 describe('StationDB', function() {
 
   let db, stationsDir;
 
-  beforeEach(function() {
+  beforeEach(async function() {
     let tmp = tmpdir();
     stationsDir = join(tmp, 'stations');
-    copy(join(__dirname, 'files', 'stations'), stationsDir);
+    await copy(join(__dirname, 'files', 'stations'), stationsDir);
     let logger = {info: spy(), warn: spy()};
     db = new StationDB(new Context({logger, stationsDir}));
   });

@@ -1,5 +1,6 @@
 import {join} from 'path';
-import {getSubDirs, readJsonFile, statSafe} from './files';
+import {readJson} from 'fs-extra';
+import {getSubDirs, statSafe} from './files';
 import {Album} from './album-types';
 import {crc32Str} from '../lib/hash';
 
@@ -34,7 +35,7 @@ export default class AlbumDB {
     let indexFile = join(this._musicDir, path, 'index.json');
     let stats = await statSafe(indexFile);
     if (!stats || !stats.isFile()) return null;
-    let data = await readJsonFile(indexFile);
+    let data = await readJson(indexFile);
     return Album.fromJson(path, data);
   }
 
