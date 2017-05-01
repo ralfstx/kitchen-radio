@@ -10,7 +10,7 @@ let spy = sandbox.spy.bind(sandbox);
 let stub = sandbox.stub.bind(sandbox);
 let tmpDirs = [];
 
-export {expect, spy, stub, tmpdir, restore};
+export {expect, spy, stub, tmpdir, restore, catchError};
 
 function tmpdir() {
   let dir = dirSync({unsafeCleanup: true});
@@ -22,4 +22,10 @@ function restore() {
   sandbox.restore();
   tmpDirs.forEach(dir => dir.removeCallback());
   tmpDirs = [];
+}
+
+function catchError(promise) {
+  return promise.then(() => {
+    throw new Error('Expected promise to fail but it resolved');
+  }, (err) => err);
 }

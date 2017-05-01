@@ -1,4 +1,4 @@
-import {expect, tmpdir, restore} from '../test';
+import {expect, tmpdir, restore, catchError} from '../test';
 import {writeFile} from 'fs-extra';
 import {join} from 'path';
 import {sha1Str, sha1File, crc32Str, crc32File} from '../../src/lib/hash';
@@ -11,7 +11,6 @@ const TEST_STR_SHA1 = 'ea3ec3b9fb22a45ddbd33b144b5d35acc52ae91a';
 describe('hash', function() {
 
   let dirname;
-  let expectedToFail = () => { throw new Error('expected to fail'); };
 
   beforeEach(function() {
     dirname = tmpdir();
@@ -58,15 +57,13 @@ describe('hash', function() {
     it('throws on missing file', async function() {
       let filename = join(dirname, 'foo');
 
-      return sha1File(filename).then(expectedToFail, err => {
-        expect(err.code).to.equal('ENOENT');
-      });
+      let err = await catchError(sha1File(filename));
+      expect(err.code).to.equal('ENOENT');
     });
 
-    it('throws on directory', function() {
-      return sha1File(dirname).then(expectedToFail, err => {
-        expect(err.code).to.equal('EISDIR');
-      });
+    it('throws on directory', async function() {
+      let err = await catchError(sha1File(dirname));
+      expect(err.code).to.equal('EISDIR');
     });
 
   });
@@ -81,18 +78,16 @@ describe('hash', function() {
       expect(result).to.equal(TEST_STR_CRC32);
     });
 
-    it('throws on missing file', function() {
+    it('throws on missing file', async function() {
       let filename = join(dirname, 'foo');
 
-      return crc32File(filename).then(expectedToFail, err => {
-        expect(err.code).to.equal('ENOENT');
-      });
+      let err = await catchError(crc32File(filename));
+      expect(err.code).to.equal('ENOENT');
     });
 
-    it('throws on directory', function() {
-      return crc32File(dirname).then(expectedToFail, err => {
-        expect(err.code).to.equal('EISDIR');
-      });
+    it('throws on directory', async function() {
+      let err = await catchError(crc32File(dirname));
+      expect(err.code).to.equal('EISDIR');
     });
 
   });

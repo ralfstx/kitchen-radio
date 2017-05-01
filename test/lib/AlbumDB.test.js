@@ -24,41 +24,38 @@ describe('AlbumDB', function() {
 
   describe('update', function() {
 
-    beforeEach(function() {
-      return albumDB.update();
+    beforeEach(async  function() {
+      await albumDB.update();
     });
 
     it('fills db with albums', function() {
       expect(albumDB.getAlbums().length).to.be.above(1);
     });
 
-    it('does not append albums to existing when called twice', function() {
+    it('does not append albums to existing when called twice', async function() {
       let origLength = albumDB.getAlbums().length;
-      return albumDB.update().then(() => {
-        expect(albumDB.getAlbums().length).to.equal(origLength);
-      });
+      await albumDB.update();
+      expect(albumDB.getAlbums().length).to.equal(origLength);
     });
 
-    it('creates ids for albums', function() {
-      return albumDB.update().then(() => {
-        let album = albumDB.getAlbums()[0];
-        expect(album.id).to.match(/^[0-9a-z]{8}$/);
-      });
+    it('creates ids for albums', async function() {
+      await albumDB.update();
+      let album = albumDB.getAlbums()[0];
+      expect(album.id).to.match(/^[0-9a-z]{8}$/);
     });
 
-    it('creates unique ids', function() {
-      return albumDB.update().then(() => {
-        let albums = albumDB.getAlbums();
-        expect(albums[0].id).not.to.equal(albums[1].id);
-      });
+    it('creates unique ids', async function() {
+      await albumDB.update();
+      let albums = albumDB.getAlbums();
+      expect(albums[0].id).not.to.equal(albums[1].id);
     });
 
   });
 
   describe('getAlbum', function() {
 
-    beforeEach(function() {
-      return albumDB.update();
+    beforeEach(async function() {
+      await albumDB.update();
     });
 
     it('returns requested album', function() {
@@ -74,8 +71,8 @@ describe('AlbumDB', function() {
 
   describe('getAlbums', function() {
 
-    beforeEach(function() {
-      return albumDB.update();
+    beforeEach(async function() {
+      await albumDB.update();
     });
 
     it('returns alls albums', function() {
@@ -95,8 +92,8 @@ describe('AlbumDB', function() {
 
   describe('search', function() {
 
-    beforeEach(function() {
-      return albumDB.update();
+    beforeEach(async function() {
+      await albumDB.update();
     });
 
     it('returns matching albums', function() {

@@ -67,35 +67,31 @@ describe('CoverDB', function() {
 
   // describe('updateImages', function() {
 
-  //   beforeEach(function() {
-  //     return db.update();
+  //   beforeEach(async function() {
+  //     await db.update();
   //   });
 
-  //   it('reports missing cover images', function() {
+  //   it('reports missing cover images', async function() {
   //     unlinkSync(join(musicDir, 'albums/animals', 'cover.jpg'));
-  //     return db.updateImages().then(results => {
-  //       expect(results.missing).to.contain(join(musicDir, 'albums/animals', 'cover.jpg'));
-  //     });
+  //     let results = await db.updateImages();
+  //     expect(results.missing).to.contain(join(musicDir, 'albums/animals', 'cover.jpg'));
   //   });
 
-  //   it('creates missing scaled images', function() {
-  //     return db.updateImages(musicDir).then(() => {
-  //       statSync(join(musicDir, 'albums/animals', 'cover-100.jpg'));
-  //       statSync(join(musicDir, 'albums/animals', 'cover-250.jpg'));
-  //     });
+  //   it('creates missing scaled images', async function() {
+  //     await db.updateImages(musicDir);
+  //     statSync(join(musicDir, 'albums/animals', 'cover-100.jpg'));
+  //     statSync(join(musicDir, 'albums/animals', 'cover-250.jpg'));
   //   });
 
-  //   it('reports written scaled images', function() {
-  //     return db.updateImages(musicDir).then(results => {
-  //       expect(results.written).to.contain(join(musicDir, 'albums/animals', 'cover-100.jpg'));
-  //       expect(results.written).to.contain(join(musicDir, 'albums/animals', 'cover-250.jpg'));
-  //     });
+  //   it('reports written scaled images', async function() {
+  //     let results = await db.updateImages(musicDir);
+  //     expect(results.written).to.contain(join(musicDir, 'albums/animals', 'cover-100.jpg'));
+  //     expect(results.written).to.contain(join(musicDir, 'albums/animals', 'cover-250.jpg'));
   //   });
 
-  //   it('does not re-create existing scaled images', function() {
-  //     return db.updateImages().then(() => db.updateImages()).then(results => {
-  //       expect(results.written).to.eql([]);
-  //     });
+  //   it('does not re-create existing scaled images', async function() {
+  //     let results = await db.updateImages().then(() => db.updateImages());
+  //     expect(results.written).to.eql([]);
   //   });
 
   // });

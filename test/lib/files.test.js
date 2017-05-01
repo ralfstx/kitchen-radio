@@ -1,5 +1,5 @@
 import {join} from 'path';
-import {expect, spy, tmpdir, restore} from '../test';
+import {expect, spy, tmpdir, restore, catchError} from '../test';
 import {mkdirSync, writeFileSync} from 'fs-extra';
 
 import {walk, getSubDirs, statSafe} from '../../src/lib/files';
@@ -16,7 +16,7 @@ describe('files', function() {
 
   describe('walk', function() {
 
-    it('calls callback for every file and directory with relative path', function() {
+    it('calls callback for every file and directory with relative path', async function() {
       let callback = spy(() => true);
       createTmpFiles(
         'A/',
@@ -27,30 +27,28 @@ describe('files', function() {
         'A/2/',
         'b'
       );
-      return walk(baseDir, callback).then(() => {
-        expect(callback.args.map(args => args[0])).to.deep.equal([
-          '',
-          'A',
-          'A/1',
-          'A/1/a',
-          'A/1/b',
-          'A/2',
-          'A/a',
-          'b'
-        ]);
-      });
+      await walk(baseDir, callback);
+      expect(callback.args.map(args => args[0])).to.deep.equal([
+        '',
+        'A',
+        'A/1',
+        'A/1/a',
+        'A/1/b',
+        'A/2',
+        'A/a',
+        'b'
+      ]);
     });
 
-    it('calls callback for every file and directory with stats', function() {
+    it('calls callback for every file and directory with stats', async function() {
       createTmpDir('A/');
       createTmpFile('A/b');
       let callback = spy();
-      return walk(baseDir, callback).then(() => {
-        callback.args.forEach(args => expect('mtime' in args[1]));
-      });
+      await walk(baseDir, callback);
+      callback.args.forEach(args => expect('mtime' in args[1]));
     });
 
-    it('recurses only if callback returns truthy', function() {
+    it('recurses only if callback returns truthy', async function() {
       let callback = spy(path => path !== 'B');
       createTmpFiles(
         'A/',
@@ -60,23 +58,22 @@ describe('files', function() {
         'C/',
         'C/c'
       );
-      return walk(baseDir, callback).then(() => {
-        expect(callback.args.map(args => args[0])).to.deep.equal([
-          '',
-          'A',
-          'A/a',
-          'B',
-          'C',
-          'C/c'
-        ]);
-      });
+      await walk(baseDir, callback);
+      expect(callback.args.map(args => args[0])).to.deep.equal([
+        '',
+        'A',
+        'A/a',
+        'B',
+        'C',
+        'C/c'
+      ]);
     });
 
   });
 
   describe('getSubDirs', function() {
 
-    it('returns all sub directories', function() {
+    it('returns all sub directories', async function() {
       createTmpFiles(
         'A/',
         'A/file',
@@ -86,39 +83,34 @@ describe('files', function() {
         'file-1',
         'file-2'
       );
-      return getSubDirs(baseDir).then(result => {
-        expect(result).to.eql(['A', 'B', 'C']);
-      });
+      let result = await getSubDirs(baseDir);
+      expect(result).to.eql(['A', 'B', 'C']);
     });
 
-    it('throws on files', function() {
+    it('throws on files', async function() {
       createTmpFile('foo');
-      return getSubDirs(join(baseDir, 'foo')).then(fail('Expected to throw'), err => {
-        expect(err.message).to.equal(`Could not read directory: '${baseDir}/foo'`);
-      });
+      let err = await catchError(getSubDirs(join(baseDir, 'foo')));
+      expect(err.message).to.equal(`Could not read directory: '${baseDir}/foo'`);
     });
 
-    it('throws on missing files', function() {
-      return getSubDirs(join(baseDir, 'missing')).then(fail('Expected to throw'), err => {
-        expect(err.message).to.equal(`Could not read directory: '${baseDir}/missing'`);
-      });
+    it('throws on missing files', async function() {
+      let err = await catchError(getSubDirs(join(baseDir, 'missing')));
+      expect(err.message).to.equal(`Could not read directory: '${baseDir}/missing'`);
     });
 
   });
 
   describe('statSafe', function() {
 
-    it('returns stats for file', function() {
+    it('returns stats for file', async function() {
       createTmpFile('foo');
-      return statSafe(join(baseDir, 'foo')).then(stats => {
-        expect(stats.isFile()).to.be.true;
-      });
+      let stats = await statSafe(join(baseDir, 'foo'));
+      expect(stats.isFile()).to.be.true;
     });
 
-    it('returns null for missing file', function() {
-      return statSafe(join(baseDir, 'missing')).then(stats => {
-        expect(stats).to.be.null;
-      });
+    it('returns null for missing file', async function() {
+      let stats = await statSafe(join(baseDir, 'missing'));
+      expect(stats).to.be.null;
     });
 
   });
@@ -141,10 +133,4 @@ function createTmpFile(name, content = 'content') {
 
 function createTmpDir(name) {
   mkdirSync(join(baseDir, name));
-}
-
-function fail(message) {
-  return () => {
-    throw new Error(message);
-  };
 }

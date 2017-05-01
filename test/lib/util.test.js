@@ -1,4 +1,4 @@
-import {expect} from '../test';
+import {expect, catchError} from '../test';
 
 import {readProps, toJson, promisify} from '../../src/lib/util';
 
@@ -70,28 +70,22 @@ describe('util', function() {
 
   describe('promisify', function() {
 
-    it('resolves when callback is called', function() {
+    it('resolves when callback is called', async function() {
       let fn = (n, cb) => setTimeout(() => cb(null, n + 1), 10);
       let pfn = promisify(fn);
 
-      return pfn(23).then(res => {
-        expect(res).to.equal(24);
-      });
+      let res = await pfn(23);
+      expect(res).to.equal(24);
     });
 
-    it('rejects when callback is called with error', function() {
+    it('rejects when callback is called with error', async function() {
       let fn = (n, cb) => setTimeout(() => cb('error'), 10);
       let pfn = promisify(fn);
 
-      return pfn(23).then(expectReject, err => {
-        expect(err).to.equal('error');
-      });
+      let err = await catchError(pfn(23));
+      expect(err).to.equal('error');
     });
 
   });
 
 });
-
-function expectReject() {
-  throw new Error('expected to reject');
-}

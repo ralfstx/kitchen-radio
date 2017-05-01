@@ -39,6 +39,6 @@ function readdirAsyncWrapped(dir) {
   });
 }
 
-export function statSafe(file) {
-  return stat(file).catch(() => null);
+export async function statSafe(file) {
+  return await stat(file).catch(() => null);
 }

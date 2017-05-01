@@ -65,124 +65,115 @@ describe('player', function() {
 
   describe('status', function() {
 
-    it('calls status and returns result', function() {
+    it('calls status and returns result', async function() {
       mpdClient.sendCommand.callsArgWith(1, null, 'volume: 100\nstate: stop\n');
-      return player.status().then(result => {
-        expect(mpdClient.sendCommand).to.have.been.calledWith('status');
-        expect(result).to.eql({volume: '100', state: 'stop'});
-      });
+      let result = await player.status();
+      expect(mpdClient.sendCommand).to.have.been.calledWith('status');
+      expect(result).to.eql({volume: '100', state: 'stop'});
     });
 
   });
 
   describe('play', function() {
 
-    it('calls play and returns null', function() {
+    it('calls play and returns null', async function() {
       mpdClient.sendCommand.callsArgWith(1, null, '');
-      return player.play().then(result => {
-        expect(mpdClient.sendCommand).to.have.been.calledWith('play 0');
-        expect(result).to.be.null;
-      });
+      let result = await player.play();
+      expect(mpdClient.sendCommand).to.have.been.calledWith('play 0');
+      expect(result).to.be.null;
     });
 
-    it('calls play with position', function() {
+    it('calls play with position', async function() {
       mpdClient.sendCommand.callsArgWith(1, null, '');
-      return player.play(3).then(result => {
-        expect(mpdClient.sendCommand).to.have.been.calledWith('play 3');
-        expect(result).to.be.null;
-      });
+      let result = await player.play(3);
+      expect(mpdClient.sendCommand).to.have.been.calledWith('play 3');
+      expect(result).to.be.null;
     });
 
   });
 
   describe('stop', function() {
 
-    it('calls stop and returns null', function() {
+    it('calls stop and returns null', async function() {
       mpdClient.sendCommand.callsArgWith(1, null, '');
-      return player.stop().then(result => {
-        expect(mpdClient.sendCommand).to.have.been.calledWith('stop');
-        expect(result).to.be.null;
-      });
+      let result = await player.stop();
+      expect(mpdClient.sendCommand).to.have.been.calledWith('stop');
+      expect(result).to.be.null;
     });
 
   });
 
   describe('append', function() {
 
-    it('calls add commands, play, and returns null', function() {
+    it('calls add commands, play, and returns null', async function() {
       mpdClient.sendCommands.callsArgWith(1, null, '');
-      return player.append(['foo.mp3', 'bar.mp3']).then(result => {
-        expect(mpdClient.sendCommands).to.have.been.calledWith(['add "foo.mp3"', 'add "bar.mp3"', 'play']);
-        expect(result).to.be.null;
-      });
+      let result = await player.append(['foo.mp3', 'bar.mp3']);
+      expect(mpdClient.sendCommands).to.have.been.calledWith(['add "foo.mp3"', 'add "bar.mp3"', 'play']);
+      expect(result).to.be.null;
     });
 
   });
 
   describe('replace', function() {
 
-    it('calls clear, add commands, play, and returns null', function() {
+    it('calls clear, add commands, play, and returns null', async function() {
       mpdClient.sendCommands.callsArgWith(1, null, '');
-      return player.replace(['foo.mp3', 'bar.mp3']).then(result => {
-        expect(mpdClient.sendCommands).to.have.been.calledWith(['clear', 'add "foo.mp3"', 'add "bar.mp3"', 'play']);
-        expect(result).to.be.null;
-      });
+      let result = await player.replace(['foo.mp3', 'bar.mp3']);
+      expect(mpdClient.sendCommands).to.have.been.calledWith(['clear', 'add "foo.mp3"', 'add "bar.mp3"', 'play']);
+      expect(result).to.be.null;
     });
 
-    it('calls load for playlists', function() {
+    it('calls load for playlists', async function() {
       mpdClient.sendCommands.callsArgWith(1, null, '');
-      return player.append(['foo.m3u']).then(() => {
-        expect(mpdClient.sendCommands).to.have.been.calledWith(['load "foo.m3u"', 'play']);
-      });
+      await player.append(['foo.m3u']);
+      expect(mpdClient.sendCommands).to.have.been.calledWith(['load "foo.m3u"', 'play']);
     });
 
   });
 
   describe('remove', function() {
 
-    it('calls remove with position', function() {
+    it('calls remove with position', async function() {
       mpdClient.sendCommand.callsArgWith(1, null, '');
-      return player.remove(3).then(result => {
-        expect(mpdClient.sendCommand).to.have.been.calledWith('delete 3');
-        expect(result).to.be.null;
-      });
+      let result = await player.remove(3);
+      expect(mpdClient.sendCommand).to.have.been.calledWith('delete 3');
+      expect(result).to.be.null;
     });
 
   });
 
   describe('playlist', function() {
 
-    it('calls playlistinfo', function() {
+    it('calls playlistinfo', async function() {
       mpdClient.sendCommand.callsArgWith(1, null, EXAMPLE_PLAYLIST_RESULT);
-      return player.playlist().then(result => {
-        expect(mpdClient.sendCommand).to.have.been.calledWith('playlistinfo');
-        expect(result).to.eql([
-          {
-            file: '/albums/aaa/tracks/1',
-            album: 'aaa',
-            disc: 1,
-            track: 1,
-            name: 'title-1-1',
-            time: 100
-          },
-          {
-            file: '/albums/aaa/tracks/2',
-            album: 'aaa',
-            disc: 1,
-            track: 2,
-            name: 'title-1-2',
-            time: 200
-          },
-          {
-            file: '/albums/aaa/discs/2/tracks/1',
-            album: 'aaa',
-            disc: 2,
-            track: 1,
-            name: 'title-2-1',
-            time: 300
-          }
-        ]);
-      });
+      let result = await player.playlist();
+      expect(mpdClient.sendCommand).to.have.been.calledWith('playlistinfo');
+      expect(result).to.eql([
+        {
+          file: '/albums/aaa/tracks/1',
+          album: 'aaa',
+          disc: 1,
+          track: 1,
+          name: 'title-1-1',
+          time: 100
+        },
+        {
+          file: '/albums/aaa/tracks/2',
+          album: 'aaa',
+          disc: 1,
+          track: 2,
+          name: 'title-1-2',
+          time: 200
+        },
+        {
+          file: '/albums/aaa/discs/2/tracks/1',
+          album: 'aaa',
+          disc: 2,
+          track: 1,
+          name: 'title-2-1',
+          time: 300
+        }
+      ]);
     });
 
   });

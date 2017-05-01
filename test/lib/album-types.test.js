@@ -284,7 +284,7 @@ describe('album-types', function() {
 
     describe('path and abspath', function() {
 
-      it('return correct paths', function() {
+      it('returns correct paths', function() {
         expect(album.path).to.equal('test');
         expect(album.location).to.equal('test');
       });
