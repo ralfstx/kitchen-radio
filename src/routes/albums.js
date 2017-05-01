@@ -11,7 +11,11 @@ export function router(context) {
     if (isHtml(req)) {
       res.render('albums', {});
     } else {
-      res.json(db.getAlbums().map(album => ({id: album.id, name: album.name})));
+      let index = db.getAlbumIds().map(id => {
+        let {name} = db.getAlbum(id);
+        return {id, name};
+      });
+      res.json(index);
     }
   });
   router.get('/:id', (req, res, next) => {

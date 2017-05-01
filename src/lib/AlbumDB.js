@@ -1,6 +1,6 @@
-import {join} from 'path';
-import {readJson} from 'fs-extra';
-import {getSubDirs, statSafe} from './files';
+import {join, basename, relative} from 'path';
+import {readJson, readdir} from 'fs-extra';
+import {statSafe} from './files';
 import {Album} from './album-types';
 import {crc32Str} from '../lib/hash';
 
@@ -15,38 +15,49 @@ export default class AlbumDB {
   async update() {
     this._albums = {};
     this.logger.info('Updating albums in ' + this._musicDir);
-    let parent = join(this._musicDir, 'albums');
-    let subdirs = await getSubDirs(parent);
-    for (let name of subdirs.filter(dir => !dir.startsWith('.'))) {
-      let album = await this._readAlbum(join('albums', name));
-      album.id = crc32Str(name);
-      if (!album) {
-        this.logger.warn('Not an album: ' + join(parent, name));
-      } else if (!album.name) {
-        this.logger.warn('Missing album name in: ' + join(parent, name));
-      } else {
-        this._albums[album.id] = album;
-      }
-    }
-    return {count: Object.keys(this._albums).length};
+    await this._processPath(this._musicDir);
   }
 
-  async _readAlbum(path) {
-    let indexFile = join(this._musicDir, path, 'index.json');
-    let stats = await statSafe(indexFile);
-    if (!stats || !stats.isFile()) return null;
-    let data = await readJson(indexFile);
-    return Album.fromJson(path, data);
+  async _processPath(path) {
+    if (this._isExcluded(path)) return;
+    let stats = await statSafe(path);
+    if (stats && stats.isDirectory()) {
+      let indexFile = join(path, 'index.json');
+      let indexStats = await statSafe(indexFile);
+      if (indexStats) {
+        await this._loadAlbumFromIndex(path);
+      } else {
+        for (let file of await this._readdirSafe(path)) {
+          await this._processPath(join(path, file));
+        }
+      }
+    }
+  }
+
+  async _loadAlbumFromIndex(path) {
+    let indexFile = join(path, 'index.json');
+    let data = await this._readJsonSafe(indexFile);
+    if (!data) return;
+    if (!data.name) {
+      console.log('name missing in', path);
+      return;
+    }
+    let id = crc32Str(data.name);
+    let album = Album.fromJson(relative(this._musicDir, path), data);
+    album.id = id;
+    this._albums[id] = album;
+  }
+
+  _isExcluded(path) {
+    return basename(path).startsWith('.') || path.endsWith('~');
   }
 
   getAlbum(id) {
     return this._albums[id] || null;
   }
 
-  getAlbums() {
-    return Object.keys(this._albums)
-      .map(id => this._albums[id])
-      .sort((a1, a2) => (a1.name < a2.name ? -1 : a1.name > a2.name ? 1 : 0));
+  getAlbumIds() {
+    return Object.keys(this._albums);
   }
 
   search(terms, limit = 20) {
@@ -60,6 +71,24 @@ export default class AlbumDB {
       }
     }
     return result;
+  }
+
+  async _readdirSafe(dir) {
+    try {
+      return await readdir(dir);
+    } catch (err) {
+      this.logger.warn(`Could not read dir '${dir}'`);
+      return [];
+    }
+  }
+
+  async _readJsonSafe(file) {
+    try {
+      return await readJson(file);
+    } catch (err) {
+      this.logger.warn(`Could not read JSON file '${file}'`);
+      return null;
+    }
   }
 
 }

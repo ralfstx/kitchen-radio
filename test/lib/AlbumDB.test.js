@@ -1,5 +1,5 @@
 import {join} from 'path';
-import {copy} from 'fs-extra';
+import {copy, pathExists} from 'fs-extra';
 import {expect, tmpdir, spy, restore} from '../test';
 import {Album} from '../../src/lib/album-types';
 import Context from '../../src/lib/Context';
@@ -19,7 +19,7 @@ describe('AlbumDB', function() {
   afterEach(restore);
 
   it('is initially empty', function() {
-    expect(albumDB.getAlbums()).to.eql([]);
+    expect(albumDB.getAlbumIds()).to.eql([]);
   });
 
   describe('update', function() {
@@ -29,25 +29,26 @@ describe('AlbumDB', function() {
     });
 
     it('fills db with albums', function() {
-      expect(albumDB.getAlbums().length).to.be.above(1);
+      expect(albumDB.getAlbumIds().length).to.be.above(1);
     });
 
     it('does not append albums to existing when called twice', async function() {
-      let origLength = albumDB.getAlbums().length;
+      let origLength = albumDB.getAlbumIds().length;
       await albumDB.update();
-      expect(albumDB.getAlbums().length).to.equal(origLength);
+      expect(albumDB.getAlbumIds().length).to.equal(origLength);
     });
 
     it('creates ids for albums', async function() {
       await albumDB.update();
-      let album = albumDB.getAlbums()[0];
-      expect(album.id).to.match(/^[0-9a-z]{8}$/);
+      let id = albumDB.getAlbumIds()[0];
+      expect(id).to.match(/^[0-9a-z]{8}$/);
     });
 
     it('creates unique ids', async function() {
       await albumDB.update();
-      let albums = albumDB.getAlbums();
-      expect(albums[0].id).not.to.equal(albums[1].id);
+      let id1 = albumDB.getAlbumIds()[0];
+      let id2 = albumDB.getAlbumIds()[1];
+      expect(id1).not.to.equal(id2);
     });
 
   });
@@ -58,34 +59,41 @@ describe('AlbumDB', function() {
       await albumDB.update();
     });
 
-    it('returns requested album', function() {
-      expect(albumDB.getAlbum('966c69dd')).to.be.instanceof(Album);
-      expect(albumDB.getAlbum('966c69dd').artist).to.equal('Pink Floyd');
-    });
-
     it('returns null when album not found', function() {
       expect(albumDB.getAlbum('missing')).to.be.null;
     });
 
+    it('returns requested album', function() {
+      expect(albumDB.getAlbum('7ffe1e9d')).to.be.instanceof(Album);
+      expect(albumDB.getAlbum('7ffe1e9d').artist).to.equal('Pink Floyd');
+    });
+
+    it('returns album with relative path', async function() {
+      let id = albumDB.getAlbumIds()[0];
+      let album = albumDB.getAlbum(id);
+      expect(await pathExists(join(musicDir, album.path))).to.be.true;
+    });
+
   });
 
-  describe('getAlbums', function() {
+  describe('getAlbumIds', function() {
 
-    beforeEach(async function() {
+    it('returns empty array by default', async function() {
+      expect(albumDB.getAlbumIds()).to.be.empty;
+    });
+
+    it('returns array of strings', async function() {
       await albumDB.update();
+      expect(albumDB.getAlbumIds()).not.to.be.empty;
+      expect(albumDB.getAlbumIds()[0]).to.be.a('string');
     });
 
-    it('returns alls albums', function() {
-      expect(albumDB.getAlbums().map(album => album.title))
-        .to.contain('Animals')
-        .to.contain('Blue Train');
-    });
-
-    it('returns albums sorted by name', function() {
-      expect(albumDB.getAlbums().map(album => album.name)).to.eql([
-        'John Coltrane - Blue Train',
-        'Pink Floyd - Animals'
-      ]);
+    it('returns a copy', async function() {
+      await albumDB.update();
+      let ids1 = albumDB.getAlbumIds();
+      let ids2 = albumDB.getAlbumIds();
+      expect(ids1).not.to.equal(ids2);
+      expect(ids1).to.deep.equal(ids2);
     });
 
   });
@@ -97,13 +105,13 @@ describe('AlbumDB', function() {
     });
 
     it('returns matching albums', function() {
-      expect(albumDB.search(['colt'])).to.eql([{album: albumDB.getAlbum('6ff57aa3'), tracks: []}]);
+      expect(albumDB.search(['colt'])).to.eql([{album: albumDB.getAlbum('4dc98dd6'), tracks: []}]);
     });
 
     it('returns matching tracks', function() {
       expect(albumDB.search(['pig', 'wing'])).to.eql([{
-        album: albumDB.getAlbum('966c69dd'),
-        tracks: [albumDB.getAlbum('966c69dd').tracks[0], albumDB.getAlbum('966c69dd').tracks[4]]
+        album: albumDB.getAlbum('7ffe1e9d'),
+        tracks: [albumDB.getAlbum('7ffe1e9d').tracks[0], albumDB.getAlbum('7ffe1e9d').tracks[4]]
       }]);
     });
 
