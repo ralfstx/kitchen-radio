@@ -6,14 +6,14 @@ import StationDB from '../../src/lib/StationDB';
 
 describe('StationDB', function() {
 
-  let db, stationsDir;
+  let db, musicDir;
 
   beforeEach(async function() {
     let tmp = tmpdir();
-    stationsDir = join(tmp, 'stations');
-    await copy(join(__dirname, 'files', 'stations'), stationsDir);
+    musicDir = join(tmp, 'music');
+    await copy(join(__dirname, 'files', 'stations'), join(musicDir, 'stations'));
     let logger = {info: spy(), warn: spy()};
-    db = new StationDB(new Context({logger, stationsDir}));
+    db = new StationDB(new Context({logger, musicDir}));
   });
 
   afterEach(restore);

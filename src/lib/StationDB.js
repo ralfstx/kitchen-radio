@@ -7,7 +7,7 @@ export default class StationDB {
 
   constructor(context) {
     this.logger = context.logger;
-    this._stationsDir = context.stationsDir;
+    this._musicDir = context.musicDir;
     this._ids = [];
     this._stations = {};
   }
@@ -15,14 +15,15 @@ export default class StationDB {
   async update() {
     this._ids = [];
     this._stations = {};
-    this.logger.info('Updating stations in ' + this._stationsDir);
-    let subdirs = await getSubDirs(this._stationsDir);
+    this.logger.info('Updating stations in ' + this._musicDir);
+    let stationsDir = join(this._musicDir, 'stations');
+    let subdirs = await getSubDirs(stationsDir);
     for (let name of subdirs.filter(dir => !dir.startsWith('.'))) {
-      let station = await this._readStation(name);
+      let station = await this._readStation(join('stations', name));
       if (!station) {
-        this.logger.warn('Not a station: ' + join(this._stationsDir, name));
+        this.logger.warn('Not a station: ' + join(stationsDir, name));
       } else if (!station.name) {
-        this.logger.warn('Missing station name in: ' + join(this._stationsDir, name));
+        this.logger.warn('Missing station name in: ' + join(stationsDir, name));
       } else {
         this._ids.push(name);
         this._stations[name] = station;
@@ -32,11 +33,13 @@ export default class StationDB {
   }
 
   async _readStation(path) {
-    let indexFile = join(this._stationsDir, path, 'index.json');
+    let indexFile = join(this._musicDir, path, 'index.json');
     let stats = await statSafe(indexFile);
     if (!stats || !stats.isFile()) return null;
-    let data = await readJson(indexFile);
-    return data; // TODO wrap in Album instance?
+    // TODO wrap in Album instance?
+    let station = await readJson(indexFile);
+    station.path = path;
+    return station;
   }
 
   getStation(id) {

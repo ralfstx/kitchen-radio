@@ -1,9 +1,9 @@
 import {Router} from 'express';
-import {join} from 'path';
+import {resolve} from 'path';
 
 export function router(context) {
   let db = context.stationDB;
-  let stationsDir = context.stationsDir;
+  let musicDir = context.musicDir;
   let router = new Router();
   router.get('/', (req, res) => {
     res.json(db.getIndex());
@@ -11,7 +11,7 @@ export function router(context) {
   router.get('/:id/image', (req, res, next) => {
     let station = db.getStation(req.params.id);
     if (station) {
-      res.sendFile(join(stationsDir, station.icon));
+      res.sendFile(resolve(musicDir, station.path, station.icon));
       return;
     }
     next();

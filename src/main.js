@@ -1,6 +1,5 @@
 /*eslint no-unused-vars: ["error", { "argsIgnorePattern": "next" }]*/
 import 'source-map-support/register';
-import {join} from 'path';
 
 import Context from './lib/Context';
 import Logger from './lib/Logger';
@@ -18,9 +17,7 @@ const defaults = {
   mpdPort: 6600
 };
 
-let context = new Context(Object.assign({}, defaults, config, {
-  stationsDir: join(config.musicDir, 'stations')
-}));
+let context = new Context(Object.assign({}, defaults, config));
 
 context.set('logger', new Logger(context));
 context.set('albumDB', new AlbumDB(context));
