@@ -83,7 +83,7 @@ export default class Player {
     this._sendCommand('status')
       .then(readProps)
       .then(status => this._notify('onStatusChange', status))
-      .catch(err => console.error(err));
+      .catch(err => this.logger.error(err));
   }
 
   _notify(name, event) {

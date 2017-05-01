@@ -39,7 +39,7 @@ export function router(context) {
         return;
       }
     } catch(err) {
-      console.error(err);
+      this.logger.error(err);
       res.status(500).json({error: err});
       return;
     }

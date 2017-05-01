@@ -14,8 +14,10 @@ export default class AlbumDB {
 
   async update() {
     this._albums = {};
-    this.logger.info('Updating albums in ' + this._musicDir);
+    this.logger.info('Searching for albums in ' + this._musicDir);
     await this._processPath(this._musicDir);
+    let found = Object.keys(this._albums).length;
+    this.logger.info(`Found ${found} albums`);
   }
 
   async _processPath(path) {
@@ -39,7 +41,7 @@ export default class AlbumDB {
     let data = await this._readJsonSafe(indexFile);
     if (!data) return;
     if (!data.name) {
-      console.log('name missing in', path);
+      this.logger.warn(`Album name missing in '${path}'`);
       return;
     }
     let id = crc32Str(data.name);

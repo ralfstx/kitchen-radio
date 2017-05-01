@@ -19,7 +19,7 @@ export default class Server {
     this.logger = context.logger;
     this._port = context.port;
     this.app = express();
-    this.app.use(morgan('dev'/*, {stream: this.logger.stream}*/));
+    this.app.use(createLogAppender((this.logger)));
     this.app.use(bodyParser.json());
     // setup template engine
     this.app.engine('html', engine);
@@ -36,9 +36,12 @@ export default class Server {
     this.app.use(handleError);
   }
 
-  start() {
-    this.httpServer = this.app.listen(this._port, () => {
-      this.logger.info(`Server listening on port ${this._port}`);
+  async start() {
+    return new Promise((resolve) => {
+      this.httpServer = this.app.listen(this._port, () => {
+        this.logger.info(`HTTP server listening on port ${this._port}`);
+        resolve();
+      });
     });
   }
 
@@ -57,7 +60,7 @@ function handleNotFound(req, res, next) {
 }
 
 function handleError(err, req, res, next) {
-  console.error(err);
+  this.logger.error(err);
   res.status(err.status || 500);
   let title = err.status === 404 ? 'Not Found' : 'Server Error';
   if (isHtml(req)) {
@@ -80,4 +83,21 @@ function engine (filePath, options, callback) {
     let rendered = content.toString().replace(/\${\s*(.*?)\s*}/g, (m, m1) => m1 in options ? options[m1] : '');
     return callback(null, rendered);
   });
+}
+
+function createLogAppender(logger) {
+  let config = {
+    stream: {
+      write(message) {
+        logger.info(message.trim());
+      }
+    }
+  };
+  let level = logger.levels[logger.level];
+  if (level === 0) {
+    config.skip = (req, res) => res.statusCode < 500;
+  } else if (level < 3) {
+    config.skip = (req, res) => res.statusCode < 400;
+  }
+  return morgan('dev', config);
 }

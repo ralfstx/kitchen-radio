@@ -18,7 +18,6 @@ const defaults = {
 };
 
 let context = new Context(Object.assign({}, defaults, config));
-
 context.set('logger', new Logger(context));
 context.set('albumDB', new AlbumDB(context));
 context.set('stationDB', new StationDB(context));
@@ -37,4 +36,5 @@ async function start(context) {
   await context.player.connectMpd();
   await context.server.start();
   await context.wsServer.start();
+  context.logger.info('Server started');
 }

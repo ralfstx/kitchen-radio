@@ -17,6 +17,7 @@ export default class StationDB {
     let stationsDir = join(this._musicDir, 'stations');
     this.logger.info('Searching for stations in ' + stationsDir);
     await this._processPath(stationsDir);
+    this.logger.info(`Found ${this._ids.length} stations`);
   }
 
   async _processPath(path) {

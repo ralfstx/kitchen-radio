@@ -1,10 +1,20 @@
 import {join} from 'path';
 import winston from 'winston';
 
+/* Winston uses npm log levels by default
+ * 0: error
+ * 1: warn
+ * 2: info
+ * 3: verbose
+ * 4: debug
+ * 5: silly
+ */
+
 export default class Logger extends winston.Logger {
 
   constructor(context) {
     super({
+      level: context.logLevel,
       transports: [
         new winston.transports.Console({
           level: context.logLevel,

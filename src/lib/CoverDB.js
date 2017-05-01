@@ -39,7 +39,7 @@ export default class CoverDB {
           await copy(srcPath, dstPath);
         }
       } catch (err) {
-        console.error(err);
+        this.logger.error(`Unable to create cache copy '${dstPath}'`, err);
       }
     }
   }
