@@ -1,0 +1,7 @@
+{
+  "id": "dlf",
+  "name": "Deutschlandfunk",
+  "image": "dlf.jpg",
+  "www": "http://www.dradio.de/dlf/",
+  "stream": "http://www.dradio.de/streaming/dlf_hq_ogg.m3u"
+}

@@ -1,7 +1,6 @@
-import {join} from 'path';
-import {readJson} from 'fs-extra';
-
-import {getSubDirs, statSafe} from './files';
+import {join, basename, dirname} from 'path';
+import {readJson, readdir} from 'fs-extra';
+import {statSafe} from './files';
 
 export default class StationDB {
 
@@ -15,39 +14,68 @@ export default class StationDB {
   async update() {
     this._ids = [];
     this._stations = {};
-    this.logger.info('Updating stations in ' + this._musicDir);
     let stationsDir = join(this._musicDir, 'stations');
-    let subdirs = await getSubDirs(stationsDir);
-    for (let name of subdirs.filter(dir => !dir.startsWith('.'))) {
-      let station = await this._readStation(join('stations', name));
-      if (!station) {
-        this.logger.warn('Not a station: ' + join(stationsDir, name));
-      } else if (!station.name) {
-        this.logger.warn('Missing station name in: ' + join(stationsDir, name));
-      } else {
-        this._ids.push(name);
-        this._stations[name] = station;
-      }
-    }
-    return {count: this._ids.length};
+    this.logger.info('Searching for stations in ' + stationsDir);
+    await this._processPath(stationsDir);
   }
 
-  async _readStation(path) {
-    let indexFile = join(this._musicDir, path, 'index.json');
-    let stats = await statSafe(indexFile);
-    if (!stats || !stats.isFile()) return null;
+  async _processPath(path) {
+    let stats = await statSafe(path);
+    if (stats && stats.isDirectory()) {
+      for (let file of await this._readdirSafe(path)) {
+        await this._processPath(join(path, file));
+      }
+    } else if (stats && stats.isFile()) {
+      if (basename(path) === 'station.json') {
+        await this._readStation(path);
+      }
+    }
+  }
+
+  async _readStation(indexFile) {
     // TODO wrap in Album instance?
-    let station = await readJson(indexFile);
-    station.path = path;
-    return station;
+    let station = await this._readJsonSafe(indexFile);
+    if (!station) return;
+    if (!station.id) {
+      this.logger.warn('Missing station id in: ' + indexFile);
+    }
+    if (!station.name) {
+      this.logger.warn('Missing station name in: ' + indexFile);
+    }
+    station.path = dirname(indexFile);
+    this._registerStation(station);
+  }
+
+  _registerStation(station) {
+    let id = station.id;
+    this._ids.push(id);
+    this._stations[id] = station;
+  }
+
+  getStationIds() {
+    return this._ids.concat();
   }
 
   getStation(id) {
     return this._stations[id] || null;
   }
 
-  getIndex() {
-    return this._ids.map(id => Object.assign({id}, this._stations[id]));
+  async _readdirSafe(dir) {
+    try {
+      return await readdir(dir);
+    } catch (err) {
+      this.logger.warn(`Could not read dir '${dir}'`);
+      return [];
+    }
+  }
+
+  async _readJsonSafe(file) {
+    try {
+      return await readJson(file);
+    } catch (err) {
+      this.logger.warn(`Could not read JSON file '${file}'`);
+      return null;
+    }
   }
 
 }

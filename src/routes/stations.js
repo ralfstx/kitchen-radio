@@ -6,12 +6,13 @@ export function router(context) {
   let musicDir = context.musicDir;
   let router = new Router();
   router.get('/', (req, res) => {
-    res.json(db.getIndex());
+    let index = db.getStationIds().map(id => db.getStation(id));
+    res.json(index);
   });
   router.get('/:id/image', (req, res, next) => {
     let station = db.getStation(req.params.id);
     if (station) {
-      res.sendFile(resolve(musicDir, station.path, station.icon));
+      res.sendFile(resolve(musicDir, station.path, station.image));
       return;
     }
     next();
