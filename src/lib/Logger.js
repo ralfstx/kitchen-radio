@@ -13,11 +13,13 @@ import winston from 'winston';
 export default class Logger extends winston.Logger {
 
   constructor(context) {
+    let level = context.logLevel || 'info';
+    let filename = join(context.logDir || '.', 'server.log');
     super({
-      level: context.logLevel,
+      level,
       transports: [
         new winston.transports.Console({
-          level: context.logLevel,
+          level,
           handleExceptions: true,
           prettyPrint: true,
           colorize: true,
@@ -25,10 +27,8 @@ export default class Logger extends winston.Logger {
           timestamp: false
         }),
         new winston.transports.File({
-          filename: join(context.logDir, 'debug.log'),
-          maxsize: 40000,
-          maxFiles: 10,
-          level: context.logLevel,
+          filename,
+          level,
           handleExceptions: true,
           prettyPrint: false,
           colorize: false,
@@ -39,6 +39,7 @@ export default class Logger extends winston.Logger {
       ],
       exitOnError: false
     });
+    this.info('Logging with level', level);
   }
 
 }

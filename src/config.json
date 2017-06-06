@@ -1,7 +1,6 @@
 {
   "musicDir": "/data/music",
   "cacheDir": "/tmp/music/cache",
-  "logDir": "./logs",
   "logLevel": "debug",
   "mpdHost": "localhost",
   "mpdPort": 6600,
