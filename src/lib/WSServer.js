@@ -1,5 +1,38 @@
 import {server as WebSocketServer} from 'websocket';
 
+const HANDLERS = {
+  play(args) {
+    return this._player.play(args.pos || 0);
+  },
+  pause() {
+    return this._player.pause();
+  },
+  prev() {
+    return this._player.prev();
+  },
+  next() {
+    return this._player.next();
+  },
+  stop() {
+    return this._player.stop();
+  },
+  append(args) {
+    return this._player.append(args);
+  },
+  replace(args) {
+    return this._player.replace(args);
+  },
+  remove(args) {
+    return this._player.remove(args.pos);
+  },
+  status(args, connection) {
+    return this._player.status().then(status => this._sendJson(connection, 'status', status));
+  },
+  playlist(args, connection) {
+    return this._player.playlist().then(playlist => this._sendJson(connection, 'playlist', playlist));
+  }
+};
+
 export default class WSServer {
 
   constructor(context) {
@@ -36,29 +69,19 @@ export default class WSServer {
   _handleMessage(message, connection) {
     if (message.type === 'utf8') {
       let data = JSON.parse(message.utf8Data);
-      let handlers = {
-        play: (args) => this._player.play(args.pos || 0),
-        pause: () => this._player.pause(),
-        prev: () => this._player.prev(),
-        next: () => this._player.next(),
-        stop: () => this._player.stop(),
-        append: (args) => this._player.append(args),
-        replace: (args) => this._player.replace(args),
-        remove: (args) => this._player.remove(args.pos),
-        status: () => this._player.status().then(status => this._send(connection, 'status', status)),
-        playlist: () => this._player.playlist().then(playlist => this._send(connection, 'playlist', playlist)),
-      };
-      if (data.command in handlers) {
-        handlers[data.command](data.args || {});
+      if (data.command in HANDLERS) {
+        HANDLERS[data.command].call(this, data.args || {}, connection)
+          .catch(err => this._sendJson(connection, 'error', err.message || 'Command failed'));
       }
     }
   }
 
   broadcast(topic, args) {
-    this._connections.forEach(connection => this._send(connection, topic, args));
+    this._connections.forEach(connection => this._sendJson(connection, topic, args));
   }
 
-  _send(connection, topic, args) {
+  _sendJson(connection, topic, args) {
+    this.logger.debug('Sent WS message to ', connection.remoteAddress, topic, args);
     connection.sendUTF(JSON.stringify({topic, args}));
   }
 
