@@ -1,6 +1,7 @@
 {
   "version": "0.1.0",
   "command": "node",
+  "runner": "terminal",
   "isShellCommand": true,
   "showOutput": "always",
   "suppressTaskName": true,
