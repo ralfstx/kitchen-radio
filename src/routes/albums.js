@@ -35,7 +35,7 @@ export function router(context) {
       let size = req.query.size ? parseInt(req.query.size) : 0;
       let file = await coverDB.getAlbumCover(req.params.id, size);
       if (file) {
-        res.sendFile(file);
+        res.sendFile(file, {maxAge: 36000});
         return;
       }
     } catch(err) {
