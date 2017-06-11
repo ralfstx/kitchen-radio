@@ -99,5 +99,5 @@ function createLogAppender(logger) {
   } else if (level < 3) {
     config.skip = (req, res) => res.statusCode < 400;
   }
-  return morgan('dev', config);
+  return morgan('tiny', config);
 }
