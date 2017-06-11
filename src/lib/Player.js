@@ -32,50 +32,52 @@ export default class Player {
     });
   }
 
-  play(pos = 0) {
-    return this._sendCommand('play ' + pos).then(() => null);
+  async play(pos = 0) {
+    return await this._sendCommand('play ' + pos);
   }
 
-  stop() {
-    return this._sendCommand('stop').then(() => null);
+  async stop() {
+    return await this._sendCommand('stop');
   }
 
-  pause() {
-    return this._sendCommand('pause').then(() => null);
+  async pause() {
+    return await this._sendCommand('pause');
   }
 
-  prev() {
-    return this._sendCommand('previous').then(() => null);
+  async prev() {
+    return await this._sendCommand('previous');
   }
 
-  next() {
-    return this._sendCommand('next').then(() => null);
+  async next() {
+    return await this._sendCommand('next');
   }
 
   // STATUS REQUESTS
 
-  status() {
-    return this._sendCommand('status').then(readProps);
+  async status() {
+    let res = await this._sendCommand('status');
+    return readProps(res);
   }
 
-  playlist() {
-    return this._sendCommand('playlistinfo').then(res => this._extractPlaylist(res));
+  async playlist() {
+    let res = await this._sendCommand('playlistinfo');
+    return this._extractPlaylist(res);
   }
 
   // PLAYLIST MODIFICATION
 
-  append(urls) {
+  async append(urls) {
     // TODO keep track of changes to playlist
-    return this._sendCommands([...this._toCommands(urls), 'play']).then(() => null);
+    await this._sendCommands([...this._toCommands(urls), 'play']);
   }
 
-  replace(urls) {
+  async replace(urls) {
     // TODO keep track of changes to playlist
-    return this._sendCommands(['clear', ...this._toCommands(urls), 'play']).then(() => null);
+    await this._sendCommands(['clear', ...this._toCommands(urls), 'play']);
   }
 
-  remove(index) {
-    return this._sendCommand('delete ' + index).then(() => null);
+  async remove(index) {
+    await this._sendCommand('delete ' + index);
   }
 
   _notifyStatusChange() {
@@ -83,7 +85,7 @@ export default class Player {
     this._sendCommand('status')
       .then(readProps)
       .then(status => this._notify('onStatusChange', status))
-      .catch(err => this.logger.error(err));
+      .catch(() => {}); // MPD error logged in _sendCommand
   }
 
   _notify(name, event) {
@@ -92,24 +94,29 @@ export default class Player {
     }
   }
 
-  _sendCommand(command) {
+  async _sendCommand(command) {
     return new Promise((resolve, reject) => {
       this._mpdClient.sendCommand(command, (err, result) => {
         if (err) {
-          reject(err);
+          this.logger.error(`Failed to send mpd command '${command}'`, err);
+          reject(new Error('Command failed'));
         } else {
+          this.logger.debug(`Sent mpd command '${command}'`);
           resolve(result);
         }
       });
     });
   }
 
-  _sendCommands(commands) {
+  async _sendCommands(commands) {
     return new Promise((resolve, reject) => {
       this._mpdClient.sendCommands(commands, (err, result) => {
+        let commandsStr = commands.map(command => `'${command}'`).join(', ');
         if (err) {
-          reject(err);
+          this.logger.error(`Failed to send mpd commands ${commandsStr}`, err);
+          reject(new Error('Command failed'));
         } else {
+          this.logger.debug(`Sent mpd commands ${commandsStr}`);
           resolve(result);
         }
       });

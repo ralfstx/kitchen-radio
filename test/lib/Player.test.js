@@ -1,4 +1,4 @@
-import {expect, spy, stub, restore} from '../test';
+import {expect, spy, stub, restore, catchError} from '../test';
 
 import {Album} from '../../src/lib/album-types';
 import Context from '../../src/lib/Context';
@@ -20,7 +20,7 @@ describe('player', function() {
   let player, mpdClient;
 
   beforeEach(function() {
-    let logger = {info: spy(), warn: spy()};
+    let logger = {debug: spy(), info: spy(), warn: spy(), error: spy()};
     player = new Player(new Context({
       logger,
       port: 8080,
@@ -72,22 +72,32 @@ describe('player', function() {
       expect(result).to.eql({volume: '100', state: 'stop'});
     });
 
+    it('throws on error', async function() {
+      mpdClient.sendCommand.callsArgWith(1, new Error('bang'));
+      let err = await catchError(player.status());
+      expect(err.message).to.equal('Command failed');
+    });
+
   });
 
   describe('play', function() {
 
-    it('calls play and returns null', async function() {
+    it('calls play', async function() {
       mpdClient.sendCommand.callsArgWith(1, null, '');
-      let result = await player.play();
+      await player.play();
       expect(mpdClient.sendCommand).to.have.been.calledWith('play 0');
-      expect(result).to.be.null;
     });
 
     it('calls play with position', async function() {
       mpdClient.sendCommand.callsArgWith(1, null, '');
-      let result = await player.play(3);
+      await player.play(3);
       expect(mpdClient.sendCommand).to.have.been.calledWith('play 3');
-      expect(result).to.be.null;
+    });
+
+    it('throws on error', async function() {
+      mpdClient.sendCommand.callsArgWith(1, new Error('bang'));
+      let err = await catchError(player.play(3));
+      expect(err.message).to.equal('Command failed');
     });
 
   });
@@ -96,31 +106,24 @@ describe('player', function() {
 
     it('calls stop and returns null', async function() {
       mpdClient.sendCommand.callsArgWith(1, null, '');
-      let result = await player.stop();
+      await player.stop();
       expect(mpdClient.sendCommand).to.have.been.calledWith('stop');
-      expect(result).to.be.null;
+    });
+
+    it('throws on error', async function() {
+      mpdClient.sendCommand.callsArgWith(1, new Error('bang'));
+      let err = await catchError(player.stop());
+      expect(err.message).to.equal('Command failed');
     });
 
   });
 
   describe('append', function() {
 
-    it('calls add commands, play, and returns null', async function() {
+    it('calls commands `add` and `play`', async function() {
       mpdClient.sendCommands.callsArgWith(1, null, '');
-      let result = await player.append(['foo.mp3', 'bar.mp3']);
+      await player.append(['foo.mp3', 'bar.mp3']);
       expect(mpdClient.sendCommands).to.have.been.calledWith(['add "foo.mp3"', 'add "bar.mp3"', 'play']);
-      expect(result).to.be.null;
-    });
-
-  });
-
-  describe('replace', function() {
-
-    it('calls clear, add commands, play, and returns null', async function() {
-      mpdClient.sendCommands.callsArgWith(1, null, '');
-      let result = await player.replace(['foo.mp3', 'bar.mp3']);
-      expect(mpdClient.sendCommands).to.have.been.calledWith(['clear', 'add "foo.mp3"', 'add "bar.mp3"', 'play']);
-      expect(result).to.be.null;
     });
 
     it('calls load for playlists', async function() {
@@ -129,15 +132,48 @@ describe('player', function() {
       expect(mpdClient.sendCommands).to.have.been.calledWith(['load "foo.m3u"', 'play']);
     });
 
+    it('throws on error', async function() {
+      mpdClient.sendCommands.callsArgWith(1, new Error('bang'));
+      let err = await catchError(player.append(['foo.mp3']));
+      expect(err.message).to.equal('Command failed');
+    });
+
+  });
+
+  describe('replace', function() {
+
+    it('calls commands `clear`, `add`, and `play`', async function() {
+      mpdClient.sendCommands.callsArgWith(1, null, '');
+      await player.replace(['foo.mp3', 'bar.mp3']);
+      expect(mpdClient.sendCommands).to.have.been.calledWith(['clear', 'add "foo.mp3"', 'add "bar.mp3"', 'play']);
+    });
+
+    it('calls load for playlists', async function() {
+      mpdClient.sendCommands.callsArgWith(1, null, '');
+      await player.replace(['foo.m3u']);
+      expect(mpdClient.sendCommands).to.have.been.calledWith(['clear', 'load "foo.m3u"', 'play']);
+    });
+
+    it('throws on error', async function() {
+      mpdClient.sendCommands.callsArgWith(1, new Error('bang'));
+      let err = await catchError(player.replace(['foo.mp3']));
+      expect(err.message).to.equal('Command failed');
+    });
+
   });
 
   describe('remove', function() {
 
     it('calls remove with position', async function() {
       mpdClient.sendCommand.callsArgWith(1, null, '');
-      let result = await player.remove(3);
+      await player.remove(3);
       expect(mpdClient.sendCommand).to.have.been.calledWith('delete 3');
-      expect(result).to.be.null;
+    });
+
+    it('throws on error', async function() {
+      mpdClient.sendCommand.callsArgWith(1, new Error('bang'));
+      let err = await catchError(player.remove(3));
+      expect(err.message).to.equal('Command failed');
     });
 
   });
@@ -174,6 +210,12 @@ describe('player', function() {
           time: 300
         }
       ]);
+    });
+
+    it('throws on error', async function() {
+      mpdClient.sendCommand.callsArgWith(1, new Error('bang'));
+      let err = await catchError(player.playlist());
+      expect(err.message).to.equal('Command failed');
     });
 
   });
