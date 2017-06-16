@@ -1,5 +1,7 @@
 import {parse as parseUrl} from 'url';
 import mpd from 'mpd';
+import fetch from 'node-fetch';
+import {isPlaylist, readFiles} from './Playlist';
 import {readProps} from './util';
 
 export default class Player {
@@ -68,12 +70,14 @@ export default class Player {
 
   async append(urls) {
     // TODO keep track of changes to playlist
-    await this._sendCommands([...this._toCommands(urls), 'play']);
+    let playCommands = await this._toCommands(urls);
+    await this._sendCommands([...playCommands, 'play']);
   }
 
   async replace(urls) {
     // TODO keep track of changes to playlist
-    await this._sendCommands(['clear', ...this._toCommands(urls), 'play']);
+    let playCommands = await this._toCommands(urls);
+    await this._sendCommands(['clear', ...playCommands, 'play']);
   }
 
   async remove(index) {
@@ -183,15 +187,26 @@ export default class Player {
     return track;
   }
 
-  _toCommands(urls) {
-    return urls
-      .map(url => url.startsWith('/') ? 'http://localhost:' + this._port + url : url)
-      .map(url => (isPlaylist(url) ? 'load "' : 'add "') + url + '"');
+  async _toCommands(urls) {
+    let commands = [];
+    for (let url of urls) {
+      if (url.startsWith('/')) {
+        url = 'http://localhost:' + this._port + url;
+      }
+      if (isPlaylist(url)) {
+        let content = await getText(url);
+        let tracks = readFiles(content);
+        tracks.forEach(track => commands.push('add "' + track + '"'));
+      } else {
+        commands.push('add "' + url + '"');
+      }
+    }
+    return commands;
   }
 
 }
 
-function isPlaylist(url) {
-  let ext = url.substr(-4).toLowerCase();
-  return ext === '.m3u' || ext === '.pls' || ext === '.asx';
+async function getText(url) {
+  let response = await fetch(url);
+  return await response.text();
 }

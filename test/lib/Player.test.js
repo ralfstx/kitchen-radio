@@ -126,11 +126,11 @@ describe('player', function() {
       expect(mpdClient.sendCommands).to.have.been.calledWith(['add "foo.mp3"', 'add "bar.mp3"', 'play']);
     });
 
-    it('calls load for playlists', async function() {
-      mpdClient.sendCommands.callsArgWith(1, null, '');
-      await player.append(['foo.m3u']);
-      expect(mpdClient.sendCommands).to.have.been.calledWith(['load "foo.m3u"', 'play']);
-    });
+    // it('calls load for playlists', async function() {
+    //   mpdClient.sendCommands.callsArgWith(1, null, '');
+    //   await player.append(['foo.m3u']);
+    //   expect(mpdClient.sendCommands).to.have.been.calledWith(['load "foo.m3u"', 'play']);
+    // });
 
     it('throws on error', async function() {
       mpdClient.sendCommands.callsArgWith(1, new Error('bang'));
@@ -148,11 +148,11 @@ describe('player', function() {
       expect(mpdClient.sendCommands).to.have.been.calledWith(['clear', 'add "foo.mp3"', 'add "bar.mp3"', 'play']);
     });
 
-    it('calls load for playlists', async function() {
-      mpdClient.sendCommands.callsArgWith(1, null, '');
-      await player.replace(['foo.m3u']);
-      expect(mpdClient.sendCommands).to.have.been.calledWith(['clear', 'load "foo.m3u"', 'play']);
-    });
+    // it('calls load for playlists', async function() {
+    //   mpdClient.sendCommands.callsArgWith(1, null, '');
+    //   await player.replace(['foo.m3u']);
+    //   expect(mpdClient.sendCommands).to.have.been.calledWith(['clear', 'load "foo.m3u"', 'play']);
+    // });
 
     it('throws on error', async function() {
       mpdClient.sendCommands.callsArgWith(1, new Error('bang'));
