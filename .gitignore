@@ -1,7 +1,7 @@
 .idea/
 .settings/
 .history/
-.project
+dist/
 build/
 node_modules/
 npm-debug.log*

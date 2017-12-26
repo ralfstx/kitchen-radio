@@ -32,9 +32,9 @@
     "mocha": "mocha -r babel-core/register",
     "test": "npm run mocha -- 'test/**/*.test.js'",
     "posttest": "npm run lint",
-    "build": "rm -rf build/ && mkdir build/ && babel --compact false -d build/ src/ && cp -r src/static src/views src/config.json package.json build/",
-    "server": "node build/main.js",
+    "build": "rm -rf dist/ && mkdir dist/ && babel --compact false -d dist/ src/ && cp -r src/static src/views src/config.json package.json dist/",
+    "server": "node dist/main.js",
     "start": "npm run build && npm run server",
-    "deploy": "rsync -rv --delete --exclude 'config.json' --exclude 'node_modules/' build/ pi@radio:/var/lib/node/"
+    "deploy": "rsync -rv --delete --exclude 'config.json' --exclude 'node_modules/' dist/ pi@radio:/var/lib/node/"
   }
 }
