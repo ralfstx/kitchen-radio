@@ -10,8 +10,8 @@
       "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/mocha",
       "runtimeArgs": [
         "--colors",
-        "--compilers",
-        "js:babel-core/register",
+        "-r",
+        "babel-core/register",
         "${file}"
       ],
       "internalConsoleOptions": "openOnSessionStart"

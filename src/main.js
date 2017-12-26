@@ -1,4 +1,3 @@
-/*eslint no-unused-vars: ["error", { "argsIgnorePattern": "next" }]*/
 import 'source-map-support/register';
 import {join} from 'path';
 import {readJson} from 'fs-extra';
