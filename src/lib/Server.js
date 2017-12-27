@@ -19,7 +19,7 @@ export default class Server {
     this.logger = context.logger;
     this._port = context.port;
     this.app = express();
-    this.app.use(createLogAppender((this.logger)));
+    this.app.use(createLogAppender(this.logger));
     this.app.use(bodyParser.json());
     // setup template engine
     this.app.engine('html', engine);
@@ -33,7 +33,7 @@ export default class Server {
     this.app.use('/stations', stationsRouter(context));
     // handle errors
     this.app.use(handleNotFound);
-    this.app.use(handleError);
+    this.app.use(createErrorHandler(this.logger));
   }
 
   async start() {
@@ -59,30 +59,32 @@ function handleNotFound(req, res, next) {
   }
 }
 
-function handleError(err, req, res, next) {
-  this.logger.error(err);
-  res.status(err.status || 500);
-  let title = err.status === 404 ? 'Not Found' : 'Server Error';
-  if (isHtml(req)) {
-    res.render('error', {
-      title,
-      message: err.message,
-      stack: err.stack
-    });
-  } else {
-    res.json({
-      error: title,
-      message: err.message,
-    });
-  }
-}
-
 function engine (filePath, options, callback) {
   readFile(filePath, function (err, content) {
     if (err) return callback(new Error(err.message));
     let rendered = content.toString().replace(/\${\s*(.*?)\s*}/g, (m, m1) => m1 in options ? options[m1] : '');
     return callback(null, rendered);
   });
+}
+
+function createErrorHandler(logger) {
+  return function handleError(err, req, res, next) {
+    logger.error(err);
+    res.status(err.status || 500);
+    let title = err.status === 'Server Error';
+    if (isHtml(req)) {
+      res.render('error', {
+        title,
+        message: err.message,
+        stack: err.stack
+      });
+    } else {
+      res.json({
+        error: title,
+        message: err.message
+      });
+    }
+  };
 }
 
 function createLogAppender(logger) {

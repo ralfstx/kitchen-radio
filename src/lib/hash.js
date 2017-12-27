@@ -37,7 +37,7 @@ export function sha1File(filename) {
   });
 }
 
-export async function crc32File(filename) {
+export function crc32File(filename) {
   return new Promise((resolve, reject) => {
     let crc;
     let stream = createReadStream(filename);

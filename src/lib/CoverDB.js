@@ -8,22 +8,25 @@ const SIZE_CLASSES = [100, 250];
 export default class CoverDB {
 
   constructor(context) {
+    this.ctx = context;
     this.logger = context.logger;
-    this._musicDir = context.musicDir;
-    this._cacheDir = context.cacheDir;
-    this._albumDB = context.albumDB;
+    this._coverDir = resolve(this.ctx.cacheDir, 'cover');
+    this._map = {};
+  }
+
+  async init() {
+    await mkdirs(this._coverDir);
   }
 
   async getAlbumCover(id, size = 0) {
-    let album = this._albumDB.getAlbum(id);
+    let album = this.ctx.albumDB.getAlbum(id);
     if (!album) return null;
     return await this._getCoverFile(album, getSizeClass(size));
   }
 
   async _getCoverFile(album, size) {
-    await mkdirs(resolve(this._cacheDir, 'cover'));
-    let cacheFile = resolve(this._cacheDir, 'cover', album.id + '-' + size);
-    let origFile = resolve(this._musicDir, album.location, 'cover.jpg');
+    let origFile = this._map[album.id];
+    let cacheFile = resolve(this._coverDir, album.id + '-' + size);
     await this._createCopy(origFile, cacheFile, size);
     return await statSafe(cacheFile) ? cacheFile : null;
   }
@@ -31,7 +34,7 @@ export default class CoverDB {
   async _createCopy(srcPath, dstPath, size) {
     let srcStats = await statSafe(srcPath);
     let dstStats = await statSafe(dstPath);
-    if (srcStats && (!dstStats || (dstStats.mtime < srcStats.mtime))) {
+    if (srcStats && srcStats.isFile() && (!dstStats || (dstStats.mtime < srcStats.mtime))) {
       try {
         if (size) {
           await resizeImage(srcPath, dstPath, size);
@@ -42,6 +45,10 @@ export default class CoverDB {
         this.logger.error(`Unable to create cache copy '${dstPath}'`, err);
       }
     }
+  }
+
+  storeAlbumCover(id, srcFile) {
+    this._map[id] = srcFile;
   }
 
 }

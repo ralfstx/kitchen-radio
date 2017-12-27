@@ -3,6 +3,7 @@ import {join} from 'path';
 import {isHtml} from '../lib/Server';
 
 export function router(context) {
+  let logger = context.logger;
   let db = context.albumDB;
   let coverDB = context.coverDB;
   let musicDir = context.musicDir;
@@ -11,10 +12,7 @@ export function router(context) {
     if (isHtml(req)) {
       res.render('albums', {});
     } else {
-      let index = db.getAlbumIds().map(id => {
-        let {name} = db.getAlbum(id);
-        return {id, name};
-      });
+      let index = db.getAlbumIds().map(id => ({id, name: db.getAlbum(id).name}));
       res.json(index);
     }
   });
@@ -24,7 +22,18 @@ export function router(context) {
       if (isHtml(req)) {
         res.render('album', {title: album.name, url: `/albums/${album.id}`});
       } else {
-        res.json(album);
+        res.json({
+          id: album.id,
+          name: album.name,
+          discs: album.discs.map(disc => ({
+            name: disc.name,
+            tracks: disc.tracks.map(track => ({
+              artist: track.artist,
+              title: track.title,
+              length: track.length
+            }))
+          }))
+        });
       }
     } else {
       next();
@@ -39,7 +48,7 @@ export function router(context) {
         return;
       }
     } catch(err) {
-      this.logger.error(err);
+      logger.error(err);
       res.status(500).json({error: err});
       return;
     }
@@ -51,7 +60,7 @@ export function router(context) {
       let number = parseInt(req.params.number) - 1;
       let track = album.tracks[number];
       if (track) {
-        res.sendFile(join(musicDir, track.location));
+        res.sendFile(join(musicDir, track.path));
         return;
       }
     }
@@ -66,7 +75,7 @@ export function router(context) {
         let tnr = parseInt(req.params.tnr);
         let track = disc.tracks[tnr - 1];
         if (track) {
-          res.sendFile(join(musicDir, track.location));
+          res.sendFile(join(musicDir, track.path));
           return;
         }
       }
@@ -82,7 +91,7 @@ export function router(context) {
       res.json(db.search(terms).map(match => ({
         id: match.album.id,
         name: match.album.name,
-        tracks: match.tracks.map(track => track.number)
+        tracks: match.tracks.map(track => match.album.tracks.indexOf(track))
       })));
     }
   });

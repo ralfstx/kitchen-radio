@@ -1,8 +1,10 @@
 import {expect, spy, stub, restore, catchError} from '../test';
 
-import {Album} from '../../src/lib/album-types';
+import Album from '../../src/lib/Album';
 import Context from '../../src/lib/Context';
 import Player from '../../src/lib/Player';
+import TrackList from '../../src/lib/TrackList';
+import Track from '../../src/lib/Track';
 
 const EXAMPLE_PLAYLIST_RESULT = `
 file: http://localhost:8080/albums/aaa/tracks/1
@@ -27,32 +29,28 @@ describe('player', function() {
       mpdHost: 'localhost',
       mpdPort: 6600,
       albumDB: {
-        getAlbum: () => Album.fromJson('foo', {
-          name: 'Foo',
-          discs: [{
-            path: '01',
-            tracks: [{
-              path: '01.ogg',
+        getAlbum: () => new Album('id', [
+          new TrackList([
+            new Track('01/01.ogg', {
               title: 'title-1-1',
               length: 100
-            }, {
-              path: '02.ogg',
+            }),
+            new Track('01/02.ogg', {
               title: 'title-1-2',
               length: 200
-            }]
-          }, {
-            path: '02',
-            tracks: [{
-              path: '01.ogg',
+            })
+          ]),
+          new TrackList([
+            new Track('02/01.ogg', {
               title: 'title-2-1',
               length: 300
-            }, {
-              path: '02.ogg',
+            }),
+            new Track('02/02.ogg', {
               title: 'title-2-2',
               length: 400
-            }]
-          }]
-        })
+            })
+          ])
+        ])
       }
     }));
     mpdClient = player._mpdClient = {

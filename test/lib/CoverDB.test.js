@@ -1,31 +1,23 @@
 import {join} from 'path';
-import {copy, statSync} from 'fs-extra';
+import {statSync} from 'fs-extra';
 import {expect, tmpdir, spy, restore} from '../test';
 import Context from '../../src/lib/Context';
 import CoverDB from '../../src/lib/CoverDB';
 
 describe('CoverDB', function() {
 
-  let coverDB, cacheDir;
+  /** @type {CoverDB} */
+  let coverDB;
+  let cacheDir;
+  const exampleCoverFile = join(__dirname,'files/albums/animals/cover.jpg');
 
   beforeEach(async function() {
     let tmpDir = tmpdir();
-    let musicDir = join(tmpDir, 'music');
     cacheDir = join(tmpDir, 'cache');
-    await copy(join(__dirname,'files/albums/animals'), join(musicDir, 'animals'));
-    let logger = {info: spy(), warn: spy()};
-    let albumDB = {
-      getAlbum(id) {
-        if (id === 'animals') {
-          return {
-            id: 'animals',
-            location: 'animals'
-          };
-        }
-        return null;
-      }
-    };
-    coverDB = new CoverDB(new Context({logger, musicDir, cacheDir, albumDB}));
+    let logger = {info: spy(), warn: spy(), error: spy()};
+    let albumDB = {getAlbum: (id) => ({id, path: id})};
+    coverDB = new CoverDB(new Context({logger, cacheDir, albumDB}));
+    await coverDB.init();
   });
 
   afterEach(restore);
@@ -33,32 +25,45 @@ describe('CoverDB', function() {
   describe('getAlbumCover', function() {
 
     it('returns null for invalid id', async function() {
-      let result = await coverDB.getAlbumCover('bar');
+      let result = await coverDB.getAlbumCover('missing');
+
       expect(result).to.be.null;
     });
 
     it('returns existing file for valid id', async function() {
-      let result = await coverDB.getAlbumCover('animals');
+      coverDB.storeAlbumCover('foo', exampleCoverFile);
+
+      let result = await coverDB.getAlbumCover('foo');
+
       expect(result).not.to.be.null;
       expect(statSync(result).size).to.be.above(0);
     });
 
     it('returns existing file for valid id and size', async function() {
-      let result = await coverDB.getAlbumCover('animals', 100);
+      coverDB.storeAlbumCover('foo', exampleCoverFile);
+
+      let result = await coverDB.getAlbumCover('foo', 100);
+
       expect(result).not.to.be.null;
       expect(statSync(result).size).to.be.above(0);
     });
 
     it('returns different files for different sizes', async function() {
-      let result = await coverDB.getAlbumCover('animals');
-      let result100 = await coverDB.getAlbumCover('animals', 100);
+      coverDB.storeAlbumCover('foo', exampleCoverFile);
+
+      let result = await coverDB.getAlbumCover('foo');
+      let result100 = await coverDB.getAlbumCover('foo', 100);
+
       expect(result).not.to.equal(result100);
       expect(statSync(result).size).not.to.equal(statSync(result100).size);
     });
 
     it('returns same files for subsequent calls', async function() {
-      let result1 = await coverDB.getAlbumCover('animals', 100);
-      let result2 = await coverDB.getAlbumCover('animals', 100);
+      coverDB.storeAlbumCover('foo', exampleCoverFile);
+
+      let result1 = await coverDB.getAlbumCover('foo', 100);
+      let result2 = await coverDB.getAlbumCover('foo', 100);
+
       expect(result1).to.equal(result2);
       expect(statSync(result1).mtime).to.deep.equal(statSync(result2).mtime);
     });

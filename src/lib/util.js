@@ -21,8 +21,9 @@ export function toJson(data) {
 
 /**
  * Returns a promisified version of a given function.
- * @param {(...any) => any} fn the function to wrap
- * @returns {(...any) => Promise<any>} a function that returns a promise
+ * @template T
+ * @param {(...any) => T} fn the function to promisify
+ * @returns {(...any) => Promise<T>}
  */
 export function promisify(fn) {
   return function() {
@@ -37,4 +38,19 @@ export function promisify(fn) {
       fn.apply(this, params);
     });
   };
+}
+
+/**
+ * Returns a copy of the given object that contains only members with the given keys.
+ * @param {{}} obj the object to filter
+ * @param {string[]} keys the keys to copy
+ */
+export function pick(obj, keys) {
+  let res = {};
+  for (let key of keys) {
+    if (key in obj) {
+      res[key] = obj[key];
+    }
+  }
+  return res;
 }

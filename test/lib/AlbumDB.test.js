@@ -1,7 +1,7 @@
 import {join} from 'path';
-import {copy, pathExists} from 'fs-extra';
+import {copy} from 'fs-extra';
 import {expect, tmpdir, spy, restore} from '../test';
-import {Album} from '../../src/lib/album-types';
+import Album from '../../src/lib/Album';
 import Context from '../../src/lib/Context';
 import AlbumDB from '../../src/lib/AlbumDB';
 
@@ -13,7 +13,8 @@ describe('AlbumDB', function() {
     musicDir = tmpdir();
     await copy(join(__dirname, 'files', 'albums'), join(musicDir, 'albums'));
     let logger = {info: spy(), warn: spy()};
-    albumDB = new AlbumDB(new Context({logger, musicDir}));
+    let coverDB = {storeAlbumCover: spy()};
+    albumDB = new AlbumDB(new Context({logger, musicDir, coverDB}));
   });
 
   afterEach(restore);
@@ -68,17 +69,19 @@ describe('AlbumDB', function() {
       expect(albumDB.getAlbum('7ffe1e9d').artist).to.equal('Pink Floyd');
     });
 
-    it('returns album with relative path', async function() {
+    it('returns album with track and correct paths', async function() {
       let id = albumDB.getAlbumIds()[0];
       let album = albumDB.getAlbum(id);
-      expect(await pathExists(join(musicDir, album.path))).to.be.true;
+
+      expect(album.tracks).to.have.length(5);
+      expect(album.tracks[0].path).to.equal('albums/animals/01.ogg');
     });
 
   });
 
   describe('getAlbumIds', function() {
 
-    it('returns empty array by default', async function() {
+    it('returns empty array by default', function() {
       expect(albumDB.getAlbumIds()).to.be.empty;
     });
 

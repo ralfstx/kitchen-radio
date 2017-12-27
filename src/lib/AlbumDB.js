@@ -1,12 +1,13 @@
 import {join, basename, relative} from 'path';
 import {readJson, readdir} from 'fs-extra';
 import {statSafe} from './files';
-import {Album} from './album-types';
+import {createAlbumFromIndex} from './AlbumIndex';
 import {crc32Str} from '../lib/hash';
 
 export default class AlbumDB {
 
   constructor(context) {
+    this.ctx = context;
     this.logger = context.logger;
     this._musicDir = context.musicDir;
     this._albums = {};
@@ -45,9 +46,8 @@ export default class AlbumDB {
       return;
     }
     let id = crc32Str(data.name);
-    let album = Album.fromJson(relative(this._musicDir, path), data);
-    album.id = id;
-    this._albums[id] = album;
+    this._albums[id] = createAlbumFromIndex(id, relative(this._musicDir, path), data);
+    await this.ctx.coverDB.storeAlbumCover(id, join(path, 'cover.jpg'));
   }
 
   _isExcluded(path) {

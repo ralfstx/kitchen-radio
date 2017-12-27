@@ -1,6 +1,6 @@
 import {expect, catchError} from '../test';
 
-import {readProps, toJson, promisify} from '../../src/lib/util';
+import {readProps, toJson, promisify, pick} from '../../src/lib/util';
 
 describe('util', function() {
 
@@ -86,6 +86,27 @@ describe('util', function() {
       expect(err).to.equal('error');
     });
 
+  });
+
+  describe('pick', function() {
+    it('accepts an empty object', function() {
+      let obj = {};
+      let res = pick(obj, []);
+      expect(res).to.deep.equal({});
+      expect(res).to.not.equal(obj);
+    });
+
+    it('accepts empty keys list', function() {
+      let obj = {foo: 23, bar: 42};
+      let res = pick(obj, []);
+      expect(res).to.deep.equal({});
+    });
+
+    it('filters unknown keys', function() {
+      let obj = {foo: 23, bar: 42, baz: 4711};
+      let res = pick(obj, ['foo', 'bar']);
+      expect(res).to.deep.equal({foo: 23, bar: 42});
+    });
   });
 
 });
