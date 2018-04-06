@@ -4,7 +4,7 @@ import {resolve} from 'path';
 export function router(context) {
   let db = context.stationDB;
   let musicDir = context.musicDir;
-  let router = new Router();
+  let router = Router();
   router.get('/', (req, res) => {
     let index = db.getStationIds().map(id => db.getStation(id));
     res.json(index);

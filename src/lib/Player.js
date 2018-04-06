@@ -7,17 +7,17 @@ import {readProps} from './util';
 export default class Player {
 
   constructor(context) {
-    this.logger = context.logger;
-    this._port = context.port;
-    this._mpdPort = context.mpdPort;
-    this._mpdHost = context.mpdHost;
+    this.ctx = context;
+    this.logger = this.ctx.logger;
     this._albumDb = context.albumDB;
   }
 
   async connectMpd() {
     return new Promise((resolve, reject) => {
-      let host = this._mpdHost, port = this._mpdPort;
+      let host = this.ctx.mpdHost;
+      let port = this.ctx.mpdPort;
       this._mpdClient = mpd.connect({host, port})
+        // @ts-ignore
         .on('ready', () => {
           this.logger.info(`Connected to mpd on ${host}, port ${port}`);
           resolve();
@@ -191,7 +191,7 @@ export default class Player {
     let commands = [];
     for (let url of urls) {
       if (url.startsWith('/')) {
-        url = 'http://localhost:' + this._port + url;
+        url = 'http://localhost:' + this.ctx.port + url;
       }
       if (isPlaylist(url)) {
         let content = await getText(url);

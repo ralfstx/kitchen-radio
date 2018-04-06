@@ -1,11 +1,23 @@
 // Place your settings in this file to overwrite default and user settings.
 {
 
-  // Configure glob patterns for excluding files and folders.
+  // Exclude these files and folders from the explorer
   "files.exclude": {
-    "**/.git": true,
-    "build/": true,
-    "logs/":true
-  }
+    "**/.git/": true,
+    "**/build/": true,
+    "**/logs/":true
+  },
+
+  // Excluse these files and folders from searches. Inherits from files.exclude.
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist/": true
+  },
+
+  // Add a print margin at 100 chars
+  "editor.rulers": [100],
+
+  // Enable JS checks in VS code
+  "javascript.implicitProjectConfig.checkJs": true
 
 }

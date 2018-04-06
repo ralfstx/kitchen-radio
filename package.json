@@ -17,6 +17,7 @@
     "winston": "^2.2.0"
   },
   "devDependencies": {
+    "@types/mocha": "^2.2.45",
     "babel-cli": "^6.14.0",
     "babel-core": "^6.14.0",
     "babel-plugin-transform-es2015-modules-commonjs": "^6.14.0",

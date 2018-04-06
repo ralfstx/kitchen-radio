@@ -6,7 +6,7 @@ export function router(context) {
   let db = context.albumDB;
   let coverDB = context.coverDB;
   let musicDir = context.musicDir;
-  let router = new Router();
+  let router = Router();
   router.get('/', (req, res) => {
     if (isHtml(req)) {
       res.render('albums', {});

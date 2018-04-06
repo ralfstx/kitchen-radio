@@ -19,6 +19,11 @@ export function toJson(data) {
   return JSON.stringify(data, null, ' ');
 }
 
+/**
+ * Returns a promisified version of a given function.
+ * @param {(...any) => any} fn the function to wrap
+ * @returns {(...any) => Promise<any>} a function that returns a promise
+ */
 export function promisify(fn) {
   return function() {
     return new Promise((resolve, reject) => {

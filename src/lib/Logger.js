@@ -1,5 +1,5 @@
 import {join} from 'path';
-import winston from 'winston';
+import * as winston from 'winston';
 
 /* Winston uses npm log levels by default
  * 0: error

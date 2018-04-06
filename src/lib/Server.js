@@ -79,7 +79,7 @@ function handleError(err, req, res, next) {
 
 function engine (filePath, options, callback) {
   readFile(filePath, function (err, content) {
-    if (err) return callback(new Error(err));
+    if (err) return callback(new Error(err.message));
     let rendered = content.toString().replace(/\${\s*(.*?)\s*}/g, (m, m1) => m1 in options ? options[m1] : '');
     return callback(null, rendered);
   });

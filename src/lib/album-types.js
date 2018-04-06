@@ -68,7 +68,7 @@ export class Track {
   }
 
   set length(length) {
-    return this._metadata.length = length;
+    this._metadata.length = length;
   }
 
   get path() {
