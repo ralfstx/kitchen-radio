@@ -23,36 +23,31 @@ describe('player', function() {
 
   beforeEach(function() {
     let logger = {debug: spy(), info: spy(), warn: spy(), error: spy()};
-    player = new Player(new Context({
-      logger,
-      port: 8080,
-      mpdHost: 'localhost',
-      mpdPort: 6600,
-      albumDB: {
-        getAlbum: () => new Album('id', [
-          new TrackList([
-            new Track('01/01.ogg', {
-              title: 'title-1-1',
-              length: 100
-            }),
-            new Track('01/02.ogg', {
-              title: 'title-1-2',
-              length: 200
-            })
-          ]),
-          new TrackList([
-            new Track('02/01.ogg', {
-              title: 'title-2-1',
-              length: 300
-            }),
-            new Track('02/02.ogg', {
-              title: 'title-2-2',
-              length: 400
-            })
-          ])
+    let albumDB = {
+      getAlbum: () => new Album('id', [
+        new TrackList([
+          new Track('01/01.ogg', {
+            title: 'title-1-1',
+            length: 100
+          }),
+          new Track('01/02.ogg', {
+            title: 'title-1-2',
+            length: 200
+          })
+        ]),
+        new TrackList([
+          new Track('02/01.ogg', {
+            title: 'title-2-1',
+            length: 300
+          }),
+          new Track('02/02.ogg', {
+            title: 'title-2-2',
+            length: 400
+          })
         ])
-      }
-    }));
+      ])
+    };
+    player = new Player(new Context({logger, albumDB}));
     mpdClient = player._mpdClient = {
       sendCommand: stub(),
       sendCommands: stub()

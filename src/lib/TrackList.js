@@ -1,4 +1,4 @@
-import {Track} from './Track';
+import {Track} from './Track'; // eslint-disable-line no-unused-vars
 
 /**
  * A list of tracks.
@@ -34,5 +34,3 @@ export class TrackList {
   }
 
 }
-
-Track.name; // eslint

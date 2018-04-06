@@ -16,7 +16,7 @@ describe('CoverDB', function() {
     cacheDir = join(tmpDir, 'cache');
     let logger = {info: spy(), warn: spy(), error: spy()};
     let albumDB = {getAlbum: (id) => ({id, path: id})};
-    coverDB = new CoverDB(new Context({logger, cacheDir, albumDB}));
+    coverDB = new CoverDB(new Context({logger, albumDB, config: {cacheDir}}));
     await coverDB.init();
   });
 

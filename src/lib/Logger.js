@@ -1,5 +1,6 @@
 import {join} from 'path';
 import * as winston from 'winston';
+import {Config} from './Config'; // eslint-disable-line no-unused-vars
 
 /* Winston uses npm log levels by default
  * 0: error
@@ -12,9 +13,12 @@ import * as winston from 'winston';
 
 export class Logger extends winston.Logger {
 
-  constructor(context) {
-    let level = context.logLevel || 'info';
-    let filename = join(context.logDir || '.', 'server.log');
+  /**
+   * @param {Config} config
+   */
+  constructor(config) {
+    let level = config.logLevel;
+    let filename = join(config.logDir, 'server.log');
     super({
       level,
       transports: [
@@ -39,7 +43,6 @@ export class Logger extends winston.Logger {
       ],
       exitOnError: false
     });
-    this.info('Logging with level', level);
   }
 
 }

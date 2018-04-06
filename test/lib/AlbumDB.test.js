@@ -14,7 +14,7 @@ describe('AlbumDB', function() {
     await copy(join(__dirname, 'files', 'albums'), join(musicDir, 'albums'));
     let logger = {info: spy(), warn: spy()};
     let coverDB = {storeAlbumCover: spy()};
-    albumDB = new AlbumDB(new Context({logger, musicDir, coverDB}));
+    albumDB = new AlbumDB(new Context({logger, coverDB, config: {musicDir}}));
   });
 
   afterEach(restore);

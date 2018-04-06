@@ -3,21 +3,26 @@ import mpd from 'mpd';
 import fetch from 'node-fetch';
 import {isPlaylist, readFiles} from './Playlist';
 import {readProps} from './util';
+import {Context} from './Context'; // eslint-disable-line no-unused-vars
 
 export class Player {
 
+  /**
+   * @param {Context} context
+   */
   constructor(context) {
-    this.ctx = context;
-    this.logger = this.ctx.logger;
+    this.logger = context.logger;
     this._albumDb = context.albumDB;
+    this._config = context.config;
+    // TODO better event mechanism
+    this.onStatusChange = null;
   }
 
   async connectMpd() {
     return new Promise((resolve, reject) => {
-      let host = this.ctx.mpdHost;
-      let port = this.ctx.mpdPort;
+      let host = this._config.mpdHost;
+      let port = this._config.mpdPort;
       this._mpdClient = mpd.connect({host, port})
-        // @ts-ignore
         .on('ready', () => {
           this.logger.info(`Connected to mpd on ${host}, port ${port}`);
           resolve();
@@ -191,7 +196,7 @@ export class Player {
     let commands = [];
     for (let url of urls) {
       if (url.startsWith('/')) {
-        url = 'http://localhost:' + this.ctx.port + url;
+        url = 'http://localhost:' + this._config.port + url;
       }
       if (isPlaylist(url)) {
         let content = await getText(url);

@@ -1,4 +1,3 @@
-/*eslint no-unused-vars: ["error", { "argsIgnorePattern": "next" }]*/
 import 'source-map-support/register';
 import express from 'express';
 import morgan from 'morgan';
@@ -6,6 +5,7 @@ import bodyParser from 'body-parser';
 import {join} from 'path';
 import {readFile} from 'fs-extra';
 
+import {Context} from './Context'; // eslint-disable-line no-unused-vars
 import {router as albumsRouter} from '../routes/albums';
 import {router as stationsRouter} from '../routes/stations';
 import {router as playerRouter} from '../routes/player';
@@ -15,9 +15,12 @@ const viewsDir = join(__dirname, '../views');
 
 export class Server {
 
+  /**
+   * @param {Context} context
+   */
   constructor(context) {
     this.logger = context.logger;
-    this._port = context.port;
+    this._port = context.config.port;
     this.app = express();
     this.app.use(createLogAppender(this.logger));
     this.app.use(bodyParser.json());
@@ -51,7 +54,7 @@ export function isHtml(req) {
   return req.query.type !== 'json' && req.accepts(['json', 'html']) === 'html';
 }
 
-function handleNotFound(req, res, next) {
+function handleNotFound(req, res, next) { // eslint-disable-line no-unused-vars
   if (isHtml(req)) {
     res.status(404).render('404', {});
   } else {
@@ -68,7 +71,7 @@ function engine (filePath, options, callback) {
 }
 
 function createErrorHandler(logger) {
-  return function handleError(err, req, res, next) {
+  return function handleError(err, req, res, next) { // eslint-disable-line no-unused-vars
     logger.error(err);
     res.status(err.status || 500);
     let title = err.status === 'Server Error';

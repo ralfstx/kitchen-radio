@@ -1,4 +1,5 @@
 import {server as WebSocketServer} from 'websocket';
+import {Context} from './Context'; // eslint-disable-line no-unused-vars
 
 const HANDLERS = {
   play(args) {
@@ -35,6 +36,9 @@ const HANDLERS = {
 
 export class WSServer {
 
+  /**
+   * @param {Context} context
+   */
   constructor(context) {
     this.logger = context.logger;
     this._player = context.player;

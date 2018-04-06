@@ -4,20 +4,20 @@ import {isHtml} from '../lib/Server';
 
 export function router(context) {
   let logger = context.logger;
-  let db = context.albumDB;
+  let albumDB = context.albumDB;
   let coverDB = context.coverDB;
-  let musicDir = context.musicDir;
+  let musicDir = context.config.musicDir;
   let router = Router();
   router.get('/', (req, res) => {
     if (isHtml(req)) {
       res.render('albums', {});
     } else {
-      let index = db.getAlbumIds().map(id => ({id, name: db.getAlbum(id).name}));
+      let index = albumDB.getAlbumIds().map(id => ({id, name: albumDB.getAlbum(id).name}));
       res.json(index);
     }
   });
   router.get('/:id', (req, res, next) => {
-    let album = db.getAlbum(req.params.id);
+    let album = albumDB.getAlbum(req.params.id);
     if (album) {
       if (isHtml(req)) {
         res.render('album', {title: album.name, url: `/albums/${album.id}`});
@@ -55,7 +55,7 @@ export function router(context) {
     next();
   });
   router.get('/:id/tracks/:number', (req, res, next) => {
-    let album = db.getAlbum(req.params.id);
+    let album = albumDB.getAlbum(req.params.id);
     if (album) {
       let number = parseInt(req.params.number) - 1;
       let track = album.tracks[number];
@@ -67,7 +67,7 @@ export function router(context) {
     next();
   });
   router.get('/:id/discs/:dnr/tracks/:tnr', (req, res, next) => {
-    let album = db.getAlbum(req.params.id);
+    let album = albumDB.getAlbum(req.params.id);
     if (album) {
       let dnr = parseInt(req.params.dnr);
       let disc = album.discs[dnr - 1];
@@ -88,7 +88,7 @@ export function router(context) {
     if (isHtml(req)) {
       res.render('search', {query});
     } else {
-      res.json(db.search(terms).map(match => ({
+      res.json(albumDB.search(terms).map(match => ({
         id: match.album.id,
         name: match.album.name,
         tracks: match.tracks.map(track => match.album.tracks.indexOf(track))
@@ -96,7 +96,7 @@ export function router(context) {
     }
   });
   router.get('/update', (req, res) => {
-    db.update().then(results => res.json(results));
+    albumDB.update().then(results => res.json(results));
   });
   return router;
 }

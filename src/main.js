@@ -1,8 +1,9 @@
+/* eslint no-console: "off" */
 import 'source-map-support/register';
 import {join} from 'path';
-import {readJson} from 'fs-extra';
 
 import {Context} from './lib/Context';
+import {Config} from './lib/Config';
 import {Logger} from './lib/Logger';
 import {AlbumDB} from './lib/AlbumDB';
 import {StationDB} from './lib/StationDB';
@@ -11,24 +12,19 @@ import {Player} from './lib/Player';
 import {Server} from './lib/Server';
 import {WSServer} from './lib/WSServer';
 
-const DEFAULT_CONFIG = {
-  port: 8080,
-  mpdHost: 'localhost',
-  mpdPort: 6600
-};
-
-
 start().catch(err => {
-  throw new Error(err);
+  console.error(err);
+  process.exit(1);
 });
 
 async function start() {
-  let config = await readConfig(join(__dirname, 'config.json')) || {};
-  let context = new Context(Object.assign({}, DEFAULT_CONFIG, config));
-  context.set('logger', new Logger(context));
+  let context = new Context({});
+  let config = await Config.readFromFile(join(__dirname, 'config.json'));
+  context.set('config', config);
+  context.set('logger', new Logger(config));
+  context.set('coverDB', new CoverDB(context));
   context.set('albumDB', new AlbumDB(context));
   context.set('stationDB', new StationDB(context));
-  context.set('coverDB', new CoverDB(context));
   context.set('player', new Player(context));
   context.set('server', new Server(context));
   context.set('wsServer', new WSServer(context));
@@ -39,15 +35,4 @@ async function start() {
   await context.server.start();
   await context.wsServer.start();
   context.logger.info('Server started');
-}
-
-async function readConfig(file) {
-  try {
-    return await readJson(file);
-  } catch (err) {
-    if (err.code !== 'ENOENT') {
-      throw new Error(`Could not read config file '${file}': ${err}`);
-    }
-    return null;
-  }
 }

@@ -1,8 +1,7 @@
 import {pick} from './util';
-import {Track} from './Track';
-import {TrackList} from './TrackList';
+import {Track} from './Track'; // eslint-disable-line no-unused-vars
+import {TrackList} from './TrackList'; // eslint-disable-line no-unused-vars
 
-/** The metadata keys to copy */
 const META_DATA_KEYS = ['name', 'artist', 'title'];
 
 /**
@@ -17,7 +16,6 @@ export class Album {
    */
   constructor(id, discs = [], metadata = {}) {
     this._discs = discs;
-    /** @private */
     this._metadata = pick(metadata, META_DATA_KEYS);
     this._id = id;
   }
@@ -65,6 +63,3 @@ export class Album {
   }
 
 }
-
-Track.name; // eslint
-TrackList.name; // eslint

@@ -1,12 +1,16 @@
 import {join, basename, dirname} from 'path';
 import {readJson, readdir} from 'fs-extra';
 import {statSafe} from './files';
+import {Context} from './Context'; // eslint-disable-line no-unused-vars
 
 export class StationDB {
 
+  /**
+   * @param {Context} context
+   */
   constructor(context) {
     this.logger = context.logger;
-    this._musicDir = context.musicDir;
+    this._musicDir = context.config.musicDir;
     this._ids = [];
     this._stations = {};
   }
