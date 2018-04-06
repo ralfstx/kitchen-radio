@@ -1,5 +1,5 @@
 import {expect} from '../test';
-import Context from '../../src/lib/Context';
+import {Context} from '../../src/lib/Context';
 
 describe('Context', function() {
 

@@ -1,9 +1,9 @@
-import Track from './Track';
+import {Track} from './Track';
 
 /**
  * A list of tracks.
  */
-export default class TrackList {
+export class TrackList {
 
   /**
    * Creates a new track list.

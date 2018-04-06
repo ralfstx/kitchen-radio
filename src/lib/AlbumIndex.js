@@ -1,8 +1,8 @@
 import {join, normalize} from 'path';
 import {pick} from './util';
-import Album from './Album';
-import Track from './Track';
-import TrackList from './TrackList';
+import {Album} from './Album';
+import {Track} from './Track';
+import {TrackList} from './TrackList';
 
 /** The metadata keys to copy */
 const META_DATA_KEYS = ['name', 'artist', 'title', 'album', 'albumartist', 'length'];

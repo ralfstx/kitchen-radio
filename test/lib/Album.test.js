@@ -1,7 +1,7 @@
 import {expect} from '../test';
-import Album from '../../src/lib/Album';
-import Track from '../../src/lib/Track';
-import TrackList from '../../src/lib/TrackList';
+import {Album} from '../../src/lib/Album';
+import {Track} from '../../src/lib/Track';
+import {TrackList} from '../../src/lib/TrackList';
 
 describe('Album', function() {
 

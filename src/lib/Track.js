@@ -3,7 +3,7 @@ import {join, basename, dirname} from 'path';
 /**
  * A single track.
  */
-export default class Track {
+export class Track {
 
   /**
    * @param {string} path the path to the audio file

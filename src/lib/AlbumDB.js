@@ -4,7 +4,7 @@ import {statSafe} from './files';
 import {createAlbumFromIndex} from './AlbumIndex';
 import {crc32Str} from '../lib/hash';
 
-export default class AlbumDB {
+export class AlbumDB {
 
   constructor(context) {
     this.ctx = context;

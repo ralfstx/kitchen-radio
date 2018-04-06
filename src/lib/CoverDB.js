@@ -5,7 +5,7 @@ import {statSafe} from './files';
 
 const SIZE_CLASSES = [100, 250];
 
-export default class CoverDB {
+export class CoverDB {
 
   constructor(context) {
     this.ctx = context;

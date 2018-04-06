@@ -2,14 +2,14 @@ import 'source-map-support/register';
 import {join} from 'path';
 import {readJson} from 'fs-extra';
 
-import Context from './lib/Context';
-import Logger from './lib/Logger';
-import AlbumDB from './lib/AlbumDB';
-import StationDB from './lib/StationDB';
-import CoverDB from './lib/CoverDB';
-import Player from './lib/Player';
-import Server from './lib/Server';
-import WSServer from './lib/WSServer';
+import {Context} from './lib/Context';
+import {Logger} from './lib/Logger';
+import {AlbumDB} from './lib/AlbumDB';
+import {StationDB} from './lib/StationDB';
+import {CoverDB} from './lib/CoverDB';
+import {Player} from './lib/Player';
+import {Server} from './lib/Server';
+import {WSServer} from './lib/WSServer';
 
 const DEFAULT_CONFIG = {
   port: 8080,

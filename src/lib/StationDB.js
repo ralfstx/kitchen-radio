@@ -2,7 +2,7 @@ import {join, basename, dirname} from 'path';
 import {readJson, readdir} from 'fs-extra';
 import {statSafe} from './files';
 
-export default class StationDB {
+export class StationDB {
 
   constructor(context) {
     this.logger = context.logger;

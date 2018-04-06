@@ -33,7 +33,7 @@ const HANDLERS = {
   }
 };
 
-export default class WSServer {
+export class WSServer {
 
   constructor(context) {
     this.logger = context.logger;

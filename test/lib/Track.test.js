@@ -1,6 +1,6 @@
 import 'mocha';
 import {expect} from 'chai';
-import Track from '../../src/lib/Track';
+import {Track} from '../../src/lib/Track';
 
 describe('Track', function() {
 

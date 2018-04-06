@@ -1,4 +1,4 @@
-export default class Context {
+export class Context {
 
   /**
    * Creates a new context object with read-only members.

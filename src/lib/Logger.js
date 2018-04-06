@@ -10,7 +10,7 @@ import * as winston from 'winston';
  * 5: silly
  */
 
-export default class Logger extends winston.Logger {
+export class Logger extends winston.Logger {
 
   constructor(context) {
     let level = context.logLevel || 'info';

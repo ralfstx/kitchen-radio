@@ -13,7 +13,7 @@ import {router as playerRouter} from '../routes/player';
 const staticDir = join(__dirname, '../static');
 const viewsDir = join(__dirname, '../views');
 
-export default class Server {
+export class Server {
 
   constructor(context) {
     this.logger = context.logger;

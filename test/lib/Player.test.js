@@ -1,10 +1,10 @@
 import {expect, spy, stub, restore, catchError} from '../test';
 
-import Album from '../../src/lib/Album';
-import Context from '../../src/lib/Context';
-import Player from '../../src/lib/Player';
-import TrackList from '../../src/lib/TrackList';
-import Track from '../../src/lib/Track';
+import {Album} from '../../src/lib/Album';
+import {Context} from '../../src/lib/Context';
+import {Player} from '../../src/lib/Player';
+import {TrackList} from '../../src/lib/TrackList';
+import {Track} from '../../src/lib/Track';
 
 const EXAMPLE_PLAYLIST_RESULT = `
 file: http://localhost:8080/albums/aaa/tracks/1

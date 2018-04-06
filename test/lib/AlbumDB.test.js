@@ -1,9 +1,9 @@
 import {join} from 'path';
 import {copy} from 'fs-extra';
 import {expect, tmpdir, spy, restore} from '../test';
-import Album from '../../src/lib/Album';
-import Context from '../../src/lib/Context';
-import AlbumDB from '../../src/lib/AlbumDB';
+import {Album} from '../../src/lib/Album';
+import {Context} from '../../src/lib/Context';
+import {AlbumDB} from '../../src/lib/AlbumDB';
 
 describe('AlbumDB', function() {
 

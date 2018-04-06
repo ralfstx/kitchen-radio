@@ -1,6 +1,6 @@
 import {pick} from './util';
-import Track from './Track';
-import TrackList from './TrackList';
+import {Track} from './Track';
+import {TrackList} from './TrackList';
 
 /** The metadata keys to copy */
 const META_DATA_KEYS = ['name', 'artist', 'title'];
@@ -8,7 +8,7 @@ const META_DATA_KEYS = ['name', 'artist', 'title'];
 /**
  * A collection of tracks, organized in parts. Each track is included in a disc.
  */
-export default class Album {
+export class Album {
 
   /**
    * @param {string} id a string to identify the album

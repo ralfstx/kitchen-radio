@@ -1,8 +1,8 @@
 import {join} from 'path';
 import {copy, move} from 'fs-extra';
 import {expect, tmpdir, spy, restore} from '../test';
-import Context from '../../src/lib/Context';
-import StationDB from '../../src/lib/StationDB';
+import {Context} from '../../src/lib/Context';
+import {StationDB} from '../../src/lib/StationDB';
 
 describe('StationDB', function() {
 

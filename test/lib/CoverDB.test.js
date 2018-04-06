@@ -1,8 +1,8 @@
 import {join} from 'path';
 import {statSync} from 'fs-extra';
 import {expect, tmpdir, spy, restore} from '../test';
-import Context from '../../src/lib/Context';
-import CoverDB from '../../src/lib/CoverDB';
+import {Context} from '../../src/lib/Context';
+import {CoverDB} from '../../src/lib/CoverDB';
 
 describe('CoverDB', function() {
 

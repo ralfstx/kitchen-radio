@@ -4,7 +4,7 @@ import fetch from 'node-fetch';
 import {isPlaylist, readFiles} from './Playlist';
 import {readProps} from './util';
 
-export default class Player {
+export class Player {
 
   constructor(context) {
     this.ctx = context;
