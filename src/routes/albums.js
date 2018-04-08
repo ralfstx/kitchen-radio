@@ -1,7 +1,11 @@
 import {Router} from 'express';
 import {join} from 'path';
 import {isHtml} from '../lib/Server';
+import {Context} from '../lib/Context'; // eslint-disable-line no-unused-vars
 
+/**
+ * @param {Context} context
+ */
 export function router(context) {
   let logger = context.logger;
   let albumDB = context.albumDB;
@@ -95,8 +99,14 @@ export function router(context) {
       })));
     }
   });
-  router.get('/update', (req, res) => {
-    albumDB.update().then(results => res.json(results));
+  router.get('/update', async (req, res) => {
+    let {count} = await albumDB.update();
+    let message = `Found ${count} albums`;
+    if (isHtml(req)) {
+      res.render('ok', {message});
+    } else {
+      res.json({message});
+    }
   });
   return router;
 }

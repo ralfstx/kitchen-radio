@@ -21,8 +21,9 @@ export class AlbumDB {
     this._albums = {};
     this.logger.info('Searching for albums in ' + this._musicDir);
     await this._processPath(this._musicDir);
-    let found = Object.keys(this._albums).length;
-    this.logger.info(`Found ${found} albums`);
+    let count = Object.keys(this._albums).length;
+    this.logger.info(`Found ${count} albums`);
+    return {count};
   }
 
   async _processPath(path) {
