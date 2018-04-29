@@ -1,6 +1,6 @@
 import {join} from 'path';
 import {expect, tmpdir, restore} from '../test';
-import {writeFileSync} from 'fs-extra';
+import {writeFile} from 'fs-extra';
 
 import {statSafe} from '../../src/lib/files';
 
@@ -17,20 +17,22 @@ describe('files', function() {
   describe('statSafe', function() {
 
     it('returns stats for file', async function() {
-      createTmpFile('foo');
-      let stats = await statSafe(join(baseDir, 'foo'));
+      let path = join(baseDir, 'file');
+      await writeFile(path, 'content');
+
+      let stats = await statSafe(path);
+
       expect(stats.isFile()).to.be.true;
     });
 
     it('returns null for missing file', async function() {
-      let stats = await statSafe(join(baseDir, 'missing'));
+      let path = join(baseDir, 'missing');
+
+      let stats = await statSafe(path);
+
       expect(stats).to.be.null;
     });
 
   });
 
 });
-
-function createTmpFile(name, content = 'content') {
-  writeFileSync(join(baseDir, name), content);
-}

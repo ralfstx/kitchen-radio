@@ -1,9 +1,8 @@
-import {join, basename, relative} from 'path';
-import {readJson, readdir} from 'fs-extra';
-import {statSafe} from './files';
-import {createAlbumFromIndex} from './AlbumIndex';
+import {join} from 'path';
 import {Context} from './Context'; // eslint-disable-line no-unused-vars
 import {crc32Str} from '../lib/hash';
+import {Album} from './Album'; // eslint-disable-line no-unused-vars
+import {AlbumFinder} from './AlbumFinder';
 
 export class AlbumDB {
 
@@ -17,46 +16,27 @@ export class AlbumDB {
     this._albums = {};
   }
 
+  /**
+   * @param {Album} album
+   */
+  addAlbum(album, path) {
+    let id = crc32Str(album.name);
+    album._id = id;
+    this._albums[id] = album;
+    this._coverDB.storeAlbumCover(id, join(path, 'cover.jpg'));
+  }
+
   async update() {
     this._albums = {};
     this.logger.info('Searching for albums in ' + this._musicDir);
-    await this._processPath(this._musicDir);
+    let finder = new AlbumFinder({
+      logger: this.logger,
+      albumDB: this
+    });
+    await finder.find(this._musicDir);
     let count = Object.keys(this._albums).length;
     this.logger.info(`Found ${count} albums`);
     return {count};
-  }
-
-  async _processPath(path) {
-    if (this._isExcluded(path)) return;
-    let stats = await statSafe(path);
-    if (stats && stats.isDirectory()) {
-      let indexFile = join(path, 'index.json');
-      let indexStats = await statSafe(indexFile);
-      if (indexStats) {
-        await this._loadAlbumFromIndex(path);
-      } else {
-        for (let file of await this._readdirSafe(path)) {
-          await this._processPath(join(path, file));
-        }
-      }
-    }
-  }
-
-  async _loadAlbumFromIndex(path) {
-    let indexFile = join(path, 'index.json');
-    let data = await this._readJsonSafe(indexFile);
-    if (!data) return;
-    if (!data.name) {
-      this.logger.warn(`Album name missing in '${path}'`);
-      return;
-    }
-    let id = crc32Str(data.name);
-    this._albums[id] = createAlbumFromIndex(id, relative(this._musicDir, path), data);
-    await this._coverDB.storeAlbumCover(id, join(path, 'cover.jpg'));
-  }
-
-  _isExcluded(path) {
-    return basename(path).startsWith('.') || path.endsWith('~');
   }
 
   getAlbum(id) {
@@ -78,24 +58,6 @@ export class AlbumDB {
       }
     }
     return result;
-  }
-
-  async _readdirSafe(dir) {
-    try {
-      return await readdir(dir);
-    } catch (err) {
-      this.logger.warn(`Could not read dir '${dir}'`);
-      return [];
-    }
-  }
-
-  async _readJsonSafe(file) {
-    try {
-      return await readJson(file);
-    } catch (err) {
-      this.logger.warn(`Could not read JSON file '${file}'`);
-      return null;
-    }
   }
 
 }
