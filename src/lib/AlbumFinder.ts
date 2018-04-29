@@ -1,35 +1,39 @@
-import {join, basename, extname, relative} from 'path';
-import {readJson, readdir} from 'fs-extra';
-import {statSafe} from './files';
-import {Album} from './Album'; // eslint-disable-line no-unused-vars
-import {Context} from './Context'; // eslint-disable-line no-unused-vars
-import {CoverDB} from './CoverDB'; // eslint-disable-line no-unused-vars
-import {getTrackMetadata} from '../lib/metadata';
-import {createAlbumFromIndex} from './AlbumIndex';
-import {TrackList} from './TrackList';
-import {Track} from './Track';
+import { readJson, readdir } from 'fs-extra';
+import { basename, extname, join, relative } from 'path';
+import { getTrackMetadata } from '../lib/metadata';
+import { AlbumDB } from './AlbumDB';
+import { createAlbumFromIndex } from './AlbumIndex';
+import { Logger } from './Logger';
+import { Track } from './Track';
+import { TrackList } from './TrackList';
+import { statSafe } from './files';
 
 export class AlbumFinder {
 
-  constructor(context) {
+  private logger: Logger;
+  private _albumDB: AlbumDB;
+  private _baseDir: string;
+
+  constructor(context: any) {
     this.logger = context.logger;
     this._albumDB = context.albumDB;
   }
 
-  async find(baseDir) {
+  public async find(baseDir: string) {
     if (this._baseDir) throw new Error('concurrent access');
     this._baseDir = baseDir;
     await this._processDir(baseDir);
     this._baseDir = null;
   }
 
-  async _processDir(path) {
+  private async _processDir(path: string) {
     let stats = await statSafe(path);
     if (!stats || !stats.isDirectory()) return;
     if (this._isExcluded(path)) return;
     if (await this._hasIndex(path)) {
       await this._loadAlbumFromIndex(path);
     } else {
+      this._findTracks(path);
       // TODO: Implement loading album from audio files
       // let trackList = await this._findTracks(path);
       // if (trackList) {
@@ -42,17 +46,12 @@ export class AlbumFinder {
     }
   }
 
-  /**
-   * Returns the index data if found, null otherwise
-   * @param {string} folder
-   * @returns {Promise<boolean>}
-   */
-  async _hasIndex(folder) {
+  private async _hasIndex(folder: string): Promise<boolean> {
     let stats = await statSafe(join(folder, 'index.json'));
-    return !!stats && stats.isFile();
+    return stats && stats.isFile();
   }
 
-  async _loadAlbumFromIndex(path) {
+  private async _loadAlbumFromIndex(path: string) {
     let indexFile = join(path, 'index.json');
     let data = await this._readJsonSafe(indexFile);
     if (!data) return;
@@ -64,7 +63,7 @@ export class AlbumFinder {
     this._albumDB.addAlbum(album, path);
   }
 
-  async _findTracks(path) {
+  private async _findTracks(path: string): Promise<TrackList> {
     let tracks = [];
     for (let name of await this._readdirSafe(path)) {
       let file = join(path, name);
@@ -77,7 +76,7 @@ export class AlbumFinder {
     return tracks.length ? new TrackList(tracks) : null;
   }
 
-  async _readMetadataSafe(file) {
+  private async _readMetadataSafe(file) {
     try {
       return getTrackMetadata(file);
     } catch (err) {
@@ -86,15 +85,15 @@ export class AlbumFinder {
     }
   }
 
-  _isSupportedFile(path) {
+  private _isSupportedFile(path) {
     return ['.mp3', '.ogg', '.flac'].includes(extname(path));
   }
 
-  _isExcluded(path) {
+  private _isExcluded(path) {
     return basename(path).startsWith('.') || path.endsWith('~');
   }
 
-  async _readdirSafe(dir) {
+  private async _readdirSafe(dir) {
     try {
       return await readdir(dir);
     } catch (err) {
@@ -103,7 +102,7 @@ export class AlbumFinder {
     }
   }
 
-  async _readJsonSafe(file) {
+  private async _readJsonSafe(file) {
     try {
       return await readJson(file);
     } catch (err) {

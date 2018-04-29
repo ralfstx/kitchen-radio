@@ -1,54 +1,23 @@
-import {expect} from '../test';
-import {Context} from '../../src/lib/Context';
+import { Context } from '../../src/lib/Context';
+import { expect } from '../test';
 
 describe('Context', function() {
 
-  let context;
+  let context: Context;
 
   describe('constructor', function() {
 
     beforeEach(function() {
-      context = new Context({foo: 23, bar: 42});
+      context = new Context({logger: 23, config: 42});
     });
 
     it('creates properties', function() {
-      expect(context.foo).to.equal(23);
-      expect(context.bar).to.equal(42);
-    });
-
-    it('creates read-only properties', function() {
-      expect(() => context.foo = 42).to.throw();
+      expect(context.logger).to.equal(23);
+      expect(context.config).to.equal(42);
     });
 
     it('creates enumerable properties', function() {
-      expect(Object.keys(context)).to.include('foo');
-    });
-
-  });
-
-  describe('instance', function() {
-
-    beforeEach(function() {
-      context = new Context({});
-    });
-
-    describe('set', function() {
-
-      it('creates new property', function() {
-        context.set('foo', 23);
-        expect(context.foo).to.equal(23);
-      });
-
-      it('creates read-only property', function() {
-        context.set('foo', 23);
-        expect(() => context.foo = 42).to.throw();
-      });
-
-      it('creates enumerable property', function() {
-        context.set('foo', 23);
-        expect(Object.keys(context)).to.include('foo');
-      });
-
+      expect(Object.keys(context)).to.include('logger');
     });
 
   });

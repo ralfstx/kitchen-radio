@@ -1,6 +1,6 @@
-import {Router} from 'express';
+import { Router } from 'express';
 
-export function router(context) {
+export function playerRouter(context) {
   let player = context.player;
   let router = Router();
   router.get('/status', (req, res, next) => {

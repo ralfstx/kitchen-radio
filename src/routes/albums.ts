@@ -1,12 +1,9 @@
-import {Router} from 'express';
-import {join} from 'path';
-import {isHtml} from '../lib/Server';
-import {Context} from '../lib/Context'; // eslint-disable-line no-unused-vars
+import { Router } from 'express';
+import { join } from 'path';
+import { Context } from '../lib/Context';
+import { isHtml } from '../lib/Server';
 
-/**
- * @param {Context} context
- */
-export function router(context) {
+export function albumsRouter(context: Context) {
   let logger = context.logger;
   let albumDB = context.albumDB;
   let coverDB = context.coverDB;
@@ -51,7 +48,7 @@ export function router(context) {
         res.sendFile(file, {maxAge: 36000});
         return;
       }
-    } catch(err) {
+    } catch (err) {
       logger.error(err);
       res.status(500).json({error: err});
       return;

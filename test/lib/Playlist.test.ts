@@ -42,7 +42,7 @@ describe('playlist', function() {
         'Length2=120',
         '',
         'NumberOfEntries=2',
-        'Version=2',
+        'Version=2'
       ].join('\n');
 
       expect(readFiles(content)).to.deep.equal(['http://example.com:8080', 'example2.mp3']);
@@ -53,7 +53,7 @@ describe('playlist', function() {
         '#EXT-X-VERSION:3',
         '#EXTM3U',
         '#EXTINF:-1, Example Radio Station',
-        'https://streaming.example.com/listen',
+        'https://streaming.example.com/listen'
       ].join('\n');
 
       expect(readFiles(content)).to.deep.equal(['https://streaming.example.com/listen']);

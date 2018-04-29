@@ -1,33 +1,33 @@
-import {resolve} from 'path';
-import {mkdirs, copy} from 'fs-extra';
-import {resizeImage} from '../lib/images';
-import {statSafe} from './files';
-import {AlbumDB} from './AlbumDB'; // eslint-disable-line no-unused-vars
-import {Logger} from './Logger'; // eslint-disable-line no-unused-vars
-import {Context} from './Context'; // eslint-disable-line no-unused-vars
+import { copy, mkdirs } from 'fs-extra';
+import { resolve } from 'path';
+import { resizeImage } from '../lib/images';
+import { Context } from './Context';
+import { Logger } from './Logger';
+import { statSafe } from './files';
 
 const SIZE_CLASSES = [100, 250];
 
 export class CoverDB {
 
-  /**
-   * @param {Context} context
-   */
-  constructor(context) {
+  private logger: Logger;
+  private _coverDir: string;
+  private _map: {};
+
+  constructor(context: Context) {
     this.logger = context.logger;
     this._coverDir = resolve(context.config.cacheDir, 'cover');
     this._map = {};
   }
 
-  async init() {
+  public async init() {
     await mkdirs(this._coverDir);
   }
 
-  async getAlbumCover(id, size = 0) {
+  public async getAlbumCover(id, size = 0) {
     return await this._getCoverFile(id, getSizeClass(size));
   }
 
-  async _getCoverFile(id, size) {
+  private async _getCoverFile(id, size) {
     let origFile = this._map[id];
     if (!origFile) return null;
     let cacheFile = resolve(this._coverDir, id + '-' + size);
@@ -35,7 +35,7 @@ export class CoverDB {
     return await statSafe(cacheFile) ? cacheFile : null;
   }
 
-  async _createCopy(srcPath, dstPath, size) {
+  private async _createCopy(srcPath, dstPath, size) {
     let srcStats = await statSafe(srcPath);
     let dstStats = await statSafe(dstPath);
     if (srcStats && srcStats.isFile() && (!dstStats || (dstStats.mtime < srcStats.mtime))) {
@@ -51,7 +51,7 @@ export class CoverDB {
     }
   }
 
-  storeAlbumCover(id, srcFile) {
+  public storeAlbumCover(id, srcFile) {
     this._map[id] = srcFile;
   }
 

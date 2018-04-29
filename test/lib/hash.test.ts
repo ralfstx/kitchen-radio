@@ -1,7 +1,7 @@
-import {expect, tmpdir, restore, catchError} from '../test';
-import {writeFile} from 'fs-extra';
-import {join} from 'path';
-import {sha1Str, sha1File, crc32Str, crc32File} from '../../src/lib/hash';
+import { writeFile } from 'fs-extra';
+import { join } from 'path';
+import { crc32File, crc32Str, sha1File, sha1Str } from '../../src/lib/hash';
+import { catchError, expect, restore, tmpdir } from '../test';
 
 // Use a long test string to test reading with multiple buffers
 const TEST_STR = 'test'.repeat(100000);
@@ -24,22 +24,12 @@ describe('hash', function() {
       expect(sha1Str(TEST_STR)).to.equal(TEST_STR_SHA1);
     });
 
-    it('throws with other types', function() {
-      expect(() => sha1Str()).to.throw(Error, /not a string/i);
-      expect(() => sha1Str(23)).to.throw(Error, /not a string/i);
-    });
-
   });
 
   describe('crc32Str', function() {
 
     it('returns CRC-32 hash for string', function() {
       expect(crc32Str(TEST_STR)).to.equal(TEST_STR_CRC32);
-    });
-
-    it('throws with other types', function() {
-      expect(() => crc32Str()).to.throw(Error, /not a string/i);
-      expect(() => crc32Str(23)).to.throw(Error, /not a string/i);
     });
 
   });

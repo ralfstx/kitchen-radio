@@ -1,12 +1,9 @@
-import {Router} from 'express';
-import {resolve} from 'path';
-import {isHtml} from '../lib/Server';
-import {Context} from '../lib/Context'; // eslint-disable-line no-unused-vars
+import { Router } from 'express';
+import { resolve } from 'path';
+import { Context } from '../lib/Context';
+import { isHtml } from '../lib/Server';
 
-/**
- * @param {Context} context
- */
-export function router(context) {
+export function stationsRouter(context: Context) {
   let stationDB = context.stationDB;
   let musicDir = context.config.musicDir;
   let router = Router();

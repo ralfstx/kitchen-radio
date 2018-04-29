@@ -1,6 +1,6 @@
-import {join} from 'path';
+import { join } from 'path';
 import * as winston from 'winston';
-import {Config} from './Config'; // eslint-disable-line no-unused-vars
+import { Config } from './Config';
 
 /* Winston uses npm log levels by default
  * 0: error
@@ -13,10 +13,7 @@ import {Config} from './Config'; // eslint-disable-line no-unused-vars
 
 export class Logger extends winston.Logger {
 
-  /**
-   * @param {Config} config
-   */
-  constructor(config) {
+  constructor(config: Config) {
     let level = config.logLevel;
     let filename = join(config.logDir, 'server.log');
     super({

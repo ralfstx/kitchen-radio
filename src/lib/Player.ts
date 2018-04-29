@@ -1,16 +1,22 @@
-import {parse as parseUrl} from 'url';
-import mpd from 'mpd';
-import fetch from 'node-fetch';
-import {isPlaylist, readFiles} from './Playlist';
-import {readProps} from './util';
-import {Context} from './Context'; // eslint-disable-line no-unused-vars
+import { parse as parseUrl } from 'url';
+import * as mpd from 'mpd';
+import * as fetch from 'node-fetch';
+import { AlbumDB } from './AlbumDB';
+import { Config } from './Config';
+import { Context } from './Context';
+import { Logger } from './Logger';
+import { isPlaylist, readFiles } from './Playlist';
+import { readProps } from './util';
 
 export class Player {
 
-  /**
-   * @param {Context} context
-   */
-  constructor(context) {
+  public onStatusChange: (status: string) => void;
+  private logger: Logger;
+  private _albumDb: AlbumDB;
+  private _config: Config;
+  private _mpdClient: any;
+
+  constructor(context: Context) {
     this.logger = context.logger;
     this._albumDb = context.albumDB;
     this._config = context.config;
@@ -18,7 +24,7 @@ export class Player {
     this.onStatusChange = null;
   }
 
-  async connectMpd() {
+  public async connectMpd() {
     return new Promise((resolve, reject) => {
       let host = this._config.mpdHost;
       let port = this._config.mpdPort;
@@ -39,71 +45,71 @@ export class Player {
     });
   }
 
-  async play(pos = 0) {
+  public async play(pos = 0) {
     return await this._sendCommand('play ' + pos);
   }
 
-  async stop() {
+  public async stop() {
     return await this._sendCommand('stop');
   }
 
-  async pause() {
+  public async pause() {
     return await this._sendCommand('pause');
   }
 
-  async prev() {
+  public async prev() {
     return await this._sendCommand('previous');
   }
 
-  async next() {
+  public async next() {
     return await this._sendCommand('next');
   }
 
   // STATUS REQUESTS
 
-  async status() {
+  public async status() {
     let res = await this._sendCommand('status');
     return readProps(res);
   }
 
-  async playlist() {
+  public async playlist() {
     let res = await this._sendCommand('playlistinfo');
     return this._extractPlaylist(res);
   }
 
   // PLAYLIST MODIFICATION
 
-  async append(urls) {
+  public async append(urls) {
     // TODO keep track of changes to playlist
     let playCommands = await this._toCommands(urls);
     await this._sendCommands([...playCommands, 'play']);
   }
 
-  async replace(urls) {
+  public async replace(urls) {
     // TODO keep track of changes to playlist
     let playCommands = await this._toCommands(urls);
     await this._sendCommands(['clear', ...playCommands, 'play']);
   }
 
-  async remove(index) {
+  public async remove(index: string) {
     await this._sendCommand('delete ' + index);
   }
 
-  _notifyStatusChange() {
+  private _notifyStatusChange() {
     this.logger.info('mpd status changed');
     this._sendCommand('status')
       .then(readProps)
       .then(status => this._notify('onStatusChange', status))
-      .catch(() => {}); // MPD error logged in _sendCommand
+      .catch(() => null); // MPD error logged in _sendCommand
   }
 
-  _notify(name, event) {
+  private _notify(name: string, event: {}) {
     if (name in this) {
       this[name](event);
     }
   }
 
-  async _sendCommand(command) {
+  private async _sendCommand(command: string) {
     return new Promise((resolve, reject) => {
       this._mpdClient.sendCommand(command, (err, result) => {
         if (err) {
@@ -114,10 +120,10 @@ export class Player {
           resolve(result);
         }
       });
-    });
+    }) as Promise<string>;
   }
 
-  async _sendCommands(commands) {
+  private async _sendCommands(commands: string[]) {
     return new Promise((resolve, reject) => {
       this._mpdClient.sendCommands(commands, (err, result) => {
         let commandsStr = commands.map(command => `'${command}'`).join(', ');
@@ -129,11 +135,11 @@ export class Player {
           resolve(result);
         }
       });
-    });
+    }) as Promise<string>;
   }
 
-  _extractPlaylist(msg) {
-    let playlist = [];
+  private _extractPlaylist(msg: string) {
+    let playlist: any[] = [];
     let entry = {};
     readProps(msg, (key, value) => {
       if (key === 'file') {
@@ -145,7 +151,7 @@ export class Player {
     return playlist.map(item => this._processPlaylistEntry(item));
   }
 
-  _processPlaylistEntry(item) {
+  private _processPlaylistEntry(item: any) {
     let url = parseUrl(item.file);
     if (url.hostname === 'localhost') {
       let info = this._extractTrackInfo(url.pathname);
@@ -170,7 +176,7 @@ export class Player {
     };
   }
 
-  _extractTrackInfo(path) {
+  private _extractTrackInfo(path: string | undefined) {
     let parts = path.split('/').filter(part => part.length);
     if (parts[0] === 'albums') {
       let album = parts[1];
@@ -180,20 +186,21 @@ export class Player {
         return {album, disc: parseInt(parts[3]), track: parseInt(parts[5])};
       }
     }
+    return null;
   }
 
-  _findTrack(info) {
+  private _findTrack(info: { album: any; disc: number; track: number; }) {
     let album = this._albumDb.getAlbum(info.album);
-    if (!album) return;
+    if (!album) return null;
     let disc = album.discs[info.disc - 1];
-    if (!disc) return;
+    if (!disc) return null;
     let track = disc.tracks[info.track - 1];
-    if (!track) return;
+    if (!track) return null;
     return track;
   }
 
-  async _toCommands(urls) {
-    let commands = [];
+  private async _toCommands(urls: any) {
+    let commands: string[] = [];
     for (let url of urls) {
       if (url.startsWith('/')) {
         url = 'http://localhost:' + this._config.port + url;
@@ -211,7 +218,7 @@ export class Player {
 
 }
 
-async function getText(url) {
+async function getText(url: any) {
   let response = await fetch(url);
   return await response.text();
 }

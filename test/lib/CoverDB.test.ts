@@ -1,15 +1,14 @@
-import {join} from 'path';
-import {statSync} from 'fs-extra';
-import {expect, tmpdir, spy, restore} from '../test';
-import {Context} from '../../src/lib/Context';
-import {CoverDB} from '../../src/lib/CoverDB';
+import { statSync } from 'fs-extra';
+import { join } from 'path';
+import { Context } from '../../src/lib/Context';
+import { CoverDB } from '../../src/lib/CoverDB';
+import { expect, restore, spy, tmpdir } from '../test';
 
 describe('CoverDB', function() {
 
-  /** @type {CoverDB} */
-  let coverDB;
+  const exampleCoverFile = join(__dirname, 'files/albums/animals/cover.jpg');
+  let coverDB: CoverDB;
   let cacheDir;
-  const exampleCoverFile = join(__dirname,'files/albums/animals/cover.jpg');
 
   beforeEach(async function() {
     let tmpDir = tmpdir();

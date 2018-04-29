@@ -6,7 +6,8 @@ import {StationDB} from '../../src/lib/StationDB';
 
 describe('StationDB', function() {
 
-  let db, musicDir;
+  let db: StationDB;
+  let musicDir: string;
 
   beforeEach(async function() {
     let tmp = tmpdir();
@@ -76,7 +77,7 @@ describe('StationDB', function() {
     });
 
     it('returns null for unknown ids', function() {
-      expect(db.getStation()).to.be.null;
+      expect(db.getStation(null)).to.be.null;
       expect(db.getStation('')).to.be.null;
       expect(db.getStation('foo')).to.be.null;
     });

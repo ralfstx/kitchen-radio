@@ -1,10 +1,10 @@
-import {expect, spy, stub, restore, catchError} from '../test';
-
-import {Album} from '../../src/lib/Album';
-import {Context} from '../../src/lib/Context';
-import {Player} from '../../src/lib/Player';
-import {TrackList} from '../../src/lib/TrackList';
-import {Track} from '../../src/lib/Track';
+import * as mpd from 'mpd';
+import { Album } from '../../src/lib/Album';
+import { Context } from '../../src/lib/Context';
+import { Player } from '../../src/lib/Player';
+import { Track } from '../../src/lib/Track';
+import { TrackList } from '../../src/lib/TrackList';
+import { catchError, expect, restore, spy, stub } from '../test';
 
 const EXAMPLE_PLAYLIST_RESULT = `
 file: http://localhost:8080/albums/aaa/tracks/1
@@ -19,9 +19,10 @@ Id: 25`;
 
 describe('player', function() {
 
-  let player, mpdClient;
+  let player: Player;
+  let mpdClient;
 
-  beforeEach(function() {
+  beforeEach(async function() {
     let logger = {debug: spy(), info: spy(), warn: spy(), error: spy()};
     let albumDB = {
       getAlbum: () => new Album('id', [
@@ -47,11 +48,21 @@ describe('player', function() {
         ])
       ])
     };
-    player = new Player(new Context({logger, albumDB}));
-    mpdClient = player._mpdClient = {
+    mpdClient = {
+      _listeners: {},
       sendCommand: stub(),
-      sendCommands: stub()
+      sendCommands: stub(),
+      on(name, fn) {
+        this._listeners[name] = fn;
+        return this;
+      }
     };
+    stub(mpd, 'connect').callsFake(() => {
+      Promise.resolve().then(() => mpdClient._listeners.ready.call());
+      return mpdClient;
+    });
+    player = new Player(new Context({ logger, albumDB, config: {} }));
+    await player.connectMpd();
   });
 
   afterEach(restore);
@@ -159,13 +170,13 @@ describe('player', function() {
 
     it('calls remove with position', async function() {
       mpdClient.sendCommand.callsArgWith(1, null, '');
-      await player.remove(3);
+      await player.remove('3');
       expect(mpdClient.sendCommand).to.have.been.calledWith('delete 3');
     });
 
     it('throws on error', async function() {
       mpdClient.sendCommand.callsArgWith(1, new Error('bang'));
-      let err = await catchError(player.remove(3));
+      let err = await catchError(player.remove('3'));
       expect(err.message).to.equal('Command failed');
     });
 

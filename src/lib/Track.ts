@@ -1,56 +1,61 @@
-import {join, basename, dirname} from 'path';
+import { normalize } from 'path';
 
 /**
  * A single track.
  */
 export class Track {
 
+  private _path: string;
+  private _artist: string;
+  private _title: string;
+  private _length: number;
+
   /**
-   * @param {string} path the path to the audio file
-   * @param {any} metadata the metadata for this track
+   * @param path the path to the audio file
+   * @param metadata the metadata for this track
    */
-  constructor(path, metadata = {}) {
+  constructor(path: string, metadata: TrackMetadata = {}) {
     if (!path) {
       throw new Error('path missing');
     }
-    // keep path name separate to allow for string interning
-    this._pathname = dirname(path);
-    this._filename = basename(path);
-    this._length = metadata.length < 0 ? 0 : Math.ceil(metadata.length);
+    this._path = normalize(path);
     this._artist = metadata.artist || '';
     this._title = metadata.title || '';
+    this._length = metadata.length < 0 ? 0 : Math.ceil(metadata.length);
   }
 
   /**
    * the path to the audio file
-   * @type {string}
    */
-  get path() {
-    return join(this._pathname, this._filename);
-  }
-
-  /**
-   * the length of this track in seconds
-   * @type {number}
-   */
-  get length() {
-    return this._length || 0;
+  get path(): string {
+    return this._path;
   }
 
   /**
    * the track artist
-   * @type {string}
    */
-  get artist() {
+  get artist(): string {
     return this._artist;
   }
 
   /**
    * the track title
-   * @type {string}
    */
-  get title() {
+  get title(): string {
     return this._title;
   }
 
+  /**
+   * the length of this track in seconds
+   */
+  get length(): number {
+    return this._length || 0;
+  }
+
+}
+
+interface TrackMetadata {
+  artist?: string;
+  title?: string;
+  length?: number;
 }

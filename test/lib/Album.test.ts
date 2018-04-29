@@ -1,12 +1,11 @@
-import {expect} from '../test';
-import {Album} from '../../src/lib/Album';
-import {Track} from '../../src/lib/Track';
-import {TrackList} from '../../src/lib/TrackList';
+import { Album } from '../../src/lib/Album';
+import { Track } from '../../src/lib/Track';
+import { TrackList } from '../../src/lib/TrackList';
+import { expect } from '../test';
 
 describe('Album', function() {
 
-  /** @type {Album} */
-  let album;
+  let album: Album;
 
   beforeEach(function() {
     album = new Album('id');

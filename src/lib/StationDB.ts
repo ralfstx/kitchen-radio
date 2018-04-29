@@ -1,21 +1,24 @@
-import {join, basename, dirname} from 'path';
-import {readJson, readdir} from 'fs-extra';
-import {statSafe} from './files';
-import {Context} from './Context'; // eslint-disable-line no-unused-vars
+import { readJson, readdir } from 'fs-extra';
+import { basename, dirname, join } from 'path';
+import { Context } from './Context';
+import { Logger } from './Logger';
+import { statSafe } from './files';
 
 export class StationDB {
 
-  /**
-   * @param {Context} context
-   */
-  constructor(context) {
+  private logger: Logger;
+  private _musicDir: string;
+  private _ids: string[];
+  private _stations: {};
+
+  constructor(context: Context) {
     this.logger = context.logger;
     this._musicDir = context.config.musicDir;
     this._ids = [];
     this._stations = {};
   }
 
-  async update() {
+  public async update() {
     this._ids = [];
     this._stations = {};
     let stationsDir = join(this._musicDir, 'stations');
@@ -26,7 +29,7 @@ export class StationDB {
     return {count};
   }
 
-  async _processPath(path) {
+  private async _processPath(path) {
     let stats = await statSafe(path);
     if (stats && stats.isDirectory()) {
       for (let file of await this._readdirSafe(path)) {
@@ -39,7 +42,7 @@ export class StationDB {
     }
   }
 
-  async _readStation(indexFile) {
+  private async _readStation(indexFile) {
     // TODO wrap in Album instance?
     let station = await this._readJsonSafe(indexFile);
     if (!station) return;
@@ -53,21 +56,21 @@ export class StationDB {
     this._registerStation(station);
   }
 
-  _registerStation(station) {
+  private _registerStation(station) {
     let id = station.id;
     this._ids.push(id);
     this._stations[id] = station;
   }
 
-  getStationIds() {
+  public getStationIds() {
     return this._ids.concat();
   }
 
-  getStation(id) {
+  public getStation(id) {
     return this._stations[id] || null;
   }
 
-  async _readdirSafe(dir) {
+  private async _readdirSafe(dir) {
     try {
       return await readdir(dir);
     } catch (err) {
@@ -76,7 +79,7 @@ export class StationDB {
     }
   }
 
-  async _readJsonSafe(file) {
+  private async _readJsonSafe(file) {
     try {
       return await readJson(file);
     } catch (err) {

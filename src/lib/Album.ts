@@ -1,6 +1,6 @@
-import {pick} from './util';
-import {Track} from './Track'; // eslint-disable-line no-unused-vars
-import {TrackList} from './TrackList'; // eslint-disable-line no-unused-vars
+import { Track } from './Track';
+import { TrackList } from './TrackList';
+import { pick } from './util';
 
 const META_DATA_KEYS = ['name', 'artist', 'title'];
 
@@ -9,56 +9,60 @@ const META_DATA_KEYS = ['name', 'artist', 'title'];
  */
 export class Album {
 
+  public _id: string; // TODO set by AlbumDB
+  private _discs: TrackList[];
+  private _metadata: {[key: string]: any};
+
   /**
-   * @param {string} id a string to identify the album
-   * @param {TrackList[]} discs the parts of this album
-   * @param {any} metadata the metadata of this album
+   * @param id a string to identify the album
+   * @param discs the parts of this album
+   * @param metadata the metadata of this album
    */
-  constructor(id, discs = [], metadata = {}) {
+  constructor(id: string, discs: TrackList[] = [], metadata: any = {}) {
+    this._id = id;
     this._discs = discs;
     this._metadata = pick(metadata, META_DATA_KEYS);
-    this._id = id;
   }
 
   /**
-   * @type {string} a string to identify the album
+   * a string to identify the album
    */
-  get id() {
+  get id(): string {
     return this._id;
   }
 
   /**
-   * @type {string} the album artist
+   * the album artist
    */
-  get artist() {
+  get artist(): string {
     return this._metadata.artist || '';
   }
 
   /**
-   * @type {string} the album title
+   * the album title
    */
-  get title() {
+  get title(): string {
     return this._metadata.title || '';
   }
 
   /**
-   * @type {string} a short name, including artist and album title
+   * a short name, including artist and album title
    */
-  get name() {
+  get name(): string {
     return this._metadata.name || [this.artist, this.title].filter(s => !!s).join(' - ');
   }
 
   /**
-   * @type {TrackList[]} a list of the parts of this album
+   * a list of the parts of this album
    */
-  get discs() {
+  get discs(): TrackList[] {
     return this._discs.concat();
   }
 
   /**
-   * @type {Track[]} a list of all tracks in this album
+   * a list of all tracks in this album
    */
-  get tracks() {
+  get tracks(): Track[] {
     return this._discs.reduce((prev, curr) => prev.concat(curr.tracks), []);
   }
 

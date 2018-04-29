@@ -11,7 +11,7 @@
       "runtimeArgs": [
         "--colors",
         "-r",
-        "babel-core/register",
+        "ts-node/register",
         "${file}"
       ],
       "internalConsoleOptions": "openOnSessionStart"

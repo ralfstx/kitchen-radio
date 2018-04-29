@@ -1,16 +1,17 @@
-import chai, {expect} from 'chai';
+import * as chai from 'chai';
 import * as sinon from 'sinon';
-import sinonChai from 'sinon-chai';
-import {dirSync} from 'tmp';
+import * as sinonChai from 'sinon-chai';
+import { dirSync } from 'tmp';
 
 chai.use(sinonChai);
 
+let expect = chai.expect;
 let sandbox = sinon.sandbox.create();
 let spy = sandbox.spy.bind(sandbox);
 let stub = sandbox.stub.bind(sandbox);
 let tmpDirs = [];
 
-export {expect, spy, stub, tmpdir, restore, catchError};
+export { expect, spy, stub, tmpdir, restore, catchError };
 
 function tmpdir() {
   let dir = dirSync({unsafeCleanup: true});
@@ -24,8 +25,14 @@ function restore() {
   tmpDirs = [];
 }
 
-function catchError(promise) {
-  return promise.then(() => {
-    throw new Error('Expected promise to fail but it resolved');
+/**
+ * Executes the given promise. Throws if the promise succeeds, and returns the error if it fails.
+ *
+ * @param promise a promise to execute
+ * @returns the caught error
+ */
+function catchError(promise: Promise<any>): Promise<any> {
+  return promise.then((result: any) => {
+    throw new Error('Expected promise to fail but it resolved with ' + result);
   }, (err) => err);
 }

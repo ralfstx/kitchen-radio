@@ -1,5 +1,8 @@
-import {server as WebSocketServer} from 'websocket';
-import {Context} from './Context'; // eslint-disable-line no-unused-vars
+import { server as WebSocketServer } from 'websocket';
+import { Context } from './Context';
+import { Logger } from './Logger';
+import { Player } from './Player';
+import { Server } from './Server';
 
 const HANDLERS = {
   play(args) {
@@ -36,10 +39,12 @@ const HANDLERS = {
 
 export class WSServer {
 
-  /**
-   * @param {Context} context
-   */
-  constructor(context) {
+  private logger: Logger;
+  private _player: Player;
+  private _server: Server;
+  private _connections: Connections;
+
+  constructor(context: Context) {
     this.logger = context.logger;
     this._player = context.player;
     this._server = context.server;
@@ -47,30 +52,30 @@ export class WSServer {
     this._player.onStatusChange = status => this.broadcast('status', status);
   }
 
-  start() {
+  public start() {
     let wsServer = new WebSocketServer({httpServer: this._server.httpServer});
     wsServer.on('request', request => this._handleRequest(request));
     wsServer.on('connect', connection => this._handleConnect(connection));
     wsServer.on('close', (connection, reason, desc) => this._handleDisconnect(connection, reason, desc));
   }
 
-  _handleRequest(request) {
+  private _handleRequest(request) {
     this.logger.info(`Connection request from ${request.origin}`);
     request.accept('player', request.origin);
   }
 
-  _handleConnect(connection) {
+  private _handleConnect(connection) {
     this.logger.info(`Connection accepted from ${connection.remoteAddress}`);
     this._connections.add(connection);
     connection.on('message', message => this._handleMessage(message, connection));
   }
 
-  _handleDisconnect(connection, reason, description) {
+  private _handleDisconnect(connection, reason, description) {
     this.logger.info(`Peer ${connection.remoteAddress} disconnected: ${description}`);
     this._connections.remove(connection);
   }
 
-  _handleMessage(message, connection) {
+  private _handleMessage(message, connection) {
     if (message.type === 'utf8') {
       let data = JSON.parse(message.utf8Data);
       if (data.command in HANDLERS) {
@@ -80,32 +85,35 @@ export class WSServer {
     }
   }
 
-  broadcast(topic, args) {
+  public broadcast(topic, args) {
     this._connections.forEach(connection => this._sendJson(connection, topic, args));
   }
 
-  _sendJson(connection, topic, args) {
+  private _sendJson(connection, topic, args) {
     this.logger.debug('Sent WS message to ', connection.remoteAddress, topic, args);
     connection.sendUTF(JSON.stringify({topic, args}));
   }
 
 }
 
+// tslint:disable-next-line:max-classes-per-file
 class Connections {
+
+  private _connections: any[];
 
   constructor() {
     this._connections = [];
   }
 
-  add(connection) {
+  public add(connection) {
     this._connections.push(connection);
   }
 
-  remove(connection) {
+  public remove(connection) {
     this._connections = this._connections.filter(element => element !== connection);
   }
 
-  forEach(cb) {
+  public forEach(cb) {
     this._connections.forEach(cb);
   }
 

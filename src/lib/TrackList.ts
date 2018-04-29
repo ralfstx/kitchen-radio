@@ -1,16 +1,19 @@
-import {Track} from './Track'; // eslint-disable-line no-unused-vars
+import { Track } from './Track';
 
 /**
  * A list of tracks.
  */
 export class TrackList {
 
+  private _tracks: Track[];
+  private _name: any;
+
   /**
    * Creates a new track list.
-   * @param {Iterable<Track>} tracks the tracks to include
-   * @param {any} metadata the metadata for the track list
+   * @param tracks the tracks to include
+   * @param metadata the metadata for the track list
    */
-  constructor(tracks, metadata = {}) {
+  constructor(tracks: Iterable<Track>, metadata: TrackListMetadata = {}) {
     if (!tracks) {
       throw new Error('tracks missing');
     }
@@ -20,17 +23,17 @@ export class TrackList {
 
   /**
    * the name of the track list
-   * @type {string}
    */
-  get name() {
+  get name(): string {
     return this._name;
   }
 
-  /**
-   * @type {Iterable<Track>}
-   */
-  get tracks() {
+  get tracks(): Track[] {
     return this._tracks.concat();
   }
 
+}
+
+interface TrackListMetadata {
+  name?: string;
 }

@@ -9,13 +9,13 @@
     {
       "taskName": "test",
       "command": "${workspaceRoot}/node_modules/.bin/mocha",
-      "args": ["--colors", "-r", "babel-core/register", "'test/**/**.test.js'"],
+      "args": ["--colors", "-r", "ts-node/register", "'test/**/**.test.ts'"],
       "isTestCommand": true
     },
     {
       "taskName": "test (file)",
       "command": "${workspaceRoot}/node_modules/.bin/mocha",
-      "args": ["--colors", "-r", "babel-core/register", "${file}"],
+      "args": ["--colors", "-r", "ts-node/register", "${file}"],
       "isTestCommand": true
     }
   ]

@@ -1,17 +1,25 @@
-export function readProps(data, callback = (key, value, props) => props[key] = value) {
+/**
+ * Reads `key: value` pairs from the lines of a string.
+ * @param data the input string
+ * @param callback an optional callback to preprocess each key-value pair
+ * @returns a map of properties
+ */
+export function readProps(data: string, callback = defCallback): {[key: string]: string} {
   let props = {};
-  if (typeof data === 'string') {
-    data.split('\n').forEach((line, index) => {
-      if (!/^\s*(#|$)/.test(line)) {
-        let match = /^\s*(\S+)\s*:\s*(.*?)\s*$/.exec(line);
-        if (!match) {
-          throw new Error('Syntax error in line ' + (index + 1));
-        }
-        callback(match[1], match[2], props);
+  data.split('\n').forEach((line, index) => {
+    if (!/^\s*(#|$)/.test(line)) {
+      let match = /^\s*(\S+)\s*:\s*(.*?)\s*$/.exec(line);
+      if (!match) {
+        throw new Error('Syntax error in line ' + (index + 1));
       }
-    });
-  }
+      callback(match[1], match[2], props);
+    }
+  });
   return props;
+}
+
+function defCallback(key: string, value: string, properties?: {[key: string]: string}) {
+  properties[key] = value;
 }
 
 export function toJson(data) {
@@ -21,11 +29,10 @@ export function toJson(data) {
 
 /**
  * Returns a promisified version of a given function.
- * @template T
- * @param {(...any) => T} fn the function to promisify
- * @returns {(...any) => Promise<T>}
+ * @param fn the function to promisify
+ * @returns a function that returns a promise
  */
-export function promisify(fn) {
+export function promisify<T>(fn: (...any) => T): (...any) => Promise<T> {
   return function() {
     return new Promise((resolve, reject) => {
       let params = Array.prototype.slice.call(arguments).concat((err, result) => {
@@ -42,10 +49,10 @@ export function promisify(fn) {
 
 /**
  * Returns a copy of the given object that contains only members with the given keys.
- * @param {{}} obj the object to filter
- * @param {string[]} keys the keys to copy
+ * @param obj the object to filter
+ * @param keys the keys to copy
  */
-export function pick(obj, keys) {
+export function pick(obj: {}, keys: string[]) {
   let res = {};
   for (let key of keys) {
     if (key in obj) {

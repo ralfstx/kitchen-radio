@@ -1,15 +1,16 @@
+import { resize } from 'imagemagick';
+import { promisify } from './util';
+
 /*
  * Utility methods for images.
  */
-import magick from 'imagemagick';
-import {promisify} from './util';
 
-let magickResize = promisify(magick.resize);
+let magickResize = promisify(resize);
 
 export function resizeImage(srcPath, dstPath, size) {
   return magickResize({
-    srcPath: srcPath,
-    dstPath: dstPath,
+    srcPath,
+    dstPath,
     width: size,
     height: size
   });

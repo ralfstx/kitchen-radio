@@ -1,10 +1,10 @@
-import {remove as removeDiacritics} from 'diacritics';
+import { remove as removeDiacritics } from 'diacritics';
 
 /**
  * Encodes a file name to contain only ASCII characters.
- * @param {string} string the file name to encode
+ * @param string the file name to encode
  */
-export function encodeAscii(string) {
+export function encodeAscii(string: string): string {
   let result = string.toLowerCase();
 
   // Turn '&' and '+' into 'and'

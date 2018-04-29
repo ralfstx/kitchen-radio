@@ -1,27 +1,22 @@
+import * as CRC32 from 'crc-32';
+import * as Crypto from 'crypto';
+import { createReadStream } from 'fs-extra';
+
 /*
  * Utility methods for hash functions.
  */
-import Crypto from 'crypto';
-import CRC32 from 'crc-32';
-import {createReadStream} from 'fs-extra';
 
-export function sha1Str(string) {
-  if (!(typeof string === 'string')) {
-    throw new Error('Not a string: ' + string);
-  }
+export function sha1Str(string: string): string {
   let hash = Crypto.createHash('sha1');
   hash.update(string);
   return hash.digest('hex');
 }
 
-export function crc32Str(string) {
-  if (!(typeof string === 'string')) {
-    throw new Error('Not a string: ' + string);
-  }
+export function crc32Str(string: string): string {
   return hex32(CRC32.str(string));
 }
 
-export function sha1File(filename) {
+export function sha1File(filename: string): Promise<string> {
   return new Promise((resolve, reject) => {
     let hash = Crypto.createHash('sha1');
     let stream = createReadStream(filename);
@@ -37,7 +32,7 @@ export function sha1File(filename) {
   });
 }
 
-export function crc32File(filename) {
+export function crc32File(filename: string): Promise<string> {
   return new Promise((resolve, reject) => {
     let crc;
     let stream = createReadStream(filename);
@@ -54,13 +49,14 @@ export function crc32File(filename) {
 }
 
 function hex32(value) {
+  // tslint:disable-next-line:no-bitwise
   let hex = Number((value) >>> 0).toString(16);
   return pad(hex, 8, '0');
 }
 
-function pad(str, length, pad) {
+function pad(str, length, padStr) {
   while (str.length < length) {
-    str = (pad || ' ') + str;
+    str = (padStr || ' ') + str;
   }
   return str;
 }

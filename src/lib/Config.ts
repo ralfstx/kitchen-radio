@@ -1,4 +1,4 @@
-import {readJson} from 'fs-extra';
+import { readJson } from 'fs-extra';
 
 const CONFIG_VARS = {
   port: 'validPort',
@@ -7,7 +7,7 @@ const CONFIG_VARS = {
   musicDir: 'nonEmpty',
   cacheDir: 'nonEmpty',
   logDir: 'nonEmpty',
-  logLevel: 'logLevel',
+  logLevel: 'logLevel'
 };
 
 const DEFAULT_CONFIG = {
@@ -15,57 +15,47 @@ const DEFAULT_CONFIG = {
   mpdPort: 6600,
   mpdHost: 'localhost',
   logDir: '.',
-  logLevel: 'info',
+  logLevel: 'info'
 };
 
 export class Config {
 
   /**
-   * @param {any} values
+   * The port to start the server
    */
-  constructor(values) {
-    /**
-     * The port to start the server
-     * @type {number}
-     */
-    this.port;
+  public readonly port: number;
 
-    /**
-     * The hostname of the mpd server to connect to
-     * @type {string}
-     */
-    this.mpdHost;
+  /**
+   * The hostname of the mpd server to connect to
+   */
+  public readonly mpdHost: string;
 
-    /**
-     * The port of the mpd server to connect to
-     * @type {number}
-     */
-    this.mpdPort;
+  /**
+   * The port of the mpd server to connect to
+   */
+  public readonly mpdPort: number;
 
-    /**
-     * The directory to search for music.
-     * @type {string}
-     */
-    this.musicDir;
+  /**
+   * The directory to search for music.
+   */
+  public readonly musicDir: string;
 
-    /**
-     * The directory to put cache data.
-     * @type {string}
-     */
-    this.cacheDir;
+  /**
+   * The directory to put cache data.
+   */
+  public readonly cacheDir: string;
 
-    /**
-     * The directory to put log files.
-     * @type {string}
-     */
-    this.logDir;
+  /**
+   * The directory to put log files.
+   */
+  public readonly logDir: string;
 
-    /**
-     * The log level.
-     * @type {'info'|'debug'|'warn'|'error'}
-     */
-    this.logLevel;
+   /**
+    * The log level.
+    */
+  public readonly logLevel: 'info'|'debug'|'warn'|'error';
 
+  private constructor(values: any) {
     extractConfigValues(this, Object.assign({}, DEFAULT_CONFIG, values));
   }
 
@@ -74,7 +64,7 @@ export class Config {
    * @property {string} file the config file to read
    * @returns {Promise<Config>}
    */
-  static async readFromFile(file) {
+  public static async readFromFile(file): Promise<Config> {
     return new Config(await readConfigFile(file));
   }
 
@@ -101,14 +91,10 @@ function checkType(type, value, handler) {
   if (type === 'validPort') return requireValidPort(value, handler);
   if (type === 'nonEmpty') return requireNonEmpty(value, handler);
   if (type === 'logLevel') return requireLogLevel(value, handler);
+  throw new Error('invalid type ' + type);
 }
 
-/**
- * @param {number} number
- * @param {(message: string) => number} handler
- * @returns {number}
- */
-function requireValidPort(number, handler) {
+function requireValidPort(number: number, handler: (message: string) => number): number {
   if (!Number.isInteger(number)) {
     return handler('not an integer: ' + number);
   }
@@ -118,12 +104,7 @@ function requireValidPort(number, handler) {
   return number;
 }
 
-/**
- * @param {string} string
- * @param {(message: string) => string} handler
- * @returns {string}
- */
-function requireLogLevel(string, handler) {
+function requireLogLevel(string: string, handler: (message: string) => string): string {
   string = requireNonEmpty(string, handler);
   if (!['debug', 'info', 'warn', 'error'].includes(string)) {
     return handler('not a valid log level: ' + string);
@@ -131,12 +112,7 @@ function requireLogLevel(string, handler) {
   return string;
 }
 
-/**
- * @param {string} string
- * @param {(message: string) => string} handler
- * @returns {string}
- */
-function requireNonEmpty(string, handler) {
+function requireNonEmpty(string: string, handler: (message: string) => string): string {
   if (typeof string !== 'string') {
     return handler('not a string: ' + string);
   }
@@ -146,8 +122,8 @@ function requireNonEmpty(string, handler) {
   return string;
 }
 
-function configError(name) {
-  return message => {
+function configError(name: string) {
+  return (message: string) => {
     throw new Error(`Invalid config value for '${name}': ${message}`);
   };
 }

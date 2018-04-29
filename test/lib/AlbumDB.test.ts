@@ -1,13 +1,14 @@
-import {join} from 'path';
-import {copy} from 'fs-extra';
-import {expect, tmpdir, spy, restore} from '../test';
-import {Album} from '../../src/lib/Album';
-import {Context} from '../../src/lib/Context';
-import {AlbumDB} from '../../src/lib/AlbumDB';
+import { copy } from 'fs-extra';
+import { join } from 'path';
+import { Album } from '../../src/lib/Album';
+import { AlbumDB } from '../../src/lib/AlbumDB';
+import { Context } from '../../src/lib/Context';
+import { expect, restore, spy, tmpdir } from '../test';
 
 describe('AlbumDB', function() {
 
-  let albumDB, musicDir;
+  let albumDB: AlbumDB;
+  let musicDir: string;
 
   beforeEach(async function() {
     musicDir = tmpdir();

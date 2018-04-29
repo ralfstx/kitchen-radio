@@ -1,32 +1,33 @@
-import {join} from 'path';
-import {Context} from './Context'; // eslint-disable-line no-unused-vars
-import {crc32Str} from '../lib/hash';
-import {Album} from './Album'; // eslint-disable-line no-unused-vars
-import {AlbumFinder} from './AlbumFinder';
+import { join } from 'path';
+import { crc32Str } from '../lib/hash';
+import { Album } from './Album';
+import { AlbumFinder } from './AlbumFinder';
+import { Context } from './Context';
+import { Logger } from './Logger';
+import { CoverDB } from './CoverDB';
 
 export class AlbumDB {
 
-  /**
-   * @param {Context} context
-   */
-  constructor(context) {
+  private logger: Logger;
+  private _coverDB: CoverDB;
+  private _musicDir: string;
+  private _albums: {[id: string]: Album};
+
+  constructor(context: Context) {
     this.logger = context.logger;
     this._coverDB = context.coverDB;
     this._musicDir = context.config.musicDir;
     this._albums = {};
   }
 
-  /**
-   * @param {Album} album
-   */
-  addAlbum(album, path) {
+  public addAlbum(album: Album, path: string) {
     let id = crc32Str(album.name);
     album._id = id;
     this._albums[id] = album;
     this._coverDB.storeAlbumCover(id, join(path, 'cover.jpg'));
   }
 
-  async update() {
+  public async update() {
     this._albums = {};
     this.logger.info('Searching for albums in ' + this._musicDir);
     let finder = new AlbumFinder({
@@ -39,15 +40,15 @@ export class AlbumDB {
     return {count};
   }
 
-  getAlbum(id) {
+  public getAlbum(id) {
     return this._albums[id] || null;
   }
 
-  getAlbumIds() {
+  public getAlbumIds() {
     return Object.keys(this._albums);
   }
 
-  search(terms, limit = 20) {
+  public search(terms, limit = 20) {
     let result = [];
     for (let id in this._albums) {
       let album = this._albums[id];

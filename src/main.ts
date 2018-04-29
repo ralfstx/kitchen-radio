@@ -1,4 +1,3 @@
-/* eslint no-console: "off" */
 import 'source-map-support/register';
 import {join} from 'path';
 
@@ -13,6 +12,7 @@ import {Server} from './lib/Server';
 import {WSServer} from './lib/WSServer';
 
 start().catch(err => {
+  // tslint:disable-next-line:no-console
   console.error(err);
   process.exit(1);
 });

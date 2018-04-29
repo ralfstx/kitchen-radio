@@ -1,11 +1,10 @@
-import 'mocha';
-import {expect} from 'chai';
-import {Track} from '../../src/lib/Track';
+import { expect } from 'chai';
+import { describe, it } from 'mocha';
+import { Track } from '../../src/lib/Track';
 
 describe('Track', function() {
 
-  /** @type {Track} */
-  let track;
+  let track: Track;
 
   beforeEach(function() {
     track = new Track('foo');
