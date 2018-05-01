@@ -17,7 +17,7 @@ export function createAlbumFromIndex(path, metadata) {
   if (metadata.discs) {
     metadata.discs.forEach(disc => {
       if (disc.tracks && disc.tracks.length) {
-        let tracks = disc.tracks.map(track => new Track(join(dir, disc.path, track.path), track));
+        let tracks = disc.tracks.map(track => new Track(join(dir, disc.path || '.', track.path), track));
         discs.push(new TrackList(tracks, disc));
       }
     });
