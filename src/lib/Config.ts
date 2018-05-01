@@ -1,21 +1,13 @@
 import { readJson } from 'fs-extra';
 
 const CONFIG_VARS = {
-  port: 'validPort',
-  mpdPort: 'validPort',
-  mpdHost: 'nonEmpty',
-  musicDir: 'nonEmpty',
-  cacheDir: 'nonEmpty',
-  logDir: 'nonEmpty',
-  logLevel: 'logLevel'
-};
-
-const DEFAULT_CONFIG = {
-  port: 8080,
-  mpdPort: 6600,
-  mpdHost: 'localhost',
-  logDir: '.',
-  logLevel: 'info'
+  port: {type: 'validPort', default: 8080},
+  mpdPort: {type: 'validPort', default: 6600},
+  mpdHost: {type: 'nonEmpty', default: 'localhost'},
+  musicDir: {type: 'nonEmpty'},
+  cacheDir: {type: 'nonEmpty'},
+  logDir: {type: 'nonEmpty', default:  '.'},
+  logLevel: {type: 'logLevel', default: 'info'}
 };
 
 export class Config {
@@ -55,8 +47,8 @@ export class Config {
     */
   public readonly logLevel: 'info'|'debug'|'warn'|'error';
 
-  private constructor(values: any) {
-    extractConfigValues(this, Object.assign({}, DEFAULT_CONFIG, values));
+  public constructor(values: any) {
+    extractConfigValues(this, values);
   }
 
   /**
@@ -80,9 +72,12 @@ async function readConfigFile(file) {
 
 function extractConfigValues(target, values) {
   for (let name in CONFIG_VARS) {
-    let type = CONFIG_VARS[name];
-    if (!(name in values)) throw new Error('Missing config value: ' + name);
-    let value = checkType(type, values[name], configError(name));
+    let spec = CONFIG_VARS[name];
+    if (!(name in values) && !('default' in spec)) {
+      throw new Error('Missing config value: ' + name);
+    }
+    let value = name in values ? values[name] : spec.default;
+    checkType(spec.type, value, configError(name));
     Object.defineProperty(target, name, {value});
   }
 }
