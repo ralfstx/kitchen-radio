@@ -32,7 +32,7 @@ function restore() {
  * @returns the caught error
  */
 function catchError(promise: Promise<any>): Promise<any> {
-  return promise.then((result: any) => {
+  return promise.then(result => {
     throw new Error('Expected promise to fail but it resolved with ' + result);
   }, (err) => err);
 }

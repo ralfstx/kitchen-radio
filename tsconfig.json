@@ -6,8 +6,6 @@
     "outDir": "dist",
     "module": "commonjs",
     "strict": false,
-    "noUnusedLocals": true,
-    "noImplicitReturns": true,
     "sourceMap": true
   },
   "include": [
