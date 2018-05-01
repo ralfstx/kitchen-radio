@@ -81,4 +81,30 @@ describe('Track', function() {
 
   });
 
+  describe('albumArtist', function() {
+
+    it('returns `` by default', function() {
+      expect(track.albumArtist).to.equal('');
+    });
+
+    it('returns albumArtist from metadata', function() {
+      track = new Track('foo.mp3', {albumArtist: 'Nirvana'});
+      expect(track.albumArtist).to.equal('Nirvana');
+    });
+
+  });
+
+  describe('albumTitle', function() {
+
+    it('returns `` by default', function() {
+      expect(track.albumTitle).to.equal('');
+    });
+
+    it('returns albumTitle from metadata', function() {
+      track = new Track('foo.mp3', {albumTitle: 'Lithium'});
+      expect(track.albumTitle).to.equal('Lithium');
+    });
+
+  });
+
 });

@@ -1,14 +1,20 @@
 import { createReadStream } from 'fs-extra';
 import * as musicmeta from 'musicmetadata';
 
+const supportedItems = {
+  title: 'title',
+  artist: 'artist',
+  album: 'albumTitle',
+  albumartist: 'albumArtist'
+};
+
 export async function getTrackMetadata(file: string): Promise<AudioFileMetadata> {
   let fileMetadata = await readMetaDataFromFile(file);
   let metadata = {} as AudioFileMetadata;
-  for (let name of ['title', 'artist', 'album', 'albumartist']) {
-    let value = fileMetadata[name];
-    let valueStr = Array.isArray(value) ? value.join(', ') : value;
-    if (valueStr) {
-      metadata[name] = valueStr;
+  for (let name in supportedItems) {
+    let value = asString(fileMetadata[name]);
+    if (value) {
+      metadata[supportedItems[name]] = value;
     }
   }
   if (fileMetadata.duration) {
@@ -29,6 +35,10 @@ function readMetaDataFromFile(file: string): Promise<any> {
       }
     });
   });
+}
+
+function asString(value) {
+  return Array.isArray(value) ? value.join(', ') : value;
 }
 
 interface AudioFileMetadata {

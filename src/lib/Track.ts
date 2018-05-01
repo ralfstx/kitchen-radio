@@ -8,6 +8,8 @@ export class Track {
   private _path: string;
   private _artist: string;
   private _title: string;
+  private _albumArtist: string;
+  private _albumTitle: string;
   private _length: number;
 
   /**
@@ -21,7 +23,9 @@ export class Track {
     this._path = normalize(path);
     this._artist = metadata.artist || '';
     this._title = metadata.title || '';
-    this._length = metadata.length < 0 ? 0 : Math.ceil(metadata.length);
+    this._albumArtist = metadata.albumArtist || '';
+    this._albumTitle = metadata.albumTitle || '';
+    this._length = metadata.length >= 0 ? Math.ceil(metadata.length) : 0;
   }
 
   /**
@@ -46,6 +50,20 @@ export class Track {
   }
 
   /**
+   * the album artist
+   */
+  get albumArtist(): string {
+    return this._albumArtist;
+  }
+
+  /**
+   * the album title
+   */
+  get albumTitle(): string {
+    return this._albumTitle;
+  }
+
+  /**
    * the length of this track in seconds
    */
   get length(): number {
@@ -57,5 +75,7 @@ export class Track {
 interface TrackMetadata {
   artist?: string;
   title?: string;
+  albumArtist?: string;
+  albumTitle?: string;
   length?: number;
 }
