@@ -1,23 +1,31 @@
-// Place your settings in this file to overwrite default and user settings.
 {
 
-  // Exclude these files and folders from the explorer
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+
+  "files.insertFinalNewline": true,
+  "files.trimFinalNewlines": true,
+  "files.trimTrailingWhitespace": true,
+
+  // exclude from the file explorer
   "files.exclude": {
     "**/.git/": true,
     "**/build/": true,
     "**/logs/":true
   },
 
-  // Excluse these files and folders from searches. Inherits from files.exclude.
+  // exclude from search, inherits from files.exclude
   "search.exclude": {
     "**/node_modules": true,
     "**/dist/": true
   },
 
-  // Add a print margin at 100 chars
+  // add print margins at 100 and 120 chars
   "editor.rulers": [100],
 
-  // Enable JS checks in VS code
-  "javascript.implicitProjectConfig.checkJs": true
+  // spellcheck dictionary
+  "cSpell.words": [
+    "flac"
+  ]
 
 }
