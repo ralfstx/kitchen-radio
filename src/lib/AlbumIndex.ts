@@ -7,7 +7,7 @@ import {TrackList} from './TrackList';
 /** The metadata keys to copy */
 const META_DATA_KEYS = ['name', 'artist', 'title', 'album', 'albumartist', 'length'];
 
-export function createAlbumFromIndex(id, path, metadata) {
+export function createAlbumFromIndex(path, metadata) {
   let dir = normalize(path);
   let discs = [];
   if (metadata.tracks && metadata.tracks.length) {
@@ -22,5 +22,5 @@ export function createAlbumFromIndex(id, path, metadata) {
       }
     });
   }
-  return new Album(id, discs, pick(metadata, META_DATA_KEYS));
+  return new Album(discs, pick(metadata, META_DATA_KEYS));
 }

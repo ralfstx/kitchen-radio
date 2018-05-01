@@ -18,13 +18,14 @@ export function albumsRouter(context: Context) {
     }
   });
   router.get('/:id', (req, res, next) => {
-    let album = albumDB.getAlbum(req.params.id);
+    let id = req.params.id;
+    let album = albumDB.getAlbum(id);
     if (album) {
       if (isHtml(req)) {
-        res.render('album', {title: album.name, url: `/albums/${album.id}`});
+        res.render('album', {title: album.name, url: `/albums/${id}`});
       } else {
         res.json({
-          id: album.id,
+          id,
           name: album.name,
           discs: album.discs.map(disc => ({
             name: disc.name,

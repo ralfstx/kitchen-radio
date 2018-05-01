@@ -59,7 +59,7 @@ export class AlbumFinder {
       this.logger.warn(`Album name missing in '${path}'`);
       return;
     }
-    let album = createAlbumFromIndex(null, relative(this._baseDir, path), data);
+    let album = createAlbumFromIndex(relative(this._baseDir, path), data);
     this._albumDB.addAlbum(album, path);
   }
 

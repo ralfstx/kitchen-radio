@@ -22,7 +22,6 @@ export class AlbumDB {
 
   public addAlbum(album: Album, path: string) {
     let id = crc32Str(album.name);
-    album._id = id;
     this._albums[id] = album;
     this._coverDB.storeAlbumCover(id, join(path, 'cover.jpg'));
   }

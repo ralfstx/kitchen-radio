@@ -9,26 +9,16 @@ const META_DATA_KEYS = ['name', 'artist', 'title'];
  */
 export class Album {
 
-  public _id: string; // TODO set by AlbumDB
   private _discs: TrackList[];
   private _metadata: {[key: string]: any};
 
   /**
-   * @param id a string to identify the album
    * @param discs the parts of this album
    * @param metadata the metadata of this album
    */
-  constructor(id: string, discs: TrackList[] = [], metadata: any = {}) {
-    this._id = id;
+  constructor(discs: TrackList[] = [], metadata: any = {}) {
     this._discs = discs;
     this._metadata = pick(metadata, META_DATA_KEYS);
-  }
-
-  /**
-   * a string to identify the album
-   */
-  get id(): string {
-    return this._id;
   }
 
   /**

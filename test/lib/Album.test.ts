@@ -8,15 +8,7 @@ describe('Album', function() {
   let album: Album;
 
   beforeEach(function() {
-    album = new Album('id');
-  });
-
-  describe('id', function() {
-
-    it('returns the id', function() {
-      expect(album.id).to.equal('id');
-    });
-
+    album = new Album();
   });
 
   describe('artist', function() {
@@ -26,7 +18,7 @@ describe('Album', function() {
     });
 
     it('returns artist from metadata', function() {
-      album = new Album('id', [], {artist: 'Pink Floyd'});
+      album = new Album([], {artist: 'Pink Floyd'});
 
       expect(album.artist).to.equal('Pink Floyd');
     });
@@ -40,7 +32,7 @@ describe('Album', function() {
     });
 
     it('returns title from metadata', function() {
-      album = new Album('id', [], {title: 'Animals'});
+      album = new Album([], {title: 'Animals'});
 
       expect(album.title).to.equal('Animals');
     });
@@ -54,19 +46,19 @@ describe('Album', function() {
     });
 
     it('returns name from metadata', function() {
-      album = new Album('id', [], {name: 'Pink Floyd - Animals'});
+      album = new Album([], {name: 'Pink Floyd - Animals'});
 
       expect(album.name).to.equal('Pink Floyd - Animals');
     });
 
     it('creates name from title', function() {
-      album = new Album('id', [], {title: 'Animals'});
+      album = new Album([], {title: 'Animals'});
 
       expect(album.name).to.equal('Animals');
     });
 
     it('creates name from artist and title', function() {
-      album = new Album('id', [], {artist: 'Pink Floyd', title: 'Animals'});
+      album = new Album([], {artist: 'Pink Floyd', title: 'Animals'});
 
       expect(album.name).to.equal('Pink Floyd - Animals');
     });
@@ -85,7 +77,7 @@ describe('Album', function() {
         new Track('01.ogg')
       ]);
 
-      album = new Album('id', [trackList]);
+      album = new Album([trackList]);
 
       expect(album.discs).to.deep.equal([trackList]);
     });
@@ -102,7 +94,7 @@ describe('Album', function() {
       let tracks = [new Track('1'), new Track('2'), new Track('3')];
       let trackLists = [new TrackList([tracks[0], tracks[1]]), new TrackList([tracks[2]])];
 
-      album = new Album('id', trackLists);
+      album = new Album(trackLists);
 
       expect(album.tracks).to.deep.equal(tracks);
     });

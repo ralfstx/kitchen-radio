@@ -5,14 +5,8 @@ describe('AlbumIndex', function() {
 
   describe('createAlbumFromIndex', function() {
 
-    it('creates album with id', function() {
-      let album = createAlbumFromIndex('foo', 'foo/bar', {});
-
-      expect(album.id).to.equal('foo');
-    });
-
     it('creates discs and tracks', function() {
-      let album = createAlbumFromIndex('id', 'foo', {
+      let album = createAlbumFromIndex('foo', {
         discs: [{
           path: '01',
           tracks: [{path: '01.ogg'}, {path: '02.ogg'}]
@@ -28,7 +22,7 @@ describe('AlbumIndex', function() {
     });
 
     it('creates disc for tracks on root level', function() {
-      let album = createAlbumFromIndex('id', 'foo', {
+      let album = createAlbumFromIndex('foo', {
         tracks: [{
           path: '01.ogg'
         }, {

@@ -25,7 +25,7 @@ describe('player', function() {
   beforeEach(async function() {
     let logger = {debug: spy(), info: spy(), warn: spy(), error: spy()};
     let albumDB = {
-      getAlbum: () => new Album('id', [
+      getAlbum: () => new Album([
         new TrackList([
           new Track('01/01.ogg', {
             title: 'title-1-1',
