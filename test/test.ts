@@ -7,18 +7,25 @@ chai.use(sinonChai);
 
 let expect = chai.expect;
 let sandbox = sinon.sandbox.create();
-let spy = sandbox.spy.bind(sandbox);
-let stub = sandbox.stub.bind(sandbox);
+let spy: sinon.SinonSpyStatic = sandbox.spy.bind(sandbox);
+let stub: sinon.SinonStubStatic = sandbox.stub.bind(sandbox);
 let tmpDirs = [];
 
 export { expect, spy, stub, tmpdir, restore, catchError };
 
-function tmpdir() {
+/**
+ * Creates a temporary directory. The directory will be cleaned up by calling `restore()`.
+ * @returns the name of the created directory
+ */
+function tmpdir(): string {
   let dir = dirSync({unsafeCleanup: true});
   tmpDirs.push(dir);
   return dir.name;
 }
 
+/**
+ * Restores spied and stubbed functions and cleans up temporary directories.
+ */
 function restore() {
   sandbox.restore();
   tmpDirs.forEach(dir => dir.removeCallback());
