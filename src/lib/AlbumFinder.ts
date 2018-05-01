@@ -1,6 +1,7 @@
 import { readJson, readdir } from 'fs-extra';
 import { basename, extname, join, relative } from 'path';
-import { getTrackMetadata } from '../lib/metadata';
+import { Metadata } from '../lib/Metadata';
+import { Album } from './Album';
 import { AlbumDB } from './AlbumDB';
 import { createAlbumFromIndex } from './AlbumIndex';
 import { Logger } from './Logger';
@@ -9,7 +10,6 @@ import { TrackList } from './TrackList';
 import { statSafe } from './files';
 
 export class AlbumFinder {
-
   private logger: Logger;
   private _albumDB: AlbumDB;
   private _baseDir: string;
@@ -33,13 +33,11 @@ export class AlbumFinder {
     if (await this._hasIndex(path)) {
       await this._loadAlbumFromIndex(path);
     } else {
-      this._findTracks(path);
-      // TODO: Implement loading album from audio files
-      // let trackList = await this._findTracks(path);
-      // if (trackList) {
-      //   let album = this._createAlbumFromTrackList(trackList);
-      //   this._albumDB.addAlbum(album, path);
-      // }
+      let trackList = await this._findTracks(path);
+      if (trackList) {
+        let album = this._createAlbumFromTrackList(trackList);
+        this._albumDB.addAlbum(album, path);
+      }
       for (let file of await this._readdirSafe(path)) {
         await this._processDir(join(path, file));
       }
@@ -63,6 +61,16 @@ export class AlbumFinder {
     this._albumDB.addAlbum(album, path);
   }
 
+  private _createAlbumFromTrackList(trackList: TrackList): Album {
+    let albumTitles = trackList.tracks.map(track => track.albumTitle);
+    let commonAlbumTitle = allSame(albumTitles) ? albumTitles[0] : '';
+    let name = commonAlbumTitle || 'Unknown Album';
+    if (albumTitles.length && albumTitles[0] && allSame(albumTitles)) {
+      name = albumTitles[0];
+    }
+    return new Album([trackList], {name});
+  }
+
   private async _findTracks(path: string): Promise<TrackList> {
     let tracks = [];
     for (let name of await this._readdirSafe(path)) {
@@ -70,7 +78,7 @@ export class AlbumFinder {
       let stats = await statSafe(file);
       if (stats && stats.isFile() && this._isSupportedFile(file)) {
         let metadata = await this._readMetadataSafe(file);
-        tracks.push(new Track(file, metadata));
+        tracks.push(new Track(relative(this._baseDir, file), metadata));
       }
     }
     return tracks.length ? new TrackList(tracks) : null;
@@ -78,7 +86,7 @@ export class AlbumFinder {
 
   private async _readMetadataSafe(file) {
     try {
-      return getTrackMetadata(file);
+      return Metadata.getTrackMetadata(file);
     } catch (err) {
       this.logger.warn(err);
       return {};
@@ -111,4 +119,13 @@ export class AlbumFinder {
     }
   }
 
+}
+
+function allSame(strings: string[]): boolean {
+  for (let i = 1; i < strings.length; i++) {
+    if (strings[i] !== strings[i - 1]) {
+      return false;
+    }
+  }
+  return true;
 }

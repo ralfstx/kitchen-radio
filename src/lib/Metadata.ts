@@ -8,19 +8,23 @@ const supportedItems = {
   albumartist: 'albumArtist'
 };
 
-export async function getTrackMetadata(file: string): Promise<AudioFileMetadata> {
-  let fileMetadata = await readMetaDataFromFile(file);
-  let metadata = {} as AudioFileMetadata;
-  for (let name in supportedItems) {
-    let value = asString(fileMetadata[name]);
-    if (value) {
-      metadata[supportedItems[name]] = value;
+export class Metadata {
+
+  public static async getTrackMetadata(file: string): Promise<AudioFileMetadata> {
+    let fileMetadata = await readMetaDataFromFile(file);
+    let metadata = {} as AudioFileMetadata;
+    for (let name in supportedItems) {
+      let value = asString(fileMetadata[name]);
+      if (value) {
+        metadata[supportedItems[name]] = value;
+      }
     }
+    if (fileMetadata.duration) {
+      metadata.length = Math.round(fileMetadata.duration);
+    }
+    return metadata;
   }
-  if (fileMetadata.duration) {
-    metadata.length = Math.round(fileMetadata.duration);
-  }
-  return metadata;
+
 }
 
 function readMetaDataFromFile(file: string): Promise<any> {
