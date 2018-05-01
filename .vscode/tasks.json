@@ -1,22 +1,17 @@
 {
-  "version": "0.1.0",
-  "command": "node",
-  "runner": "terminal",
-  "isShellCommand": true,
-  "showOutput": "always",
-  "suppressTaskName": true,
+  "version": "2.0.0",
   "tasks": [
     {
-      "taskName": "test",
+      "label": "test",
       "command": "${workspaceRoot}/node_modules/.bin/mocha",
-      "args": ["--colors", "-r", "ts-node/register", "'test/**/**.test.ts'"],
-      "isTestCommand": true
+      "args": ["--colors", "-r", "ts-node/register", "test/**/*.test.ts"],
+      "group": "test"
     },
     {
-      "taskName": "test (file)",
+      "label": "test (file)",
       "command": "${workspaceRoot}/node_modules/.bin/mocha",
       "args": ["--colors", "-r", "ts-node/register", "${file}"],
-      "isTestCommand": true
+      "group": "test"
     }
   ]
 }
