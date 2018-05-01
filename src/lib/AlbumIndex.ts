@@ -5,22 +5,22 @@ import {Track} from './Track';
 import {TrackList} from './TrackList';
 
 /** The metadata keys to copy */
-const META_DATA_KEYS = ['name', 'artist', 'title', 'album', 'albumartist', 'length'];
+const META_DATA_KEYS = ['name', 'artist', 'title', 'tags'];
 
-export function createAlbumFromIndex(path, metadata) {
+export function createAlbumFromIndex(path, index) {
   let dir = normalize(path);
   let discs = [];
-  if (metadata.tracks && metadata.tracks.length) {
-    let tracks = metadata.tracks.map(track => new Track(join(dir, track.path), track));
+  if (index.tracks && index.tracks.length) {
+    let tracks = index.tracks.map(track => new Track(join(dir, track.path), track));
     discs.push(new TrackList(tracks));
   }
-  if (metadata.discs) {
-    metadata.discs.forEach(disc => {
+  if (index.discs) {
+    index.discs.forEach(disc => {
       if (disc.tracks && disc.tracks.length) {
         let tracks = disc.tracks.map(track => new Track(join(dir, disc.path || '.', track.path), track));
         discs.push(new TrackList(tracks, disc));
       }
     });
   }
-  return new Album(discs, pick(metadata, META_DATA_KEYS));
+  return new Album(discs, pick(index, META_DATA_KEYS));
 }

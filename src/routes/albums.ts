@@ -26,6 +26,7 @@ export function albumsRouter(context: Context) {
       } else {
         res.json({
           id,
+          tags: album.tags,
           name: album.name,
           discs: album.discs.map(disc => ({
             name: disc.name,

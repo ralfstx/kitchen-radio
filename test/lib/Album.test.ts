@@ -101,4 +101,18 @@ describe('Album', function() {
 
   });
 
+  describe('tags', function() {
+
+    it('returns [] by default', function() {
+      expect(album.tags).to.deep.equal([]);
+    });
+
+    it('contains tracks from all discs', function() {
+      album = new Album([], {tags: ['foo', 'bar']});
+
+      expect(album.tags).to.deep.equal(['foo', 'bar']);
+    });
+
+  });
+
 });

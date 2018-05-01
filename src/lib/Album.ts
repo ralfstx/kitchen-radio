@@ -2,23 +2,21 @@ import { Track } from './Track';
 import { TrackList } from './TrackList';
 import { pick } from './util';
 
-const META_DATA_KEYS = ['name', 'artist', 'title'];
-
 /**
  * A collection of tracks, organized in parts. Each track is included in a disc.
  */
 export class Album {
 
   private _discs: TrackList[];
-  private _metadata: {[key: string]: any};
+  private _metadata: AlbumMetadata;
 
   /**
    * @param discs the parts of this album
    * @param metadata the metadata of this album
    */
-  constructor(discs: TrackList[] = [], metadata: any = {}) {
+  constructor(discs: TrackList[] = [], metadata: AlbumMetadata = {}) {
     this._discs = discs;
-    this._metadata = pick(metadata, META_DATA_KEYS);
+    this._metadata = metadata;
   }
 
   /**
@@ -56,4 +54,18 @@ export class Album {
     return this._discs.reduce((prev, curr) => prev.concat(curr.tracks), []);
   }
 
+  /**
+   * a list of all tags attached to this album
+   */
+  get tags(): string[] {
+    return this._metadata.tags || [];
+  }
+
+}
+
+interface AlbumMetadata {
+  name?: string;
+  artist?: string;
+  title?: string;
+  tags?: string[];
 }

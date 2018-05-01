@@ -14,6 +14,9 @@
     <div id="app" v-cloak>
       <h1>${title}</h1>
       <img width="250" height="250" v-bind:src="'/albums/' + album.id + '/cover?size=250'" />
+      <div class="tags">
+        <span class="tag" v-for="tag in album.tags">{{tag}}</span>
+      </div>
       <div v-for="(disc, dn) in album.discs">
         <h2 v-if="album.discs.length > 1">Disc {{dn + 1}}</h2>
         <div class="line" v-for="(track, tn) in disc.tracks">

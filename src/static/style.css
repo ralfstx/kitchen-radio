@@ -32,3 +32,16 @@ div.button:hover {
 div.line {
   margin-top: 1px;
 }
+
+div.tags {
+  margin-bottom: 5px;
+}
+
+span.tag {
+  color: white;
+  background: lightslategrey;
+  padding: 0 5px;
+  border-radius: 2px;
+  margin-right: 5px;
+  cursor: default;
+}
