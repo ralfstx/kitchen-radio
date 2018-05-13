@@ -9,7 +9,7 @@ export class WSServer {
   private _logger: Logger;
   private _player: Player;
   private _server: Server;
-  private _connections: Connections;
+  private _connections: Set<Connection>;
 
   private _handlers: {[key: string]: Handler} = {
     play: (args) => this._player.play(args.pos || 0),
@@ -30,7 +30,7 @@ export class WSServer {
     this._logger = context.logger;
     this._player = context.player;
     this._server = context.server;
-    this._connections = new Connections();
+    this._connections = new Set();
     this._player.onStatusChange = status => this.broadcast('status', status);
   }
 
@@ -54,7 +54,7 @@ export class WSServer {
 
   private _handleDisconnect(connection: Connection, reason: number, description: string) {
     this._logger.info(`Peer ${connection.remoteAddress} disconnected: ${description}`);
-    this._connections.remove(connection);
+    this._connections.delete(connection);
   }
 
   private _handleMessage(message: IMessage, connection: Connection) {
@@ -76,29 +76,6 @@ export class WSServer {
 function sendJson(connection: Connection, topic: string, args: any) {
   this.logger.debug('Sent WS message to ', connection.remoteAddress, topic, args);
   connection.sendUTF(JSON.stringify({topic, args}));
-}
-
-// tslint:disable-next-line:max-classes-per-file
-class Connections {
-
-  private _connections: Connection[];
-
-  constructor() {
-    this._connections = [];
-  }
-
-  public add(connection: Connection) {
-    this._connections.push(connection);
-  }
-
-  public remove(connection: Connection) {
-    this._connections = this._connections.filter(element => element !== connection);
-  }
-
-  public forEach(cb: (connection: Connection, index: number) => void) {
-    this._connections.forEach(cb);
-  }
-
 }
 
 type Handler = (args: any, connection: Connection) => Promise<any>;
