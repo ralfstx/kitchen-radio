@@ -27,5 +27,11 @@
   "cSpell.words": [
     "albumartist",
     "flac"
-  ]
+  ],
+
+  "[typescript]": {
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    }
+  }
 }
