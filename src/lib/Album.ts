@@ -1,6 +1,5 @@
 import { Track } from './Track';
 import { TrackList } from './TrackList';
-import { pick } from './util';
 
 /**
  * A collection of tracks, organized in parts. Each track is included in a disc.

@@ -1,6 +1,6 @@
 import { readJson, readdir } from 'fs-extra';
 import { basename, extname, join, relative } from 'path';
-import { Metadata } from '../lib/Metadata';
+import { Metadata, AudioFileMetadata } from '../lib/Metadata';
 import { Album } from './Album';
 import { AlbumDB } from './AlbumDB';
 import { createAlbumFromIndex } from './AlbumIndex';
@@ -10,23 +10,23 @@ import { TrackList } from './TrackList';
 import { statSafe } from './files';
 
 export class AlbumFinder {
-  private logger: Logger;
+  private _logger: Logger;
   private _albumDB: AlbumDB;
   private _baseDir: string;
 
-  constructor(context: any) {
-    this.logger = context.logger;
+  constructor(context: {logger: Logger, albumDB: AlbumDB}) {
+    this._logger = context.logger;
     this._albumDB = context.albumDB;
   }
 
-  public async find(baseDir: string) {
+  public async find(baseDir: string): Promise<void> {
     if (this._baseDir) throw new Error('concurrent access');
     this._baseDir = baseDir;
     await this._processDir(baseDir);
     this._baseDir = null;
   }
 
-  private async _processDir(path: string) {
+  private async _processDir(path: string): Promise<void> {
     let stats = await statSafe(path);
     if (!stats || !stats.isDirectory()) return;
     if (this._isExcluded(path)) return;
@@ -49,12 +49,12 @@ export class AlbumFinder {
     return stats && stats.isFile();
   }
 
-  private async _loadAlbumFromIndex(path: string) {
+  private async _loadAlbumFromIndex(path: string): Promise<void> {
     let indexFile = join(path, 'index.json');
     let data = await this._readJsonSafe(indexFile);
     if (!data) return;
     if (!data.name) {
-      this.logger.warn(`Album name missing in '${path}'`);
+      this._logger.warn(`Album name missing in '${path}'`);
       return;
     }
     let album = createAlbumFromIndex(relative(this._baseDir, path), data);
@@ -84,37 +84,37 @@ export class AlbumFinder {
     return tracks.length ? new TrackList(tracks) : null;
   }
 
-  private async _readMetadataSafe(file) {
+  private async _readMetadataSafe(file: string): Promise<AudioFileMetadata> {
     try {
       return Metadata.getTrackMetadata(file);
     } catch (err) {
-      this.logger.warn(err);
+      this._logger.warn(err);
       return {};
     }
   }
 
-  private _isSupportedFile(path) {
+  private _isSupportedFile(path: string): boolean {
     return ['.mp3', '.ogg', '.flac'].includes(extname(path));
   }
 
-  private _isExcluded(path) {
+  private _isExcluded(path: string): boolean {
     return basename(path).startsWith('.') || path.endsWith('~');
   }
 
-  private async _readdirSafe(dir) {
+  private async _readdirSafe(dir: string): Promise<string[]> {
     try {
       return await readdir(dir);
     } catch (err) {
-      this.logger.warn(`Could not read dir '${dir}'`);
+      this._logger.warn(`Could not read dir '${dir}'`);
       return [];
     }
   }
 
-  private async _readJsonSafe(file) {
+  private async _readJsonSafe(file: string): Promise<any> {
     try {
       return await readJson(file);
     } catch (err) {
-      this.logger.warn(`Could not read JSON file '${file}'`);
+      this._logger.warn(`Could not read JSON file '${file}'`);
       return null;
     }
   }

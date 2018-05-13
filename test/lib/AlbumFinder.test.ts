@@ -88,19 +88,19 @@ describe('AlbumFinder', function() {
 
 });
 
-async function createDir(parent, name) {
+async function createDir(parent: string, name: string) {
   let dir = join(parent, name);
   await mkdirs(dir);
   return dir;
 }
 
-async function createIndex(dir, index) {
+async function createIndex(dir: string, index: any) {
   let file = join(dir, 'index.json');
   await writeJson(file, index);
   return file;
 }
 
-async function createFile(parent, name, content = '') {
+async function createFile(parent: string, name: string, content = '') {
   let file = join(parent, name);
   await writeFile(file, content);
   return file;

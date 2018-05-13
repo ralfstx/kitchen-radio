@@ -4,7 +4,7 @@ import {writeFile} from 'fs-extra';
 
 import {statSafe} from '../../src/lib/files';
 
-let baseDir;
+let baseDir: string;
 
 describe('files', function() {
 

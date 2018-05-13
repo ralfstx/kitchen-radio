@@ -24,11 +24,11 @@ export class Context {
    */
   constructor(values: ContextValues) {
     for (let name in values) {
-      this.set(name, values[name]);
+      this.set(name, (values as any)[name]);
     }
   }
 
-  public set(name: string, value: any) {
+  public set(name: string, value: any): void {
     Object.defineProperty(this, name, {enumerable: true, value});
   }
 

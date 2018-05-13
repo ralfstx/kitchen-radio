@@ -25,7 +25,7 @@ describe('util', function() {
     });
 
     it('uses callback when provided', function() {
-      let callback = (key, value, props) => props[key.toUpperCase()] = value;
+      let callback = (key: string, value: any, props: any) => props[key.toUpperCase()] = value;
       expect(readProps('foo: 23\nbar: 42', callback)).to.deep.equal({FOO: '23', BAR: '42'});
     });
 
@@ -63,7 +63,7 @@ describe('util', function() {
   describe('promisify', function() {
 
     it('resolves when callback is called', async function() {
-      let fn = (n, cb) => setTimeout(() => cb(null, n + 1), 10);
+      let fn = (n: number, cb: any) => setTimeout(() => cb(null, n + 1), 10);
       let pfn = promisify(fn);
 
       let res = await pfn(23);
@@ -71,7 +71,7 @@ describe('util', function() {
     });
 
     it('rejects when callback is called with error', async function() {
-      let fn = (n, cb) => setTimeout(() => cb('error'), 10);
+      let fn = (n: number, cb: any) => setTimeout(() => cb('error'), 10);
       let pfn = promisify(fn);
 
       let err = await catchError(pfn(23));

@@ -6,30 +6,30 @@ import { statSafe } from './files';
 
 export class StationDB {
 
-  private logger: Logger;
+  private _logger: Logger;
   private _musicDir: string;
   private _ids: string[];
-  private _stations: {};
+  private _stations: Map<string, any>;
 
   constructor(context: Context) {
-    this.logger = context.logger;
+    this._logger = context.logger;
     this._musicDir = context.config.musicDir;
     this._ids = [];
-    this._stations = {};
+    this._stations = new Map();
   }
 
   public async update() {
     this._ids = [];
-    this._stations = {};
+    this._stations.clear();
     let stationsDir = join(this._musicDir, 'stations');
-    this.logger.info('Searching for stations in ' + stationsDir);
+    this._logger.info('Searching for stations in ' + stationsDir);
     await this._processPath(stationsDir);
     let count = this._ids.length;
-    this.logger.info(`Found ${count} stations`);
+    this._logger.info(`Found ${count} stations`);
     return {count};
   }
 
-  private async _processPath(path) {
+  private async _processPath(path: string) {
     let stats = await statSafe(path);
     if (stats && stats.isDirectory()) {
       for (let file of await this._readdirSafe(path)) {
@@ -42,48 +42,48 @@ export class StationDB {
     }
   }
 
-  private async _readStation(indexFile) {
+  private async _readStation(indexFile: string) {
     // TODO wrap in Album instance?
     let station = await this._readJsonSafe(indexFile);
     if (!station) return;
     if (!station.id) {
-      this.logger.warn('Missing station id in: ' + indexFile);
+      this._logger.warn('Missing station id in: ' + indexFile);
     }
     if (!station.name) {
-      this.logger.warn('Missing station name in: ' + indexFile);
+      this._logger.warn('Missing station name in: ' + indexFile);
     }
     station.path = dirname(indexFile);
     this._registerStation(station);
   }
 
-  private _registerStation(station) {
+  private _registerStation(station: any) {
     let id = station.id;
     this._ids.push(id);
-    this._stations[id] = station;
+    this._stations.set(id, station);
   }
 
   public getStationIds() {
     return this._ids.concat();
   }
 
-  public getStation(id) {
-    return this._stations[id] || null;
+  public getStation(id: string) {
+    return this._stations.get(id) || null;
   }
 
-  private async _readdirSafe(dir) {
+  private async _readdirSafe(dir: string) {
     try {
       return await readdir(dir);
     } catch (err) {
-      this.logger.warn(`Could not read dir '${dir}'`);
+      this._logger.warn(`Could not read dir '${dir}'`);
       return [];
     }
   }
 
-  private async _readJsonSafe(file) {
+  private async _readJsonSafe(file: string) {
     try {
       return await readJson(file);
     } catch (err) {
-      this.logger.warn(`Could not read JSON file '${file}'`);
+      this._logger.warn(`Could not read JSON file '${file}'`);
       return null;
     }
   }

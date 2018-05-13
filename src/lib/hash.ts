@@ -34,7 +34,7 @@ export function sha1File(filename: string): Promise<string> {
 
 export function crc32File(filename: string): Promise<string> {
   return new Promise((resolve, reject) => {
-    let crc;
+    let crc: number;
     let stream = createReadStream(filename);
     stream.on('data', (data) => {
       crc = CRC32.buf(data, crc);
@@ -48,13 +48,13 @@ export function crc32File(filename: string): Promise<string> {
   });
 }
 
-function hex32(value) {
+function hex32(value: number) {
   // tslint:disable-next-line:no-bitwise
   let hex = Number((value) >>> 0).toString(16);
   return pad(hex, 8, '0');
 }
 
-function pad(str, length, padStr) {
+function pad(str: string, length: number, padStr: string) {
   while (str.length < length) {
     str = (padStr || ' ') + str;
   }

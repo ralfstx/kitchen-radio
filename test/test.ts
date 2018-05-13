@@ -9,7 +9,7 @@ let expect = chai.expect;
 let sandbox = sinon.sandbox.create();
 let spy: sinon.SinonSpyStatic = sandbox.spy.bind(sandbox);
 let stub: sinon.SinonStubStatic = sandbox.stub.bind(sandbox);
-let tmpDirs = [];
+let tmpDirs: any[] = [];
 
 export { expect, spy, stub, tmpdir, restore, catchError };
 

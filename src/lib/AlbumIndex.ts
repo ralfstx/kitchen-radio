@@ -7,17 +7,17 @@ import {TrackList} from './TrackList';
 /** The metadata keys to copy */
 const META_DATA_KEYS = ['name', 'artist', 'title', 'tags'];
 
-export function createAlbumFromIndex(path, index) {
+export function createAlbumFromIndex(path: string, index: any): Album {
   let dir = normalize(path);
-  let discs = [];
-  if (index.tracks && index.tracks.length) {
-    let tracks = index.tracks.map(track => new Track(join(dir, track.path), track));
+  let discs: TrackList[] = [];
+  if (Array.isArray(index.tracks) && index.tracks.length) {
+    let tracks = index.tracks.map((track: any) => new Track(join(dir, track.path), track));
     discs.push(new TrackList(tracks));
   }
-  if (index.discs) {
-    index.discs.forEach(disc => {
+  if (Array.isArray(index.discs)) {
+    index.discs.forEach((disc: any) => {
       if (disc.tracks && disc.tracks.length) {
-        let tracks = disc.tracks.map(track => new Track(join(dir, disc.path || '.', track.path), track));
+        let tracks = disc.tracks.map((track: any) => new Track(join(dir, disc.path || '.', track.path), track));
         discs.push(new TrackList(tracks, disc));
       }
     });

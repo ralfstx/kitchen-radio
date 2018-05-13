@@ -5,16 +5,17 @@ import { AlbumFinder } from './AlbumFinder';
 import { Context } from './Context';
 import { Logger } from './Logger';
 import { CoverDB } from './CoverDB';
+import { Track } from './Track';
 
 export class AlbumDB {
 
-  private logger: Logger;
+  private _logger: Logger;
   private _coverDB: CoverDB;
   private _musicDir: string;
   private _albums: {[id: string]: Album};
 
   constructor(context: Context) {
-    this.logger = context.logger;
+    this._logger = context.logger;
     this._coverDB = context.coverDB;
     this._musicDir = context.config.musicDir;
     this._albums = {};
@@ -26,34 +27,34 @@ export class AlbumDB {
     this._coverDB.storeAlbumCover(id, join(path, 'cover.jpg'));
   }
 
-  public async update() {
+  public async update(): Promise<{count: number}> {
     this._albums = {};
-    this.logger.info('Searching for albums in ' + this._musicDir);
+    this._logger.info('Searching for albums in ' + this._musicDir);
     let finder = new AlbumFinder({
-      logger: this.logger,
+      logger: this._logger,
       albumDB: this
     });
     await finder.find(this._musicDir);
     let count = Object.keys(this._albums).length;
-    this.logger.info(`Found ${count} albums`);
+    this._logger.info(`Found ${count} albums`);
     return {count};
   }
 
-  public getAlbum(id) {
+  public getAlbum(id: string): Album | null {
     return this._albums[id] || null;
   }
 
-  public getAlbumIds() {
+  public getAlbumIds(): string[] {
     return Object.keys(this._albums);
   }
 
-  public search(terms, limit = 20) {
+  public search(terms: string[], limit = 20): AlbumSearchResult[] {
     let result = [];
     for (let id in this._albums) {
       let album = this._albums[id];
       let tracks = album.tracks.filter(track => matches(track.title, terms));
       if (tracks.length || matches(album.name, terms)) {
-        result.push({album, tracks});
+        result.push({id, album, tracks});
         if (result.length >= limit) return result;
       }
     }
@@ -62,10 +63,16 @@ export class AlbumDB {
 
 }
 
-function matches(string, terms) {
+function matches(string: string, terms: string[]): boolean {
   if (!terms || !string) {
     return false;
   }
   let parts = string.toLowerCase().split(/\s/);
   return terms.every(term => parts.some(part => !part.indexOf(term.toLowerCase())));
+}
+
+interface AlbumSearchResult {
+  id: string;
+  album: Album;
+  tracks: Track[];
 }

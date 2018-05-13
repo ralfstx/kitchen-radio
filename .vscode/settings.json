@@ -21,11 +21,11 @@
   },
 
   // add print margins at 100 and 120 chars
-  "editor.rulers": [100],
+  "editor.rulers": [100, 120],
 
   // spellcheck dictionary
   "cSpell.words": [
+    "albumartist",
     "flac"
   ]
-
 }

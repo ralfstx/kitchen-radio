@@ -20,7 +20,7 @@ Id: 25`;
 describe('player', function() {
 
   let player: Player;
-  let mpdClient;
+  let mpdClient: any;
 
   beforeEach(async function() {
     let logger = {debug: spy(), info: spy(), warn: spy(), error: spy()};
@@ -52,7 +52,7 @@ describe('player', function() {
       _listeners: {},
       sendCommand: stub(),
       sendCommands: stub(),
-      on(name, fn) {
+      on(name: string, fn: any) {
         this._listeners[name] = fn;
         return this;
       }

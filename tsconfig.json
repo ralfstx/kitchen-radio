@@ -2,13 +2,18 @@
   "compilerOptions": {
     "target": "es2017",
     "lib": ["es2017"],
-    "rootDir": "src",
-    "outDir": "dist",
+    "rootDirs": [
+      "src",
+      "test"
+    ],
+    "outDir": "out",
     "module": "commonjs",
     "strict": false,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
     "sourceMap": true
   },
   "include": [
-    "src/**/*"
+    "**/*.ts"
   ]
 }

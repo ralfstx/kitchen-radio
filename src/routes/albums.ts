@@ -92,7 +92,7 @@ export function albumsRouter(context: Context) {
       res.render('search', {query});
     } else {
       res.json(albumDB.search(terms).map(match => ({
-        id: match.album.id,
+        id: match.id,
         name: match.album.name,
         tracks: match.tracks.map(track => match.album.tracks.indexOf(track))
       })));

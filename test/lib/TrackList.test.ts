@@ -5,8 +5,8 @@ import {TrackList} from '../../src/lib/TrackList';
 
 describe('TrackList', function() {
 
-  let track;
-  let trackList;
+  let track: Track;
+  let trackList: TrackList;
 
   beforeEach(function() {
     track = new Track('foo');

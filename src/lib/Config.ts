@@ -1,6 +1,6 @@
 import { readJson } from 'fs-extra';
 
-const CONFIG_VARS = {
+const CONFIG_VARS: {[key: string]: ConfigSpec} = {
   port: {type: 'validPort', default: 8080},
   mpdPort: {type: 'validPort', default: 6600},
   mpdHost: {type: 'nonEmpty', default: 'localhost'},
@@ -56,13 +56,13 @@ export class Config {
    * @property {string} file the config file to read
    * @returns {Promise<Config>}
    */
-  public static async readFromFile(file): Promise<Config> {
+  public static async readFromFile(file: string): Promise<Config> {
     return new Config(await readConfigFile(file));
   }
 
 }
 
-async function readConfigFile(file) {
+async function readConfigFile(file: string) {
   try {
     return await readJson(file);
   } catch (err) {
@@ -70,7 +70,7 @@ async function readConfigFile(file) {
   }
 }
 
-function extractConfigValues(target, values) {
+function extractConfigValues(target: object, values: any) {
   for (let name in CONFIG_VARS) {
     let spec = CONFIG_VARS[name];
     if (!(name in values) && !('default' in spec)) {
@@ -82,7 +82,7 @@ function extractConfigValues(target, values) {
   }
 }
 
-function checkType(type, value, handler) {
+function checkType(type: string, value: any, handler: (message: string) => any) {
   if (type === 'validPort') return requireValidPort(value, handler);
   if (type === 'nonEmpty') return requireNonEmpty(value, handler);
   if (type === 'logLevel') return requireLogLevel(value, handler);
@@ -121,4 +121,9 @@ function configError(name: string) {
   return (message: string) => {
     throw new Error(`Invalid config value for '${name}': ${message}`);
   };
+}
+
+interface ConfigSpec {
+  type: string;
+  default?: any;
 }

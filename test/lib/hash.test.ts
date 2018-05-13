@@ -10,7 +10,7 @@ const TEST_STR_SHA1 = 'ea3ec3b9fb22a45ddbd33b144b5d35acc52ae91a';
 
 describe('hash', function() {
 
-  let dirname;
+  let dirname: string;
 
   beforeEach(function() {
     dirname = tmpdir();

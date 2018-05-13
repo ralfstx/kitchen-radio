@@ -109,11 +109,16 @@ describe('AlbumDB', function() {
     });
 
     it('returns matching albums', function() {
-      expect(albumDB.search(['colt'])).to.eql([{album: albumDB.getAlbum('4dc98dd6'), tracks: []}]);
+      expect(albumDB.search(['colt'])).to.eql([{
+        id: '4dc98dd6',
+        album: albumDB.getAlbum('4dc98dd6'),
+        tracks: []
+      }]);
     });
 
     it('returns matching tracks', function() {
       expect(albumDB.search(['pig', 'wing'])).to.eql([{
+        id: '7ffe1e9d',
         album: albumDB.getAlbum('7ffe1e9d'),
         tracks: [albumDB.getAlbum('7ffe1e9d').tracks[0], albumDB.getAlbum('7ffe1e9d').tracks[4]]
       }]);

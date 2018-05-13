@@ -7,7 +7,7 @@ import { promisify } from './util';
 
 let magickResize = promisify(resize);
 
-export function resizeImage(srcPath, dstPath, size) {
+export function resizeImage(srcPath: string, dstPath: string, size: number) {
   return magickResize({
     srcPath,
     dstPath,

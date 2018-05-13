@@ -1,6 +1,6 @@
 import { parse as parseUrl } from 'url';
 import * as mpd from 'mpd';
-import * as fetch from 'node-fetch';
+import fetch from 'node-fetch';
 import { AlbumDB } from './AlbumDB';
 import { Config } from './Config';
 import { Context } from './Context';
@@ -10,14 +10,14 @@ import { readProps } from './util';
 
 export class Player {
 
-  public onStatusChange: (status: string) => void;
-  private logger: Logger;
+  public onStatusChange: (status: any) => void;
+  private _logger: Logger;
   private _albumDb: AlbumDB;
   private _config: Config;
-  private _mpdClient: any;
+  private _mpdClient: mpd.Client;
 
   constructor(context: Context) {
-    this.logger = context.logger;
+    this._logger = context.logger;
     this._albumDb = context.albumDB;
     this._config = context.config;
     // TODO better event mechanism
@@ -30,15 +30,15 @@ export class Player {
       let port = this._config.mpdPort;
       this._mpdClient = mpd.connect({host, port})
         .on('ready', () => {
-          this.logger.info(`Connected to mpd on ${host}, port ${port}`);
+          this._logger.info(`Connected to mpd on ${host}, port ${port}`);
           resolve();
         })
         .on('error', (err) => {
-          this.logger.error('mpd error', err);
+          this._logger.error('mpd error', err);
           reject(err);
         })
         .on('end', () => {
-          this.logger.error('mpd disconnected');
+          this._logger.error('mpd disconnected');
         })
         .on('system-player', () => this._notifyStatusChange())
         .on('system-playlist', () => this._notifyStatusChange());
@@ -79,13 +79,13 @@ export class Player {
 
   // PLAYLIST MODIFICATION
 
-  public async append(urls) {
+  public async append(urls: string[]) {
     // TODO keep track of changes to playlist
     let playCommands = await this._toCommands(urls);
     await this._sendCommands([...playCommands, 'play']);
   }
 
-  public async replace(urls) {
+  public async replace(urls: string[]) {
     // TODO keep track of changes to playlist
     let playCommands = await this._toCommands(urls);
     await this._sendCommands(['clear', ...playCommands, 'play']);
@@ -96,27 +96,21 @@ export class Player {
   }
 
   private _notifyStatusChange() {
-    this.logger.info('mpd status changed');
+    this._logger.info('mpd status changed');
     this._sendCommand('status')
       .then(readProps)
-      .then(status => this._notify('onStatusChange', status))
+      .then(status => this.onStatusChange && this.onStatusChange(status))
       .catch(() => null); // MPD error logged in _sendCommand
-  }
-
-  private _notify(name: string, event: {}) {
-    if (name in this) {
-      this[name](event);
-    }
   }
 
   private async _sendCommand(command: string) {
     return new Promise((resolve, reject) => {
       this._mpdClient.sendCommand(command, (err, result) => {
         if (err) {
-          this.logger.error(`Failed to send mpd command '${command}'`, err);
+          this._logger.error(`Failed to send mpd command '${command}'`, err);
           reject(new Error('Command failed'));
         } else {
-          this.logger.debug(`Sent mpd command '${command}'`);
+          this._logger.debug(`Sent mpd command '${command}'`);
           resolve(result);
         }
       });
@@ -125,13 +119,13 @@ export class Player {
 
   private async _sendCommands(commands: string[]) {
     return new Promise((resolve, reject) => {
-      this._mpdClient.sendCommands(commands, (err, result) => {
+      this._mpdClient.sendCommands(commands, (err: any, result: string) => {
         let commandsStr = commands.map(command => `'${command}'`).join(', ');
         if (err) {
-          this.logger.error(`Failed to send mpd commands ${commandsStr}`, err);
+          this._logger.error(`Failed to send mpd commands ${commandsStr}`, err);
           reject(new Error('Command failed'));
         } else {
-          this.logger.debug(`Sent mpd commands ${commandsStr}`);
+          this._logger.debug(`Sent mpd commands ${commandsStr}`);
           resolve(result);
         }
       });
@@ -140,7 +134,7 @@ export class Player {
 
   private _extractPlaylist(msg: string) {
     let playlist: any[] = [];
-    let entry = {};
+    let entry = {} as any;
     readProps(msg, (key, value) => {
       if (key === 'file') {
         entry = {};
@@ -199,7 +193,7 @@ export class Player {
     return track;
   }
 
-  private async _toCommands(urls: any) {
+  private async _toCommands(urls: string[]) {
     let commands: string[] = [];
     for (let url of urls) {
       if (url.startsWith('/')) {
@@ -218,7 +212,7 @@ export class Player {
 
 }
 
-async function getText(url: any) {
+async function getText(url: string): Promise<string> {
   let response = await fetch(url);
   return await response.text();
 }

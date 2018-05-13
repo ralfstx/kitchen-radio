@@ -15,9 +15,11 @@ export class Logger extends winston.Logger {
 
   constructor(config: Config) {
     let level = config.logLevel;
+    let levels = winston.config.npm.levels;
     let filename = join(config.logDir, 'server.log');
     super({
       level,
+      levels,
       transports: [
         new winston.transports.Console({
           level,
@@ -42,4 +44,8 @@ export class Logger extends winston.Logger {
     });
   }
 
+  // overriding the builtin field, because it's missing in @types/winston
+  get levels() {
+    return winston.config.npm.levels;
+  }
 }

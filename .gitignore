@@ -2,7 +2,7 @@
 .settings/
 .history/
 dist/
-build/
+out/
 node_modules/
 npm-debug.log*
 *.log
