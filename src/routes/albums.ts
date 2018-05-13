@@ -2,18 +2,19 @@ import { Router } from 'express';
 import { join } from 'path';
 import { Context } from '../lib/Context';
 import { isHtml } from '../lib/Server';
+import { ensure } from '../lib/util';
 
 export function albumsRouter(context: Context) {
-  let logger = context.logger;
-  let albumDB = context.albumDB;
-  let coverDB = context.coverDB;
-  let musicDir = context.config.musicDir;
+  let logger = ensure(context.logger);
+  let albumDB = ensure(context.albumDB);
+  let coverDB = ensure(context.coverDB);
+  let musicDir = ensure(context.config).musicDir;
   let router = Router();
   router.get('/', (req, res) => {
     if (isHtml(req)) {
       res.render('albums', {});
     } else {
-      let index = albumDB.getAlbumIds().map(id => ({id, name: albumDB.getAlbum(id).name}));
+      let index = albumDB.getAlbumIds().map(id => ({id, name: albumDB.getAlbum(id)!.name}));
       res.json(index);
     }
   });

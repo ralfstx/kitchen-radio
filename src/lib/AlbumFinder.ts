@@ -12,7 +12,7 @@ import { statSafe } from './files';
 export class AlbumFinder {
   private _logger: Logger;
   private _albumDB: AlbumDB;
-  private _baseDir: string;
+  private _baseDir: string | undefined;
 
   constructor(context: {logger: Logger, albumDB: AlbumDB}) {
     this._logger = context.logger;
@@ -20,10 +20,9 @@ export class AlbumFinder {
   }
 
   public async find(baseDir: string): Promise<void> {
-    if (this._baseDir) throw new Error('concurrent access');
+    if (this._baseDir) throw new Error('instance already in use');
     this._baseDir = baseDir;
     await this._processDir(baseDir);
-    this._baseDir = null;
   }
 
   private async _processDir(path: string): Promise<void> {
@@ -46,7 +45,7 @@ export class AlbumFinder {
 
   private async _hasIndex(folder: string): Promise<boolean> {
     let stats = await statSafe(join(folder, 'index.json'));
-    return stats && stats.isFile();
+    return !!stats && stats.isFile();
   }
 
   private async _loadAlbumFromIndex(path: string): Promise<void> {
@@ -57,7 +56,7 @@ export class AlbumFinder {
       this._logger.warn(`Album name missing in '${path}'`);
       return;
     }
-    let album = createAlbumFromIndex(relative(this._baseDir, path), data);
+    let album = createAlbumFromIndex(relative(this._baseDir!, path), data);
     this._albumDB.addAlbum(album, path);
   }
 
@@ -71,14 +70,14 @@ export class AlbumFinder {
     return new Album([trackList], {name});
   }
 
-  private async _findTracks(path: string): Promise<TrackList> {
+  private async _findTracks(path: string): Promise<TrackList | null> {
     let tracks = [];
     for (let name of await this._readdirSafe(path)) {
       let file = join(path, name);
       let stats = await statSafe(file);
       if (stats && stats.isFile() && this._isSupportedFile(file)) {
         let metadata = await this._readMetadataSafe(file);
-        tracks.push(new Track(relative(this._baseDir, file), metadata));
+        tracks.push(new Track(relative(this._baseDir!, file), metadata));
       }
     }
     return tracks.length ? new TrackList(tracks) : null;

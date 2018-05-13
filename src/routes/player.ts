@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import { Context } from '../lib/Context';
+import { ensure } from '../lib/util';
 
 export function playerRouter(context: Context) {
-  let player = context.player;
+  let player = ensure(context.player);
   let router = Router();
   router.get('/status', (req, res, next) => {
     player.status().then(data => res.json(data)).catch(err => next(err));

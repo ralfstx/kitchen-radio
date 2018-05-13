@@ -1,4 +1,4 @@
-import { pick, promisify, readProps, toJson } from '../../src/lib/util';
+import { ensure, pick, promisify, readProps, toJson } from '../../src/lib/util';
 import { catchError, expect } from '../test';
 
 describe('util', function() {
@@ -98,6 +98,21 @@ describe('util', function() {
       let obj = {foo: 23, bar: 42, baz: 4711};
       let res = pick(obj, ['foo', 'bar']);
       expect(res).to.deep.equal({foo: 23, bar: 42});
+    });
+  });
+
+  describe('ensure', function() {
+    it('returns original value', function() {
+      let obj = {};
+      expect(ensure(obj)).to.equal(obj);
+    });
+
+    it('throws with undefined', function() {
+      expect(() => ensure(undefined)).to.throw(Error, 'value is undefined');
+    });
+
+    it('throws with null', function() {
+      expect(() => ensure(null)).to.throw(Error, 'value is null');
     });
   });
 

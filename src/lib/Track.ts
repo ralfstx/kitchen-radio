@@ -25,7 +25,7 @@ export class Track {
     this._title = metadata.title || '';
     this._albumArtist = metadata.albumArtist || '';
     this._albumTitle = metadata.albumTitle || '';
-    this._length = metadata.length >= 0 ? Math.ceil(metadata.length) : 0;
+    this._length = metadata.length && metadata.length > 0 ? Math.ceil(metadata.length) : 0;
   }
 
   /**

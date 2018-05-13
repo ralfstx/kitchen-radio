@@ -4,6 +4,7 @@ import { resizeImage } from '../lib/images';
 import { Context } from './Context';
 import { Logger } from './Logger';
 import { statSafe } from './files';
+import { ensure } from './util';
 
 const SIZE_CLASSES = [100, 250];
 
@@ -14,8 +15,8 @@ export class CoverDB {
   private _map: Map<string, string>;
 
   constructor(context: Context) {
-    this._logger = context.logger;
-    this._coverDir = resolve(context.config.cacheDir, 'cover');
+    this._logger = ensure(context.logger);
+    this._coverDir = resolve(ensure(context.config).cacheDir, 'cover');
     this._map = new Map();
   }
 

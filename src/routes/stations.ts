@@ -2,10 +2,11 @@ import { Router } from 'express';
 import { resolve } from 'path';
 import { Context } from '../lib/Context';
 import { isHtml } from '../lib/Server';
+import { ensure } from '../lib/util';
 
 export function stationsRouter(context: Context) {
-  let stationDB = context.stationDB;
-  let musicDir = context.config.musicDir;
+  let stationDB = ensure(context.stationDB);
+  let musicDir = ensure(context.config).musicDir;
   let router = Router();
   router.get('/', (req, res) => {
     let index = stationDB.getStationIds().map(id => stationDB.getStation(id));

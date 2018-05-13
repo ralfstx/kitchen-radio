@@ -28,11 +28,11 @@ async function start() {
   context.set('player', new Player(context));
   context.set('server', new Server(context));
   context.set('wsServer', new WSServer(context));
-  await context.albumDB.update();
-  await context.stationDB.update();
-  await context.coverDB.init();
-  await context.player.connectMpd();
-  await context.server.start();
-  await context.wsServer.start();
-  context.logger.info('Server started');
+  await context.albumDB!.update();
+  await context.stationDB!.update();
+  await context.coverDB!.init();
+  await context.player!.connectMpd();
+  await context.server!.start();
+  await context.wsServer!.start();
+  context.logger!.info('Server started');
 }

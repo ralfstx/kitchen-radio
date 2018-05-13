@@ -1,5 +1,7 @@
 import * as bodyParser from 'body-parser';
 import * as express from 'express';
+import { ErrorRequestHandler } from 'express';
+import { Response } from 'express-serve-static-core';
 import { readFile } from 'fs-extra';
 import * as http from 'http';
 import * as morgan from 'morgan';
@@ -10,8 +12,7 @@ import { playerRouter } from '../routes/player';
 import { stationsRouter } from '../routes/stations';
 import { Context } from './Context';
 import { Logger } from './Logger';
-import { Response } from 'express-serve-static-core';
-import { ErrorRequestHandler } from 'express';
+import { ensure } from './util';
 
 const staticDir = join(__dirname, '../static');
 const viewsDir = join(__dirname, '../views');
@@ -21,11 +22,11 @@ export class Server {
   private _logger: Logger;
   private _port: number;
   private _app: express.Express;
-  public httpServer: http.Server;
+  private _httpServer: http.Server | undefined;
 
   constructor(context: Context) {
-    this._logger = context.logger;
-    this._port = context.config.port;
+    this._logger = ensure(context.logger);
+    this._port = ensure(context.config).port;
     this._app = express();
     this._app.use(createLogAppender(this._logger));
     this._app.use(bodyParser.json());
@@ -46,13 +47,19 @@ export class Server {
 
   public async start() {
     return new Promise((resolve) => {
-      this.httpServer = this._app.listen(this._port, () => {
+      this._httpServer = this._app.listen(this._port, () => {
         this._logger.info(`HTTP server listening on port ${this._port}`);
         resolve();
       });
     });
   }
 
+  public get httpServer(): http.Server {
+    if (!this._httpServer) {
+      throw new Error('not started');
+    }
+    return this._httpServer;
+  }
 }
 
 export function isHtml(req: express.Request) {

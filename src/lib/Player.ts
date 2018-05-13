@@ -1,25 +1,25 @@
-import { parse as parseUrl } from 'url';
 import * as mpd from 'mpd';
 import fetch from 'node-fetch';
+import { parse as parseUrl } from 'url';
 import { AlbumDB } from './AlbumDB';
 import { Config } from './Config';
 import { Context } from './Context';
 import { Logger } from './Logger';
 import { isPlaylist, readFiles } from './Playlist';
-import { readProps } from './util';
+import { ensure, readProps } from './util';
 
 export class Player {
 
-  public onStatusChange: (status: any) => void;
+  public onStatusChange: ((status: any) => void) | null;
   private _logger: Logger;
   private _albumDb: AlbumDB;
   private _config: Config;
-  private _mpdClient: mpd.Client;
+  private _mpdClient: mpd.Client | undefined;
 
   constructor(context: Context) {
-    this._logger = context.logger;
-    this._albumDb = context.albumDB;
-    this._config = context.config;
+    this._logger = ensure(context.logger);
+    this._albumDb = ensure(context.albumDB);
+    this._config = ensure(context.config);
     // TODO better event mechanism
     this.onStatusChange = null;
   }
@@ -39,6 +39,7 @@ export class Player {
         })
         .on('end', () => {
           this._logger.error('mpd disconnected');
+          delete this._mpdClient;
         })
         .on('system-player', () => this._notifyStatusChange())
         .on('system-playlist', () => this._notifyStatusChange());
@@ -105,6 +106,9 @@ export class Player {
 
   private async _sendCommand(command: string) {
     return new Promise((resolve, reject) => {
+      if (!this._mpdClient) {
+        throw new Error('not connected');
+      }
       this._mpdClient.sendCommand(command, (err, result) => {
         if (err) {
           this._logger.error(`Failed to send mpd command '${command}'`, err);
@@ -119,6 +123,9 @@ export class Player {
 
   private async _sendCommands(commands: string[]) {
     return new Promise((resolve, reject) => {
+      if (!this._mpdClient) {
+        throw new Error('not connected');
+      }
       this._mpdClient.sendCommands(commands, (err: any, result: string) => {
         let commandsStr = commands.map(command => `'${command}'`).join(', ');
         if (err) {
@@ -147,7 +154,7 @@ export class Player {
 
   private _processPlaylistEntry(item: any) {
     let url = parseUrl(item.file);
-    if (url.hostname === 'localhost') {
+    if (url.hostname === 'localhost' && url.pathname) {
       let info = this._extractTrackInfo(url.pathname);
       if (info) {
         let track = this._findTrack(info);
@@ -170,7 +177,7 @@ export class Player {
     };
   }
 
-  private _extractTrackInfo(path: string | undefined) {
+  private _extractTrackInfo(path: string) {
     let parts = path.split('/').filter(part => part.length);
     if (parts[0] === 'albums') {
       let album = parts[1];

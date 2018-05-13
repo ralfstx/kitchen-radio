@@ -35,7 +35,7 @@ describe('CoverDB', function() {
       let result = await coverDB.getAlbumCover('foo');
 
       expect(result).not.to.be.null;
-      expect(statSync(result).size).to.be.above(0);
+      expect(statSync(result!).size).to.be.above(0);
     });
 
     it('returns existing file for valid id and size', async function() {
@@ -44,7 +44,7 @@ describe('CoverDB', function() {
       let result = await coverDB.getAlbumCover('foo', 100);
 
       expect(result).not.to.be.null;
-      expect(statSync(result).size).to.be.above(0);
+      expect(statSync(result!).size).to.be.above(0);
     });
 
     it('returns different files for different sizes', async function() {
@@ -54,7 +54,7 @@ describe('CoverDB', function() {
       let result100 = await coverDB.getAlbumCover('foo', 100);
 
       expect(result).not.to.equal(result100);
-      expect(statSync(result).size).not.to.equal(statSync(result100).size);
+      expect(statSync(result!).size).not.to.equal(statSync(result100!).size);
     });
 
     it('returns same files for subsequent calls', async function() {
@@ -64,7 +64,7 @@ describe('CoverDB', function() {
       let result2 = await coverDB.getAlbumCover('foo', 100);
 
       expect(result1).to.equal(result2);
-      expect(statSync(result1).mtime).to.deep.equal(statSync(result2).mtime);
+      expect(statSync(result1!).mtime).to.deep.equal(statSync(result2!).mtime);
     });
 
   });

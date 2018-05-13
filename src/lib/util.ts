@@ -19,7 +19,9 @@ export function readProps(data: string, callback = defCallback): {[key: string]:
 }
 
 function defCallback(key: string, value: string, properties?: {[key: string]: string}) {
-  properties[key] = value;
+  if (properties) {
+    properties[key] = value;
+  }
 }
 
 export function toJson(data: any) {
@@ -60,4 +62,21 @@ export function pick(obj: {[key: string]: any}, keys: string[]): {[key: string]:
     }
   }
   return res;
+}
+
+/**
+ * Ensures that the provided value is not `null` or `undefined` and returns it.
+ * Throws if the value is `null` or `undefined`.
+ *
+ * @param value any value
+ * @returns the value provided as argument
+ */
+export function ensure<T>(value: T | null | undefined): T {
+  if (typeof value === 'undefined') {
+    throw new Error('value is undefined');
+  }
+  if (value === null) {
+    throw new Error('value is null');
+  }
+  return value;
 }

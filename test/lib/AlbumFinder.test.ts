@@ -1,24 +1,26 @@
 import { mkdirs, writeFile, writeJson } from 'fs-extra';
 import { join } from 'path';
+import { SinonSpy } from 'sinon';
 import { Album } from '../../src/lib/Album';
 import { AlbumFinder } from '../../src/lib/AlbumFinder';
-import { Context } from '../../src/lib/Context';
 import { Metadata } from '../../src/lib/Metadata';
 import { expect, restore, spy, stub, tmpdir } from '../test';
+import { AlbumDB } from './AlbumDB';
+import { Logger } from './Logger';
 
 describe('AlbumFinder', function() {
 
   let baseDir: string;
-  let albumDB: { addAlbum: sinon.SinonSpy };
-  let logger;
+  let albumDB: AlbumDB & {addAlbum: SinonSpy};
+  let logger: Logger;
   let albumFinder: AlbumFinder;
   let metadataStub: sinon.SinonStub;
 
   beforeEach(async function() {
     baseDir = tmpdir();
-    logger = { info: spy(), warn: spy() };
-    albumDB = { addAlbum: spy() };
-    albumFinder = new AlbumFinder(new Context({logger, albumDB}));
+    logger = { info: spy(), warn: spy() } as any;
+    albumDB = { addAlbum: spy() } as any;
+    albumFinder = new AlbumFinder({logger, albumDB});
     metadataStub = stub(Metadata, 'getTrackMetadata');
   });
 

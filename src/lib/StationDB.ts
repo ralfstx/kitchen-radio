@@ -3,6 +3,7 @@ import { basename, dirname, join } from 'path';
 import { Context } from './Context';
 import { Logger } from './Logger';
 import { statSafe } from './files';
+import { ensure } from './util';
 
 export class StationDB {
 
@@ -12,8 +13,8 @@ export class StationDB {
   private _stations: Map<string, any>;
 
   constructor(context: Context) {
-    this._logger = context.logger;
-    this._musicDir = context.config.musicDir;
+    this._logger = ensure(context.logger);
+    this._musicDir = ensure(context.config).musicDir;
     this._ids = [];
     this._stations = new Map();
   }

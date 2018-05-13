@@ -3,9 +3,10 @@ import { crc32Str } from '../lib/hash';
 import { Album } from './Album';
 import { AlbumFinder } from './AlbumFinder';
 import { Context } from './Context';
-import { Logger } from './Logger';
 import { CoverDB } from './CoverDB';
+import { Logger } from './Logger';
 import { Track } from './Track';
+import { ensure } from './util';
 
 export class AlbumDB {
 
@@ -15,9 +16,9 @@ export class AlbumDB {
   private _albums: {[id: string]: Album};
 
   constructor(context: Context) {
-    this._logger = context.logger;
-    this._coverDB = context.coverDB;
-    this._musicDir = context.config.musicDir;
+    this._logger = ensure(context.logger);
+    this._coverDB = ensure(context.coverDB);
+    this._musicDir = ensure(context.config).musicDir;
     this._albums = {};
   }
 

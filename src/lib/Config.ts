@@ -15,37 +15,37 @@ export class Config {
   /**
    * The port to start the server
    */
-  public readonly port: number;
+  public readonly port!: number;
 
   /**
    * The hostname of the mpd server to connect to
    */
-  public readonly mpdHost: string;
+  public readonly mpdHost!: string;
 
   /**
    * The port of the mpd server to connect to
    */
-  public readonly mpdPort: number;
+  public readonly mpdPort!: number;
 
   /**
    * The directory to search for music.
    */
-  public readonly musicDir: string;
+  public readonly musicDir!: string;
 
   /**
    * The directory to put cache data.
    */
-  public readonly cacheDir: string;
+  public readonly cacheDir!: string;
 
   /**
    * The directory to put log files.
    */
-  public readonly logDir: string;
+  public readonly logDir!: string;
 
    /**
     * The log level.
     */
-  public readonly logLevel: 'info'|'debug'|'warn'|'error';
+  public readonly logLevel!: 'info'|'debug'|'warn'|'error';
 
   public constructor(values: any) {
     extractConfigValues(this, values);

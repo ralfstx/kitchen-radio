@@ -22,7 +22,7 @@ describe('files', function() {
 
       let stats = await statSafe(path);
 
-      expect(stats.isFile()).to.be.true;
+      expect(stats!.isFile()).to.be.true;
     });
 
     it('returns null for missing file', async function() {

@@ -67,15 +67,15 @@ describe('AlbumDB', function() {
 
     it('returns requested album', function() {
       expect(albumDB.getAlbum('7ffe1e9d')).to.be.instanceof(Album);
-      expect(albumDB.getAlbum('7ffe1e9d').artist).to.equal('Pink Floyd');
+      expect(albumDB.getAlbum('7ffe1e9d')!.artist).to.equal('Pink Floyd');
     });
 
     it('returns album with track and correct paths', async function() {
       let id = albumDB.getAlbumIds()[0];
       let album = albumDB.getAlbum(id);
 
-      expect(album.tracks).to.have.length(5);
-      expect(album.tracks[0].path).to.equal('albums/animals/01.ogg');
+      expect(album!.tracks).to.have.length(5);
+      expect(album!.tracks[0].path).to.equal('albums/animals/01.ogg');
     });
 
   });
@@ -120,7 +120,7 @@ describe('AlbumDB', function() {
       expect(albumDB.search(['pig', 'wing'])).to.eql([{
         id: '7ffe1e9d',
         album: albumDB.getAlbum('7ffe1e9d'),
-        tracks: [albumDB.getAlbum('7ffe1e9d').tracks[0], albumDB.getAlbum('7ffe1e9d').tracks[4]]
+        tracks: [albumDB.getAlbum('7ffe1e9d')!.tracks[0], albumDB.getAlbum('7ffe1e9d')!.tracks[4]]
       }]);
     });
 

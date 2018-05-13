@@ -77,7 +77,6 @@ describe('StationDB', function() {
     });
 
     it('returns null for unknown ids', function() {
-      expect(db.getStation(null)).to.be.null;
       expect(db.getStation('')).to.be.null;
       expect(db.getStation('foo')).to.be.null;
     });

@@ -50,7 +50,7 @@ export class Album {
    * a list of all tracks in this album
    */
   get tracks(): Track[] {
-    return this._discs.reduce((prev, curr) => prev.concat(curr.tracks), []);
+    return this._discs.reduce((prev, curr) => prev.concat(curr.tracks), [] as Track[]);
   }
 
   /**

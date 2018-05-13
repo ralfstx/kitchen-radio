@@ -10,7 +10,7 @@ import { Stats, stat } from 'fs-extra';
  * @param path the path to get stats for
  * @returns the stats of the file if available, `null` otherwise
  */
-export async function statSafe(path: string): Promise<Stats> {
+export async function statSafe(path: string): Promise<Stats | null> {
   try {
     return await stat(path);
   } catch (error) {

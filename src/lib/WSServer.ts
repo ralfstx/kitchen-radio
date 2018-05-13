@@ -3,6 +3,7 @@ import { Context } from './Context';
 import { Logger } from './Logger';
 import { Player } from './Player';
 import { Server } from './Server';
+import { ensure } from './util';
 
 export class WSServer {
 
@@ -27,9 +28,9 @@ export class WSServer {
   };
 
   constructor(context: Context) {
-    this._logger = context.logger;
-    this._player = context.player;
-    this._server = context.server;
+    this._logger = ensure(context.logger);
+    this._player = ensure(context.player);
+    this._server = ensure(context.server);
     this._connections = new Set();
     this._player.onStatusChange = status => this.broadcast('status', status);
   }
@@ -58,7 +59,7 @@ export class WSServer {
   }
 
   private _handleMessage(message: IMessage, connection: Connection) {
-    if (message.type === 'utf8') {
+    if (message.type === 'utf8' && message.utf8Data) {
       let data = JSON.parse(message.utf8Data);
       if (data.command in this._handlers) {
         this._handlers[data.command](data.args || {}, connection)
