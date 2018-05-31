@@ -37,7 +37,7 @@ export class AlbumDB {
       albumDB: this
     });
     await finder.find(this._musicDir);
-    let count = Object.keys(this._albums).length;
+    let count = this._albums.size;
     this._logger.info(`Found ${count} albums`);
     return {count};
   }

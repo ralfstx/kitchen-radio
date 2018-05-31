@@ -34,6 +34,12 @@ describe('AlbumDB', function() {
       expect(albumDB.getAlbumIds().length).to.be.above(1);
     });
 
+    it('returns number of albums found', async function() {
+      let {count} = await albumDB.update();
+
+      expect(count).to.be.above(1);
+    });
+
     it('does not append albums to existing when called twice', async function() {
       let origLength = albumDB.getAlbumIds().length;
       await albumDB.update();
