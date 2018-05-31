@@ -1,9 +1,9 @@
 import { readJson, readdir } from 'fs-extra';
 import { basename, extname, join, relative } from 'path';
-import { Metadata, AudioFileMetadata } from '../lib/Metadata';
+import { AudioFileMetadata, Metadata } from '../lib/Metadata';
 import { Album } from './Album';
 import { AlbumDB } from './AlbumDB';
-import { createAlbumFromIndex } from './AlbumIndex';
+import { readAlbumFromIndex } from './AlbumIndex';
 import { Logger } from './Logger';
 import { Track } from './Track';
 import { TrackList } from './TrackList';
@@ -56,7 +56,7 @@ export class AlbumFinder {
       this._logger.warn(`Album name missing in '${path}'`);
       return;
     }
-    let album = createAlbumFromIndex(relative(this._baseDir!, path), data);
+    let album = readAlbumFromIndex(relative(this._baseDir!, path), data);
     this._albumDB.addAlbum(album, path);
   }
 
