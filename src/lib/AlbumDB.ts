@@ -2,6 +2,7 @@ import { join } from 'path';
 import { crc32Str } from '../lib/hash';
 import { Album } from './Album';
 import { AlbumFinder } from './AlbumFinder';
+import { writeAlbumIndex } from './AlbumIndex';
 import { Context } from './Context';
 import { CoverDB } from './CoverDB';
 import { Logger } from './Logger';
@@ -13,23 +14,23 @@ export class AlbumDB {
   private _logger: Logger;
   private _coverDB: CoverDB;
   private _musicDir: string;
-  private _albums: {[id: string]: Album};
+  private _albums: Map<string, {album: Album, path: string}>;
 
   constructor(context: Context) {
     this._logger = ensure(context.logger);
     this._coverDB = ensure(context.coverDB);
     this._musicDir = ensure(context.config).musicDir;
-    this._albums = {};
+    this._albums = new Map();
   }
 
   public addAlbum(album: Album, path: string) {
     let id = crc32Str(album.name);
-    this._albums[id] = album;
+    this._albums.set(id, {album, path});
     this._coverDB.storeAlbumCover(id, join(path, 'cover.jpg'));
   }
 
   public async update(): Promise<{count: number}> {
-    this._albums = {};
+    this._albums.clear();
     this._logger.info('Searching for albums in ' + this._musicDir);
     let finder = new AlbumFinder({
       logger: this._logger,
@@ -42,17 +43,17 @@ export class AlbumDB {
   }
 
   public getAlbum(id: string): Album | null {
-    return this._albums[id] || null;
+    let entry = this._albums.get(id);
+    return entry ? entry.album : null;
   }
 
   public getAlbumIds(): string[] {
-    return Object.keys(this._albums);
+    return [...this._albums.keys()];
   }
 
   public search(terms: string[], limit = 20): AlbumSearchResult[] {
     let result = [];
-    for (let id in this._albums) {
-      let album = this._albums[id];
+    for (let [id, {album}] of this._albums) {
       let tracks = album.tracks.filter(track => matches(track.title, terms));
       if (tracks.length || matches(album.name, terms)) {
         result.push({id, album, tracks});
@@ -60,6 +61,14 @@ export class AlbumDB {
       }
     }
     return result;
+  }
+
+  public async saveAlbum(id: string): Promise<void> {
+    let entry = this._albums.get(id);
+    if (entry) {
+      let {album, path} = entry;
+      await writeAlbumIndex(path, album);
+    }
   }
 
 }

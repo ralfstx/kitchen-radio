@@ -60,6 +60,19 @@ export class Album {
     return this._metadata.tags || [];
   }
 
+  public addTags(tags: string[]) {
+    if (!this._metadata.tags) {
+      this._metadata.tags = [];
+    }
+    this._metadata.tags = this._metadata.tags.filter(tag => !tags.includes(tag));
+    this._metadata.tags.push(...tags);
+  }
+
+  public removeTags(tags: string[]) {
+    if (this._metadata.tags) {
+      this._metadata.tags = this._metadata.tags.filter(tag => !tags.includes(tag));
+    }
+  }
 }
 
 interface AlbumMetadata {

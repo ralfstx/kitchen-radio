@@ -115,4 +115,52 @@ describe('Album', function() {
 
   });
 
+  describe('addTags', function() {
+
+    it('sets tags when empty', function() {
+      album = new Album([]);
+
+      album.addTags(['foo', 'bar']);
+
+      expect(album.tags).to.deep.equal(['foo', 'bar']);
+    });
+
+    it('appends tags to existing', function() {
+      album = new Album([], {tags: ['foo', 'bar']});
+
+      album.addTags(['baz']);
+
+      expect(album.tags).to.deep.equal(['foo', 'bar', 'baz']);
+    });
+
+    it('does not add duplicates', function() {
+      album = new Album([], {tags: ['foo', 'bar']});
+
+      album.addTags(['foo', 'baz']);
+
+      expect(album.tags).to.have.length(3);
+    });
+
+  });
+
+  describe('removeTags', function() {
+
+    it('removes all tags', function() {
+      album = new Album([], {tags: ['foo', 'bar']});
+
+      album.removeTags(['foo', 'bar']);
+
+      expect(album.tags).to.be.empty;
+    });
+
+    it('keeps other tags', function() {
+      album = new Album([], {tags: ['foo', 'bar']});
+
+      album.removeTags(['bar', 'baz']);
+
+      expect(album.tags).to.deep.equal(['foo']);
+    });
+
+  });
+
 });

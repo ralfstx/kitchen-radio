@@ -15,7 +15,17 @@
       <h1>${title}</h1>
       <img width="250" height="250" v-bind:src="'/albums/' + album.id + '/cover?size=250'" />
       <div class="tags">
-        <span class="tag" v-for="tag in album.tags">{{tag}}</span>
+        <span class="tag" v-for="tag in album.tags">
+          {{tag}}
+          <span class="delete" v-on:click="removeTag(tag)">x</span>
+        </span>
+        <span class="link" v-if="editor.action !== 'add-tags'" @click="addTags()">add tags</span>
+        <input type="text"
+            v-if="editor.action === 'add-tags'"
+            v-focus
+            v-model="editor.model"
+            @keyup.enter="saveEdit()"
+            @keyup.esc="cancelEdit()">
       </div>
       <div v-for="(disc, dn) in album.discs">
         <h2 v-if="album.discs.length > 1">Disc {{dn + 1}}</h2>
@@ -33,13 +43,28 @@
       window.onload = function() {
         new Vue({
           el: '#app',
-          data: {
-            album: {}
+          directives: {
+            focus: {
+              inserted: function (el) {
+                el.focus();
+              }
+            }
           },
-          created: function() {
-            fetch('${url}?type=json').then(res => res.json()).then(album => this.album = album);
+          data: {
+            album: {},
+            editor: {}
+          },
+          created() {
+            this.loadAlbum();
           },
           methods: {
+            loadAlbum() {
+              fetch('${url}?type=json').then(res => res.json()).then(album => {
+                this.album = album;
+              }).catch(err => {
+                console.error('loading failed', err);
+              });
+            },
             play(track) {
               fetch('/player/replace', {
                 headers: {
@@ -48,6 +73,41 @@
                 },
                 method: 'POST',
                 body: JSON.stringify([track])
+              });
+            },
+            addTags() {
+              this.startEdit('add-tags', '', text => text.split(/\s+/).filter(part => !!part));
+            },
+            removeTag(tag) {
+              this.startEdit('remove-tags', [tag]);
+              this.saveEdit();
+            },
+            startEdit(action, start, converter) {
+              this.editor = {action, model: start, converter};
+            },
+            cancelEdit() {
+              this.editor = {};
+            },
+            saveEdit() {
+              let {action, model, converter} = this.editor;
+              let content = converter ? converter(model) : model;
+              fetch('${url}?type=json', {
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application/json'
+                },
+                method: 'POST',
+                body: JSON.stringify({action, content})
+              }).then((res) => {
+                if (res.status >= 400) {
+                  throw new Error('request failed: ' + res.statusText);
+                }
+                return res.json();
+              }).then(album => {
+                this.editor = {};
+                this.album = album;
+              }).catch(err => {
+                console.error('saving failed', err);
               });
             }
           }

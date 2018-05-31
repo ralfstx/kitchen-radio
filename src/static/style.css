@@ -40,8 +40,22 @@ div.tags {
 span.tag {
   color: white;
   background: lightslategrey;
-  padding: 0 5px;
+  padding: 4px 6px 2px;
   border-radius: 2px;
   margin-right: 5px;
   cursor: default;
+}
+
+span.delete {
+  cursor: pointer;
+  margin-left: 5px;
+  display: none;
+}
+span:hover span.delete {
+  display: inline;
+}
+
+span.link {
+  color: gray;
+  cursor: pointer;
 }
