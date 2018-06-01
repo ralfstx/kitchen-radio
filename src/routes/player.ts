@@ -1,43 +1,53 @@
-import { Router } from 'express';
+import * as bodyParser from 'koa-body';
+import * as Router from 'koa-router';
 import { Context } from '../lib/Context';
 import { ensure } from '../lib/util';
 
 export function playerRouter(context: Context) {
   let player = ensure(context.player);
-  let router = Router();
-  router.get('/status', (req, res, next) => {
-    player.status().then(data => res.json(data)).catch(err => next(err));
+  let router = new Router();
+  router.get('/status', async ctx => {
+    ctx.body = await player.status();
   });
-  router.get('/playlist', (req, res, next) => {
-    player.playlist().then(data => res.json(data)).catch(err => next(err));
+  router.get('/playlist', async ctx => {
+    ctx.body = await player.playlist();
   });
-  router.get('/play', (req, res, next) => {
-    player.play(req.query.pos || 0).then(() => res.json({})).catch(err => next(err));
+  router.get('/play', async ctx => {
+    await player.play(ctx.query.pos || 0);
+    ctx.body = {};
   });
-  router.get('/stop', (req, res, next) => {
-    player.stop().then(() => res.json({})).catch(err => next(err));
+  router.get('/stop', async ctx => {
+    await player.stop();
+    ctx.body = {};
   });
-  router.get('/pause', (req, res, next) => {
-    player.pause().then(() => res.json({})).catch(err => next(err));
+  router.get('/pause', async ctx => {
+    await player.pause();
+    ctx.body = {};
   });
-  router.get('/prev', (req, res, next) => {
-    player.prev().then(() => res.json({})).catch(err => next(err));
+  router.get('/prev', async ctx => {
+    await player.prev();
+    ctx.body = {};
   });
-  router.get('/next', (req, res, next) => {
-    player.next().then(() => res.json({})).catch(err => next(err));
+  router.get('/next', async ctx => {
+    await player.next();
+    ctx.body = {};
   });
-  router.post('/replace', (req, res, next) => {
-    if (!Array.isArray(req.body)) {
-      res.status(400).json({error: 'Not an array'});
+  router.post('/replace', bodyParser(), async ctx => {
+    if (!Array.isArray(ctx.request.body)) {
+      ctx.status = 400;
+      ctx.message = 'Not an array';
     } else {
-      player.replace(req.body).then(() => res.json({})).catch(err => next(err));
+      await player.replace(ctx.request.body);
+      ctx.body = {};
     }
   });
-  router.post('/append', (req, res, next) => {
-    if (!Array.isArray(req.body)) {
-      res.status(400).json({error: 'Not an array'});
+  router.post('/append', bodyParser(), async ctx => {
+    if (!Array.isArray(ctx.request.body)) {
+      ctx.status = 400;
+      ctx.message = 'Not an array';
     } else {
-      player.append(req.body).then(() => res.json({})).catch(err => next(err));
+      await player.append(ctx.request.body);
+      ctx.body = {};
     }
   });
   return router;

@@ -1,10 +1,9 @@
-import * as bodyParser from 'body-parser';
-import * as express from 'express';
-import { ErrorRequestHandler } from 'express';
-import { Response } from 'express-serve-static-core';
 import { readFile } from 'fs-extra';
 import * as http from 'http';
-import * as morgan from 'morgan';
+import * as Koa from 'koa';
+import * as morgan from 'koa-morgan';
+import * as Router from 'koa-router';
+import * as serveStatic from 'koa-static';
 import { join } from 'path';
 import 'source-map-support/register';
 import { albumsRouter } from '../routes/albums';
@@ -21,28 +20,27 @@ export class Server {
 
   private _logger: Logger;
   private _port: number;
-  private _app: express.Express;
+  private _app: Koa;
   private _httpServer: http.Server | undefined;
 
   constructor(context: Context) {
     this._logger = ensure(context.logger);
     this._port = ensure(context.config).port;
-    this._app = express();
+    this._app = new Koa();
+    this._app.on('error', (err, ctx) => this._logger.error(err));
     this._app.use(createLogAppender(this._logger));
-    this._app.use(bodyParser.json());
-    // setup template engine
-    this._app.engine('html', engine);
-    this._app.set('views', viewsDir);
-    this._app.set('view engine', 'html');
-    // setup resources
-    this._app.use(express.static(staticDir));
-    this._app.get('/', (req, res) => res.render('index', {}));
-    this._app.use('/player', playerRouter(context));
-    this._app.use('/albums', albumsRouter(context));
-    this._app.use('/stations', stationsRouter(context));
-    // handle errors
-    this._app.use(handleNotFound);
+    this._app.use(createViewsRenderer(viewsDir));
     this._app.use(createErrorHandler(this._logger));
+    this._app.use(serveStatic(staticDir));
+    this._app.use(async (ctx, next) => {
+      if (ctx.path === '/') {
+        await ctx.render('index', {});
+      }
+      await next();
+    });
+    this._addRouter('/player', playerRouter(context));
+    this._addRouter('/albums', albumsRouter(context));
+    this._addRouter('/stations', stationsRouter(context));
   }
 
   public async start() {
@@ -60,44 +58,47 @@ export class Server {
     }
     return this._httpServer;
   }
-}
 
-export function isHtml(req: express.Request) {
-  return req.query.type !== 'json' && req.accepts(['json', 'html']) === 'html';
-}
-
-function handleNotFound(req: express.Request, res: Response, next: express.NextFunction) {
-  if (isHtml(req)) {
-    res.status(404).render('404', {});
-  } else {
-    res.status(404).json({error: 'Not Found'});
+  private _addRouter(prefix: string, router: Router) {
+    router.prefix(prefix);
+    this._app.use(router.routes()).use(router.allowedMethods());
   }
 }
 
-function engine(filePath: string, options: any, callback: any) {
-  readFile(filePath, function(err, content) {
-    if (err) return callback(new Error(err.message));
-    let rendered = content.toString().replace(/\${\s*(.*?)\s*}/g, (m, m1) => m1 in options ? options[m1] : '');
-    return callback(null, rendered);
-  });
+export function isHtml(ctx: Koa.Context) { // TODO
+  return ctx.request.query.type !== 'json' && ctx.accepts(['json', 'html']) === 'html';
 }
 
-function createErrorHandler(logger: Logger): ErrorRequestHandler {
-  return function handleError(err, req, res, next) {
-    logger.error(err);
-    res.status(err.status || 500);
-    let title = err.status === 'Server Error';
-    if (isHtml(req)) {
-      res.render('error', {
-        title,
-        message: err.message,
-        stack: err.stack
-      });
-    } else {
-      res.json({
-        error: title,
-        message: err.message
-      });
+function createViewsRenderer(root: string) {
+  return async function(ctx: Koa.Context, next: () => Promise<any>) {
+    if (ctx.render) return next();
+    ctx.render = async function(relPath: string, options: any = {}) {
+      let filePath = join(root, relPath + '.html');
+      let content = await readFile(filePath, 'utf-8');
+      ctx.body = content.replace(/\${\s*(.*?)\s*}/g, (m, m1) => m1 in options ? options[m1] : '');
+    };
+    return next();
+  };
+}
+
+function createErrorHandler(logger: Logger) {
+  return async function(ctx: Koa.Context, next: () => Promise<any>) {
+    async function render() {
+      let statusText = http.STATUS_CODES[ctx.status];
+      let message = ctx.message !== statusText ? ctx.message : '';
+      if (isHtml(ctx)) {
+        await ctx.render('error', {title: statusText, message});
+      } else {
+        ctx.body = {error: statusText, message: ctx.message};
+      }
+    }
+    try {
+      await next();
+      if (ctx.status !== 200) await render();
+    } catch (err) {
+      logger.error(err);
+      ctx.status = err.status || 500;
+      await render();
     }
   };
 }

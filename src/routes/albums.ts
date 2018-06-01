@@ -1,5 +1,6 @@
-import { NextFunction, Request, Response, Router } from 'express';
-import { join } from 'path';
+import * as bodyParser from 'koa-body';
+import * as Router from 'koa-router';
+import * as send from 'koa-send';
 import { Album } from '../lib/Album';
 import { Context } from '../lib/Context';
 import { isHtml } from '../lib/Server';
@@ -9,105 +10,95 @@ export function albumsRouter(context: Context) {
   let albumDB = ensure(context.albumDB);
   let coverDB = ensure(context.coverDB);
   let musicDir = ensure(context.config).musicDir;
-  let router = Router();
-  router.get('/', safe((req, res) => {
-    if (isHtml(req)) {
-      res.render('albums', {});
+  let router = new Router();
+  router.get('/', async (ctx) => {
+    if (isHtml(ctx)) {
+      await ctx.render('albums', {});
     } else {
-      let index = albumDB.getAlbumIds().map(id => ({id, name: albumDB.getAlbum(id)!.name}));
-      res.json(index);
+      ctx.body = albumDB.getAlbumIds().map(id => ({id, name: albumDB.getAlbum(id)!.name}));
     }
-  }));
-  router.get('/:id', safe((req, res, next) => {
-    let id = req.params.id;
+  });
+  router.get('/search', async (ctx) => {
+    let query = ctx.query.q || '';
+    let terms = query.split(/\s+/);
+    if (isHtml(ctx)) {
+      await ctx.render('search', {query});
+    } else {
+      ctx.body = albumDB.search(terms).map(match => ({
+        id: match.id,
+        name: match.album.name,
+        tracks: match.tracks.map(track => match.album.tracks.indexOf(track))
+      }));
+    }
+  });
+  router.get('/update', async (ctx) => {
+    let {count} = await albumDB.update();
+    let message = `Found ${count} albums`;
+    if (isHtml(ctx)) {
+      await ctx.render('ok', {message});
+    } else {
+      ctx.body = {message};
+    }
+  });
+  router.get('/:id', async (ctx) => {
+    let id = ctx.params.id;
     let album = albumDB.getAlbum(id);
     if (album) {
-      if (isHtml(req)) {
-        res.render('album', {title: album.name, url: `/albums/${id}`});
+      if (isHtml(ctx)) {
+        await ctx.render('album', {title: album.name, url: `/albums/${id}`});
       } else {
-        res.json({id, ...serializeAlbum(album)});
+        ctx.body = {id, ...serializeAlbum(album)};
       }
-    } else {
-      next();
     }
-  }));
-  router.post('/:id', safe(async function(req, res, next) {
-    let id = req.params.id;
-    let album = albumDB.getAlbum(req.params.id);
+  });
+  router.post('/:id', bodyParser(), async function(ctx) {
+    let id = ctx.params.id;
+    let album = albumDB.getAlbum(ctx.params.id);
     if (album) {
-      let {action, content} = req.body;
+      let {action, content} = ctx.request.body;
       if (action === 'add-tags') {
         album.addTags(content);
       } else if (action === 'remove-tags') {
         album.removeTags(content);
       } else {
-        throw httpError(400, `unknown action '${action}'`);
+        ctx.status = 400;
+        ctx.message = `unknown action '${action}'`;
       }
       await albumDB.saveAlbum(id);
-      res.json({id, ...serializeAlbum(album)});
-      return;
+      ctx.body = {id, ...serializeAlbum(album)};
     }
-    next();
-  }));
-  router.get('/:id/cover', safe(async (req, res, next) => {
-    let size = req.query.size ? parseInt(req.query.size) : 0;
-    let file = await coverDB.getAlbumCover(req.params.id, size);
+  });
+  router.get('/:id/cover', async (ctx) => {
+    let size = ctx.query.size ? parseInt(ctx.query.size) : 0;
+    let file = await coverDB.getAlbumCover(ctx.params.id, size);
     if (file) {
-      res.sendFile(file, {maxAge: 36000});
-      return;
+      await send(ctx, file, {root: '/', maxAge: 36000});
     }
-    next();
-  }));
-  router.get('/:id/tracks/:number', safe((req, res, next) => {
-    let album = albumDB.getAlbum(req.params.id);
+  });
+  router.get('/:id/tracks/:number', async (ctx) => {
+    let album = albumDB.getAlbum(ctx.params.id);
     if (album) {
-      let number = parseInt(req.params.number) - 1;
+      let number = parseInt(ctx.params.number) - 1;
       let track = album.tracks[number];
       if (track) {
-        res.sendFile(join(musicDir, track.path));
-        return;
+        await send(ctx, track.path, {root: musicDir});
       }
     }
-    next();
-  }));
-  router.get('/:id/discs/:dnr/tracks/:tnr', safe((req, res, next) => {
-    let album = albumDB.getAlbum(req.params.id);
+  });
+  router.get('/:id/discs/:dnr/tracks/:tnr', async (ctx) => {
+    let album = albumDB.getAlbum(ctx.params.id);
     if (album) {
-      let dnr = parseInt(req.params.dnr);
+      let dnr = parseInt(ctx.params.dnr);
       let disc = album.discs[dnr - 1];
       if (disc) {
-        let tnr = parseInt(req.params.tnr);
+        let tnr = parseInt(ctx.params.tnr);
         let track = disc.tracks[tnr - 1];
         if (track) {
-          res.sendFile(join(musicDir, track.path));
-          return;
+          await send(ctx, track.path, {root: musicDir});
         }
       }
     }
-    next();
-  }));
-  router.get('/search', safe((req, res) => {
-    let query = req.query.q || '';
-    let terms = query.split(/\s+/);
-    if (isHtml(req)) {
-      res.render('search', {query});
-    } else {
-      res.json(albumDB.search(terms).map(match => ({
-        id: match.id,
-        name: match.album.name,
-        tracks: match.tracks.map(track => match.album.tracks.indexOf(track))
-      })));
-    }
-  }));
-  router.get('/update', safe(async (req, res) => {
-    let {count} = await albumDB.update();
-    let message = `Found ${count} albums`;
-    if (isHtml(req)) {
-      res.render('ok', {message});
-    } else {
-      res.json({message});
-    }
-  }));
+  });
   return router;
 }
 
@@ -124,20 +115,4 @@ function serializeAlbum(album: Album) {
       }))
     }))
   };
-}
-
-function safe(fn: (req: Request, res: Response, next: NextFunction) => Promise<void> | void) {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      await fn(req, res, next);
-    } catch (err) {
-      next(err);
-    }
-  };
-}
-
-function httpError(status: number, message: string) {
-  let error: any = new Error(message);
-  error.status = status;
-  return error;
 }
