@@ -6,9 +6,9 @@ import { dirSync } from 'tmp';
 chai.use(sinonChai);
 
 let expect = chai.expect;
-let sandbox = sinon.sandbox.create();
-let spy: sinon.SinonSpyStatic = sandbox.spy.bind(sandbox);
-let stub: sinon.SinonStubStatic = sandbox.stub.bind(sandbox);
+let sandbox = sinon.createSandbox();
+let spy = sandbox.spy.bind(sandbox);
+let stub = sandbox.stub.bind(sandbox);
 let tmpDirs: any[] = [];
 
 export { expect, spy, stub, tmpdir, restore, catchError };
