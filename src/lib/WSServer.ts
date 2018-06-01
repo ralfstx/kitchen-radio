@@ -22,9 +22,9 @@ export class WSServer {
     replace: (args) => this._player.replace(args),
     remove: (args) => this._player.remove(args.pos),
     status: (args, connection) => this._player.status()
-        .then(status => sendJson(connection, 'status', status)),
+        .then(status => this._sendJson(connection, 'status', status)),
     playlist: (args, connection) => this._player.playlist()
-        .then(playlist => sendJson(connection, 'playlist', playlist))
+        .then(playlist => this._sendJson(connection, 'playlist', playlist))
   };
 
   constructor(context: Context) {
@@ -43,18 +43,18 @@ export class WSServer {
   }
 
   private _handleRequest(request: Request) {
-    this._logger.info(`Connection request from ${request.origin}`);
+    this._logger.info(`WS connection request from ${request.origin}`);
     request.accept('player', request.origin);
   }
 
   private _handleConnect(connection: Connection) {
-    this._logger.info(`Connection accepted from ${connection.remoteAddress}`);
+    this._logger.info(`WS connection accepted from ${connection.remoteAddress}`);
     this._connections.add(connection);
     connection.on('message', message => this._handleMessage(message, connection));
   }
 
   private _handleDisconnect(connection: Connection, reason: number, description: string) {
-    this._logger.info(`Peer ${connection.remoteAddress} disconnected: ${description}`);
+    this._logger.info(`WS peer ${connection.remoteAddress} disconnected: ${description}`);
     this._connections.delete(connection);
   }
 
@@ -63,20 +63,20 @@ export class WSServer {
       let data = JSON.parse(message.utf8Data);
       if (data.command in this._handlers) {
         this._handlers[data.command](data.args || {}, connection)
-          .catch(err => sendJson(connection, 'error', err.message || 'Command failed'));
+          .catch(err => this._sendJson(connection, 'error', err.message || 'Command failed'));
       }
     }
   }
 
   public broadcast(topic: string, args: any) {
-    this._connections.forEach(connection => sendJson(connection, topic, args));
+    this._connections.forEach(connection => this._sendJson(connection, topic, args));
   }
 
-}
+  private _sendJson(connection: Connection, topic: string, args: any) {
+    this._logger.debug(`WS message '${topic}' sent to '${connection.remoteAddress} (${args})`);
+    connection.sendUTF(JSON.stringify({topic, args}));
+  }
 
-function sendJson(connection: Connection, topic: string, args: any) {
-  this.logger.debug('Sent WS message to ', connection.remoteAddress, topic, args);
-  connection.sendUTF(JSON.stringify({topic, args}));
 }
 
 type Handler = (args: any, connection: Connection) => Promise<any>;
