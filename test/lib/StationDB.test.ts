@@ -1,8 +1,8 @@
-import {join} from 'path';
-import {copy, move} from 'fs-extra';
-import {expect, tmpdir, spy, restore} from '../test';
-import {Context} from '../../src/lib/Context';
-import {StationDB} from '../../src/lib/StationDB';
+import { copy, move } from 'fs-extra';
+import { join } from 'path';
+import { Context } from '../../src/lib/Context';
+import { StationDB } from '../../src/lib/StationDB';
+import { expect, restore, spy, tmpdir } from '../test';
 
 describe('StationDB', function() {
 
@@ -13,7 +13,7 @@ describe('StationDB', function() {
     let tmp = tmpdir();
     musicDir = join(tmp, 'music');
     await copy(join(__dirname, 'files', 'stations'), join(musicDir, 'stations'));
-    let logger = {info: spy(), warn: spy()};
+    let logger = {debug: spy(), info: spy(), warn: spy()};
     db = new StationDB(new Context({logger, config: {musicDir}}));
   });
 

@@ -7,7 +7,7 @@ import { ensure } from '../lib/util';
 
 export function stationsRouter(context: Context) {
   let stationDB = ensure(context.stationDB);
-  // let musicDir = ensure(context.config).musicDir; TODO make station.path relative to musicDir
+  let musicDir = ensure(context.config).musicDir;
   let router = new Router();
   router.get('/', (ctx) => {
     ctx.body = stationDB.getStationIds().map(id => stationDB.getStation(id));
@@ -15,7 +15,7 @@ export function stationsRouter(context: Context) {
   router.get('/:id/image', async (ctx) => {
     let station = stationDB.getStation(ctx.params.id);
     if (station) {
-      await send(ctx, join(station.path, station.image), {root: '/'});
+      await send(ctx, join(station.path, station.image), {root: musicDir});
     }
   });
   router.get('/update', async (ctx) => {
