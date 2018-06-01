@@ -1,6 +1,8 @@
 import { readFile } from 'fs-extra';
 import * as http from 'http';
 import * as Koa from 'koa';
+import * as conditional from 'koa-conditional-get';
+import * as etag from 'koa-etag';
 import * as morgan from 'koa-morgan';
 import * as Router from 'koa-router';
 import * as serveStatic from 'koa-static';
@@ -28,10 +30,12 @@ export class Server {
     this._port = ensure(context.config).port;
     this._app = new Koa();
     this._app.on('error', (err, ctx) => this._logger.error(err));
+    this._app.use((conditional as any)());
+    this._app.use((etag as any)());
     this._app.use(createLogAppender(this._logger));
     this._app.use(createViewsRenderer(viewsDir));
     this._app.use(createErrorHandler(this._logger));
-    this._app.use(serveStatic(staticDir));
+    this._app.use(serveStatic(staticDir, {maxAge: 3600000}));
     this._app.use(async (ctx, next) => {
       if (ctx.path === '/') {
         await ctx.render('index', {});
