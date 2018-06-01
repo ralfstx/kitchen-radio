@@ -72,7 +72,7 @@ export function albumsRouter(context: Context) {
     let size = ctx.query.size ? parseInt(ctx.query.size) : 0;
     let file = await coverDB.getAlbumCover(ctx.params.id, size);
     if (file) {
-      await send(ctx, file, {root: '/', maxAge: 36000});
+      await send(ctx, file, {root: '/', hidden: true, maxAge: 3600000});
     }
   });
   router.get('/:id/tracks/:number', async (ctx) => {
@@ -81,7 +81,7 @@ export function albumsRouter(context: Context) {
       let number = parseInt(ctx.params.number) - 1;
       let track = album.tracks[number];
       if (track) {
-        await send(ctx, track.path, {root: musicDir});
+        await send(ctx, track.path, {root: musicDir, hidden: true, maxAge: 3600000});
       }
     }
   });
@@ -94,7 +94,7 @@ export function albumsRouter(context: Context) {
         let tnr = parseInt(ctx.params.tnr);
         let track = disc.tracks[tnr - 1];
         if (track) {
-          await send(ctx, track.path, {root: musicDir});
+          await send(ctx, track.path, {root: musicDir, hidden: true, maxAge: 3600000});
         }
       }
     }

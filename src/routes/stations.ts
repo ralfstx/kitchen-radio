@@ -15,7 +15,7 @@ export function stationsRouter(context: Context) {
   router.get('/:id/image', async (ctx) => {
     let station = stationDB.getStation(ctx.params.id);
     if (station) {
-      await send(ctx, join(station.path, station.image), {root: musicDir});
+      await send(ctx, join(station.path, station.image), {root: musicDir, hidden: true, maxAge: 3600000});
     }
   });
   router.get('/update', async (ctx) => {
