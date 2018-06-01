@@ -46,14 +46,15 @@
     "tmp": "0.0.33",
     "ts-node": "^6.0.5",
     "tslint": "^5.10.0",
-    "typescript": "^2.8.4"
+    "typescript": "^2.8.4",
+    "vue": "^2.5.16"
   },
   "scripts": {
     "lint": "tslint 'src/**/*.ts' 'test/**/*.ts'",
     "mocha": "mocha -r ts-node/register",
     "test": "npm run mocha -- 'test/**/*.test.ts'",
     "posttest": "npm run lint",
-    "build": "rm -rf dist/ && tsc -p . && cp -r out/src dist/ && cp -r src/static src/views src/config.json package.json dist/",
+    "build": "rm -rf dist/ && tsc -p . && cp -r out/src dist/ && cp -r src/static src/views src/config.json package.json dist/ && cp node_modules/vue/dist/vue.min.js dist/static/",
     "server": "node dist/main.js",
     "start": "npm run build && npm run server",
     "deploy": "rsync -rv --delete --exclude 'config.json' --exclude 'node_modules/' dist/ pi@radio:/var/lib/node/"
