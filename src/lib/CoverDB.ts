@@ -24,6 +24,14 @@ export class CoverDB {
     await mkdirs(this._coverDir);
   }
 
+  public async storeAlbumCover(id: string, srcFile: string): Promise<void> {
+    let stats = await statSafe(srcFile);
+    if (!stats || !stats.isFile()) {
+      throw new Error(`Missing cover image '${srcFile}'`);
+    }
+    this._map.set(id, srcFile);
+  }
+
   public async getAlbumCover(id: string, size = 0): Promise<string | null> {
     return await this._getCoverFile(id, getSizeClass(size));
   }
@@ -33,12 +41,15 @@ export class CoverDB {
     if (!origFile) return null;
     let cacheFile = resolve(this._coverDir, id + '-' + size);
     await this._createCopy(origFile, cacheFile, size);
-    return await statSafe(cacheFile) ? cacheFile : null;
+    let result = await statSafe(cacheFile) ? cacheFile : null;
+    this._logger.info('created image copy', id, size, result); // TODO
+    return result;
   }
 
   private async _createCopy(srcPath: string, dstPath: string, size: number): Promise<void> {
     let srcStats = await statSafe(srcPath);
     let dstStats = await statSafe(dstPath);
+    this._logger.info('creating image copy', srcPath, dstPath); // TODO
     if (srcStats && srcStats.isFile() && (!dstStats || (dstStats.mtime < srcStats.mtime))) {
       try {
         if (size) {
@@ -50,10 +61,6 @@ export class CoverDB {
         this._logger.error(`Unable to create cache copy '${dstPath}'`, err);
       }
     }
-  }
-
-  public storeAlbumCover(id: string, srcFile: string): void {
-    this._map.set(id, srcFile);
   }
 
 }

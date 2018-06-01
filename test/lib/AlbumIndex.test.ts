@@ -1,4 +1,4 @@
-import { readFile, readJson, writeJson } from 'fs-extra';
+import { mkdir, readFile, readJson, writeJson } from 'fs-extra';
 import { join } from 'path';
 import { Album } from '../../src/lib/Album';
 import { readAlbumFromIndex, writeAlbumIndex } from '../../src/lib/AlbumIndex';
@@ -53,19 +53,23 @@ describe('AlbumIndex', function() {
 
   describe('writeAlbumIndex', function() {
 
-    let dir: string;
+    let baseDir: string;
+    let indexFile: string;
+    const albumPath = 'album';
 
     beforeEach(function() {
-      dir = tmpdir();
+      baseDir = tmpdir();
+      mkdir(join(baseDir, albumPath));
+      indexFile = join(baseDir, albumPath, 'index.json');
     });
 
     it('creates index file', async function() {
       let discs = [new TrackList([])];
       let album = new Album(discs, {});
 
-      await writeAlbumIndex(dir, album);
+      await writeAlbumIndex(indexFile, album, albumPath);
 
-      let stats = await statSafe(join(dir, 'index.json'));
+      let stats = await statSafe(indexFile);
       expect(stats).not.to.be.null;
     });
 
@@ -73,32 +77,43 @@ describe('AlbumIndex', function() {
       let data = {tags: ['foo', 'bar']};
       let discs = [new TrackList([])];
       let album = new Album(discs, data);
-      await writeJson(join(dir, 'index.json'), {extra: 23});
+      await writeJson(indexFile, {extra: 23});
 
-      await writeAlbumIndex(dir, album);
+      await writeAlbumIndex(indexFile, album, albumPath);
 
-      let written = await readJson(join(dir, 'index.json'));
+      let written = await readJson(indexFile);
       expect(written).to.deep.include({extra: 23, tags: ['foo', 'bar']});
     });
 
     it('deletes existing tracks (they are copied into a disc)', async function() {
-      let discs = [new TrackList([new Track('01.ogg')])];
+      let discs = [new TrackList([])];
       let album = new Album(discs, {});
-      await writeJson(join(dir, 'index.json'), {tracks: [{path: '01.ogg'}]});
+      await writeJson(indexFile, {tracks: [{path: '01.ogg'}]});
 
-      await writeAlbumIndex(dir, album);
+      await writeAlbumIndex(indexFile, album, albumPath);
 
-      let written = await readJson(join(dir, 'index.json'));
+      let written = await readJson(indexFile);
       expect(written).to.not.include.any.keys('tracks');
     });
 
+    it('removes deleted tags', async function() {
+      let discs = [new TrackList([])];
+      let album = new Album(discs, {});
+      await writeJson(indexFile, {tags: ['foo', 'bar']});
+
+      await writeAlbumIndex(indexFile, album, albumPath);
+
+      let written = await readJson(indexFile);
+      expect(written).to.not.include.any.keys('tags');
+    });
+
     it('creates correct structure', async function() {
-      let discs = [new TrackList([new Track('01.ogg', {title: 'Sheep'})])];
+      let discs = [new TrackList([new Track(join(albumPath, '01.ogg'), {title: 'Sheep'})])];
       let album = new Album(discs, {artist: 'Pink Floyd', title: 'Animals'});
 
-      await writeAlbumIndex(dir, album);
+      await writeAlbumIndex(indexFile, album, albumPath);
 
-      let written = await readJson(join(dir, 'index.json'));
+      let written = await readJson(indexFile);
       expect(written).to.deep.equal({
         name: 'Pink Floyd - Animals',
         artist: 'Pink Floyd',
@@ -114,13 +129,13 @@ describe('AlbumIndex', function() {
     });
 
     it('creates members in predefined order', async function() {
-      let discs = [new TrackList([new Track('01.ogg', {title: 'Sheep'})])];
+      let discs = [new TrackList([new Track(join(albumPath, '01.ogg'), {title: 'Sheep'})])];
       let album = new Album(discs, {artist: 'Pink Floyd', title: 'Animals'});
-      await writeJson(join(dir, 'index.json'), {foo: 23, bar: 42});
+      await writeJson(indexFile, {foo: 23, bar: 42});
 
-      await writeAlbumIndex(dir, album);
+      await writeAlbumIndex(indexFile, album, albumPath);
 
-      let written = await readFile(join(dir, 'index.json'), 'utf8');
+      let written = await readFile(indexFile, 'utf8');
       expect(written.split(/\n/)).to.deep.equal([
         '{',
         ' "name": "Pink Floyd - Animals",',

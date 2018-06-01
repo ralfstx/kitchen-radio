@@ -3,7 +3,7 @@ import { join } from 'path';
 import { Album } from '../../src/lib/Album';
 import { AlbumDB } from '../../src/lib/AlbumDB';
 import { Context } from '../../src/lib/Context';
-import { expect, restore, spy, tmpdir } from '../test';
+import { catchError, expect, restore, spy, tmpdir } from '../test';
 
 describe('AlbumDB', function() {
 
@@ -13,7 +13,7 @@ describe('AlbumDB', function() {
   beforeEach(async function() {
     musicDir = tmpdir();
     await copy(join(__dirname, 'files', 'albums'), join(musicDir, 'albums'));
-    let logger = {info: spy(), warn: spy()};
+    let logger = {debug: spy(), info: spy(), warn: spy()};
     let coverDB = {storeAlbumCover: spy()};
     albumDB = new AlbumDB(new Context({logger, coverDB, config: {musicDir}}));
   });
@@ -21,7 +21,23 @@ describe('AlbumDB', function() {
   afterEach(restore);
 
   it('is initially empty', function() {
-    expect(albumDB.getAlbumIds()).to.eql([]);
+    expect(albumDB.getAlbumIds()).to.be.empty;
+  });
+
+  describe('addAlbum', function() {
+
+    it('adds album to db', async function() {
+      await albumDB.addAlbum(new Album(), 'albums/animals');
+
+      expect(albumDB.getAlbumIds()).to.have.length(1);
+    });
+
+    it('throws if path is not a directory', async function() {
+      let error = await catchError(albumDB.addAlbum(new Album(), 'not/there'));
+
+      expect(error.message).to.equal('album directory does not exist: \'not/there\'');
+    });
+
   });
 
   describe('update', function() {
@@ -115,7 +131,7 @@ describe('AlbumDB', function() {
     });
 
     it('returns matching albums', function() {
-      expect(albumDB.search(['colt'])).to.eql([{
+      expect(albumDB.search(['colt'])).to.deep.equal([{
         id: '4dc98dd6',
         album: albumDB.getAlbum('4dc98dd6'),
         tracks: []
@@ -123,7 +139,7 @@ describe('AlbumDB', function() {
     });
 
     it('returns matching tracks', function() {
-      expect(albumDB.search(['pig', 'wing'])).to.eql([{
+      expect(albumDB.search(['pig', 'wing'])).to.deep.equal([{
         id: '7ffe1e9d',
         album: albumDB.getAlbum('7ffe1e9d'),
         tracks: [albumDB.getAlbum('7ffe1e9d')!.tracks[0], albumDB.getAlbum('7ffe1e9d')!.tracks[4]]

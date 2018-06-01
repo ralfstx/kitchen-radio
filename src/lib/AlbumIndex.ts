@@ -1,6 +1,6 @@
 import { readJson, writeFile } from 'fs-extra';
 import * as stringify from 'json-stable-stringify';
-import { join, normalize } from 'path';
+import { join, normalize, relative } from 'path';
 import { Album } from './Album';
 import { Track } from './Track';
 import { TrackList } from './TrackList';
@@ -31,12 +31,12 @@ export function readAlbumFromIndex(path: string, index: any): Album {
   return new Album(discs, pick(index, META_DATA_KEYS));
 }
 
-export async function writeAlbumIndex(path: string, album: Album): Promise<void> {
-  let indexFile = join(path, 'index.json');
+export async function writeAlbumIndex(indexFile: string, album: Album, basePath: string) {
   let stats = await statSafe(indexFile);
   let hasIndex = !!stats && stats.isFile();
   let data = hasIndex ? await readJson(indexFile) : {};
   delete data.tracks;
+  delete data.tags;
   let newData = {
     ...data,
     ...(album.tags.length ? {tags: album.tags} : {}),
@@ -47,25 +47,26 @@ export async function writeAlbumIndex(path: string, album: Album): Promise<void>
   };
   let json = stringify(newData, {space: 1, cmp: compareMembers});
   await writeFile(indexFile, json, 'utf-8');
-}
 
-function serializeDisc(disc: TrackList) {
-  let {name, tracks} = disc;
-  let result: any = {
-    tracks: tracks.map(serializeTrack)
-  };
-  if (name) result.name = name;
-  return result;
-}
+  function serializeDisc(disc: TrackList) {
+    let {name, tracks} = disc;
+    let result: any = {
+      tracks: tracks.map(serializeTrack)
+    };
+    if (name) result.name = name;
+    return result;
+  }
 
-function serializeTrack(track: Track) {
-  let {path, title, artist, albumTitle, albumArtist, length} = track;
-  let result: any = {path, length};
-  if (title) result.title = title;
-  if (artist) result.artist = artist;
-  if (albumTitle) result.albumTitle = albumTitle;
-  if (albumArtist) result.albumArtist = albumArtist;
-  return result;
+  function serializeTrack(track: Track) {
+    let {title, artist, albumTitle, albumArtist, length} = track;
+    let path = relative(basePath, track.path);
+    let result: any = {path, length};
+    if (title) result.title = title;
+    if (artist) result.artist = artist;
+    if (albumTitle) result.albumTitle = albumTitle;
+    if (albumArtist) result.albumArtist = albumArtist;
+    return result;
+  }
 }
 
 function compareMembers(a: {key: string}, b: {key: string}) {

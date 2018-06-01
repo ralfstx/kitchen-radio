@@ -2,7 +2,7 @@ import { statSync } from 'fs-extra';
 import { join } from 'path';
 import { Context } from '../../src/lib/Context';
 import { CoverDB } from '../../src/lib/CoverDB';
-import { expect, restore, spy, tmpdir } from '../test';
+import { catchError, expect, restore, spy, tmpdir } from '../test';
 
 describe('CoverDB', function() {
 
@@ -21,6 +21,16 @@ describe('CoverDB', function() {
 
   afterEach(restore);
 
+  describe('storeAlbumCover', function() {
+
+    it('throws if file does not exist', async function() {
+      let error = await catchError(coverDB.storeAlbumCover('4711', 'not/there'));
+
+      expect(error.message).to.equal('Missing cover image \'not/there\'');
+    });
+
+  });
+
   describe('getAlbumCover', function() {
 
     it('returns null for invalid id', async function() {
@@ -30,7 +40,7 @@ describe('CoverDB', function() {
     });
 
     it('returns existing file for valid id', async function() {
-      coverDB.storeAlbumCover('foo', exampleCoverFile);
+      await coverDB.storeAlbumCover('foo', exampleCoverFile);
 
       let result = await coverDB.getAlbumCover('foo');
 
@@ -39,7 +49,7 @@ describe('CoverDB', function() {
     });
 
     it('returns existing file for valid id and size', async function() {
-      coverDB.storeAlbumCover('foo', exampleCoverFile);
+      await coverDB.storeAlbumCover('foo', exampleCoverFile);
 
       let result = await coverDB.getAlbumCover('foo', 100);
 
@@ -48,7 +58,7 @@ describe('CoverDB', function() {
     });
 
     it('returns different files for different sizes', async function() {
-      coverDB.storeAlbumCover('foo', exampleCoverFile);
+      await coverDB.storeAlbumCover('foo', exampleCoverFile);
 
       let result = await coverDB.getAlbumCover('foo');
       let result100 = await coverDB.getAlbumCover('foo', 100);
@@ -58,7 +68,7 @@ describe('CoverDB', function() {
     });
 
     it('returns same files for subsequent calls', async function() {
-      coverDB.storeAlbumCover('foo', exampleCoverFile);
+      await coverDB.storeAlbumCover('foo', exampleCoverFile);
 
       let result1 = await coverDB.getAlbumCover('foo', 100);
       let result2 = await coverDB.getAlbumCover('foo', 100);

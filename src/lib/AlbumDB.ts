@@ -7,6 +7,7 @@ import { Context } from './Context';
 import { CoverDB } from './CoverDB';
 import { Logger } from './Logger';
 import { Track } from './Track';
+import { statSafe } from './files';
 import { ensure } from './util';
 
 export class AlbumDB {
@@ -23,10 +24,16 @@ export class AlbumDB {
     this._albums = new Map();
   }
 
-  public addAlbum(album: Album, path: string) {
+  public async addAlbum(album: Album, path: string) {
+    await this._checkAlbumDir(path);
+    this._logger.debug('adding album', path);
     let id = crc32Str(album.name);
     this._albums.set(id, {album, path});
-    this._coverDB.storeAlbumCover(id, join(path, 'cover.jpg'));
+    let coverFile = join(this._musicDir, path, 'cover.jpg');
+    let coverStats = await statSafe(coverFile);
+    if (coverStats && coverStats.isFile()) {
+      await this._coverDB.storeAlbumCover(id, coverFile);
+    }
   }
 
   public async update(): Promise<{count: number}> {
@@ -67,7 +74,15 @@ export class AlbumDB {
     let entry = this._albums.get(id);
     if (entry) {
       let {album, path} = entry;
-      await writeAlbumIndex(path, album);
+      let indexFile = join(this._musicDir, path, 'index.json');
+      await writeAlbumIndex(indexFile, album, path);
+    }
+  }
+
+  private async _checkAlbumDir(path: string) {
+    let stats = await statSafe(join(this._musicDir, path));
+    if (!stats || !stats.isDirectory()) {
+      throw new Error(`album directory does not exist: '${path}'`);
     }
   }
 
