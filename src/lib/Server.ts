@@ -5,11 +5,11 @@ import * as morgan from 'koa-morgan';
 import * as Router from 'koa-router';
 import * as serveStatic from 'koa-static';
 import { join } from 'path';
-import 'source-map-support/register';
 import { albumsRouter } from '../routes/albums';
 import { playerRouter } from '../routes/player';
 import { stationsRouter } from '../routes/stations';
 import { Context } from './Context';
+import { createErrorHandler } from './ErrorHandler';
 import { Logger } from './Logger';
 import { ensure } from './util';
 
@@ -78,28 +78,6 @@ function createViewsRenderer(root: string) {
       ctx.body = content.replace(/\${\s*(.*?)\s*}/g, (m, m1) => m1 in options ? options[m1] : '');
     };
     return next();
-  };
-}
-
-function createErrorHandler(logger: Logger) {
-  return async function(ctx: Koa.Context, next: () => Promise<any>) {
-    async function render() {
-      let statusText = http.STATUS_CODES[ctx.status];
-      let message = ctx.message !== statusText ? ctx.message : '';
-      if (isHtml(ctx)) {
-        await ctx.render('error', {title: statusText, message});
-      } else {
-        ctx.body = {error: statusText, message: ctx.message};
-      }
-    }
-    try {
-      await next();
-      if (ctx.status !== 200) await render();
-    } catch (err) {
-      logger.error(err);
-      ctx.status = err.status || 500;
-      await render();
-    }
   };
 }
 

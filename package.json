@@ -36,6 +36,7 @@
     "@types/node-fetch": "^2.1.0",
     "@types/sinon": "^5.0.1",
     "@types/sinon-chai": "^2.7.32",
+    "@types/supertest": "^2.0.4",
     "@types/tmp": "0.0.33",
     "@types/websocket": "0.0.39",
     "@types/winston": "^2.3.9",
@@ -43,6 +44,7 @@
     "mocha": "^5.2.0",
     "sinon": "^5.0.10",
     "sinon-chai": "^3.1.0",
+    "supertest": "^3.1.0",
     "tmp": "0.0.33",
     "ts-node": "^6.0.5",
     "tslint": "^5.10.0",
@@ -54,9 +56,10 @@
     "mocha": "mocha -r ts-node/register",
     "test": "npm run mocha -- 'test/**/*.test.ts'",
     "posttest": "npm run lint",
-    "build": "rm -rf dist/ && tsc -p . && cp -r out/src dist/ && cp -r src/static src/views src/config.json package.json dist/ && cp node_modules/vue/dist/vue.min.js dist/static/",
+    "build": "rm -rf out/ dist/ && tsc -p . && cp -r out/src dist/ && cp -r src/static src/views src/config.json package.json dist/ && cp node_modules/vue/dist/vue.min.js dist/static/",
     "server": "node dist/main.js",
     "start": "npm run build && npm run server",
+    "predeploy": "npm run build",
     "deploy": "rsync -rv --delete --exclude 'config.json' --exclude 'node_modules/' dist/ pi@radio:/var/lib/node/"
   }
 }
