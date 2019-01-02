@@ -36,6 +36,9 @@ div.line {
 div.tags {
   margin-bottom: 5px;
 }
+div.downloads {
+  margin-bottom: 5px;
+}
 
 span.tag {
   color: white;

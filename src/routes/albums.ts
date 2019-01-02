@@ -1,6 +1,8 @@
 import * as bodyParser from 'koa-body';
 import * as Router from 'koa-router';
 import * as send from 'koa-send';
+import { basename, join } from 'path';
+import { ZipFile } from 'yazl';
 import { Album } from '../lib/Album';
 import { Context } from '../lib/Context';
 import { isHtml } from '../lib/Server';
@@ -75,6 +77,15 @@ export function albumsRouter(context: Context) {
       await send(ctx, file, {root: '/', hidden: true, maxAge: 3600000});
     }
   });
+  router.get('/:id/download', async (ctx) => {
+    let id = ctx.params.id;
+    let album = albumDB.getAlbum(id);
+    if (album) {
+      let zipStream = await createDownloadZip(album, musicDir);
+      ctx.set('content-disposition', 'attachment; filename="album.zip"');
+      ctx.body = zipStream;
+    }
+  });
   router.get('/:id/tracks/:number', async (ctx) => {
     let album = albumDB.getAlbum(ctx.params.id);
     if (album) {
@@ -115,4 +126,22 @@ function serializeAlbum(album: Album) {
       }))
     }))
   };
+}
+
+async function createDownloadZip(album: Album, musicDir: string) {
+  let zip = new ZipFile();
+  for (let disc of album.discs) {
+    let discName = album.discs.length === 1 ? null : pad2(album.discs.indexOf(disc) + 1);
+    for (let track of disc.tracks) {
+      let trackName = basename(track.path);
+      let trackZipFileName = discName ? discName + '/' + trackName : trackName;
+      zip.addFile(join(musicDir, track.path), trackZipFileName);
+    }
+  }
+  zip.end();
+  return zip.outputStream;
+}
+
+function pad2(n: number) {
+  return (n < 10 ? '0' : '') + n;
 }
