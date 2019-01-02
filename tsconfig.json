@@ -13,7 +13,11 @@
     "noUnusedLocals": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "typeRoots" : [
+      "./node_modules/@types",
+      "./types"
+    ]
   },
   "include": [
     "**/*.ts"
