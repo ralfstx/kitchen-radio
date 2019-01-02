@@ -1,8 +1,8 @@
-import { readJson, readdir } from 'fs-extra';
+import { readdir, readJson } from 'fs-extra';
 import { join } from 'path';
 import { Context } from './Context';
-import { Logger } from './Logger';
 import { statSafe } from './files';
+import { Logger } from './Logger';
 import { ensure } from './util';
 
 export class StationDB {
@@ -13,7 +13,7 @@ export class StationDB {
   private _stations: Map<string, any>;
 
   constructor(context: Context) {
-    this._logger = ensure(context.logger);
+    this._logger = ensure(context.logger).child('StationDB');
     this._baseDir = ensure(context.config).musicDir;
     this._ids = [];
     this._stations = new Map();
@@ -55,17 +55,17 @@ export class StationDB {
     let station = await this._readJsonSafe(indexFile);
     if (!station) return;
     if (!station.id) {
-      this._logger.warn('Missing station id in: ' + indexFile);
+      this._logger.warn(`Missing station id in: ${indexFile}`);
     }
     if (!station.name) {
-      this._logger.warn('Missing station name in: ' + indexFile);
+      this._logger.warn(`Missing station name in: ${indexFile}`);
     }
     station.path = path;
     this._registerStation(station);
   }
 
   private _registerStation(station: any) {
-    this._logger.debug('adding station', station.path);
+    this._logger.debug(`adding station ${station.path}`);
     let id = station.id;
     this._ids.push(id);
     this._stations.set(id, station);
@@ -83,7 +83,7 @@ export class StationDB {
     try {
       return await readdir(dir);
     } catch (err) {
-      this._logger.warn(`Could not read dir '${dir}'`);
+      this._logger.warn(`Could not read dir '${dir}'`, {err});
       return [];
     }
   }
@@ -92,7 +92,7 @@ export class StationDB {
     try {
       return await readJson(file);
     } catch (err) {
-      this._logger.warn(`Could not read JSON file '${file}'`);
+      this._logger.warn(`Could not read JSON file '${file}'`, {err});
       return null;
     }
   }

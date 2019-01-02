@@ -1,4 +1,4 @@
-import { IMessage, connection as Connection, request as Request, server as WebSocketServer } from 'websocket';
+import { connection as Connection, IMessage, request as Request, server as WebSocketServer } from 'websocket';
 import { Context } from './Context';
 import { Logger } from './Logger';
 import { Player } from './Player';
@@ -28,7 +28,7 @@ export class WSServer {
   };
 
   constructor(context: Context) {
-    this._logger = ensure(context.logger);
+    this._logger = ensure(context.logger).child('WSServer');
     this._player = ensure(context.player);
     this._server = ensure(context.server);
     this._connections = new Set();

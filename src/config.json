@@ -2,6 +2,7 @@
   "musicDir": "/data/music",
   "cacheDir": "/tmp/music/cache",
   "logLevel": "debug",
+  "logToConsole": true,
   "mpdHost": "localhost",
   "mpdPort": 6600,
   "port": 8080

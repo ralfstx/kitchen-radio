@@ -34,7 +34,7 @@ export class Player {
           resolve();
         })
         .on('error', (err) => {
-          this._logger.error('mpd error', err);
+          this._logger.error('mpd error', {err});
           reject(err);
         })
         .on('end', () => {
@@ -111,7 +111,7 @@ export class Player {
       }
       this._mpdClient.sendCommand(command, (err, result) => {
         if (err) {
-          this._logger.error(`Failed to send mpd command '${command}'`, err);
+          this._logger.error(`Failed to send mpd command '${command}'`, {err});
           reject(new Error('Command failed'));
         } else {
           this._logger.debug(`Sent mpd command '${command}'`);

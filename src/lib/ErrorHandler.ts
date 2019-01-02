@@ -10,7 +10,7 @@ export function createErrorHandler(logger: Logger) {
       await next();
       if (ctx.status >= 400) await renderError(ctx);
     } catch (err) {
-      logger.error(err);
+      logger.error('Server error', {err});
       ctx.status = err.status || 500;
       await renderError(ctx);
     }

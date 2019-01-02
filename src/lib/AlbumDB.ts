@@ -5,9 +5,9 @@ import { AlbumFinder } from './AlbumFinder';
 import { writeAlbumIndex } from './AlbumIndex';
 import { Context } from './Context';
 import { CoverDB } from './CoverDB';
+import { statSafe } from './files';
 import { Logger } from './Logger';
 import { Track } from './Track';
-import { statSafe } from './files';
 import { ensure } from './util';
 
 export class AlbumDB {
@@ -18,7 +18,7 @@ export class AlbumDB {
   private _albums: Map<string, {album: Album, path: string}>;
 
   constructor(context: Context) {
-    this._logger = ensure(context.logger);
+    this._logger = ensure(context.logger).child('AlbumDB');
     this._coverDB = ensure(context.coverDB);
     this._musicDir = ensure(context.config).musicDir;
     this._albums = new Map();
@@ -26,7 +26,7 @@ export class AlbumDB {
 
   public async addAlbum(album: Album, path: string) {
     await this._checkAlbumDir(path);
-    this._logger.debug('adding album', path);
+    this._logger.debug(`adding album ${path}`);
     let id = crc32Str(album.name);
     this._albums.set(id, {album, path});
     let coverFile = join(this._musicDir, path, 'cover.jpg');
@@ -38,7 +38,7 @@ export class AlbumDB {
 
   public async update(): Promise<{count: number}> {
     this._albums.clear();
-    this._logger.info('Searching for albums in ' + this._musicDir);
+    this._logger.info(`Searching for albums in ${this._musicDir}`);
     let finder = new AlbumFinder({
       logger: this._logger,
       albumDB: this

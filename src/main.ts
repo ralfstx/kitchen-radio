@@ -20,7 +20,7 @@ async function start() {
   let context = new Context({});
   let config = await Config.readFromFile(join(__dirname, 'config.json'));
   context.set('config', config);
-  context.set('logger', new Logger(config));
+  context.set('logger', Logger.create(config));
   context.set('coverDB', new CoverDB(context));
   context.set('albumDB', new AlbumDB(context));
   context.set('stationDB', new StationDB(context));

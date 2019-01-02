@@ -7,9 +7,11 @@ import * as morgan from 'koa-morgan';
 import * as Router from 'koa-router';
 import * as serveStatic from 'koa-static';
 import { join } from 'path';
+import rfs from 'rotating-file-stream';
 import { albumsRouter } from '../routes/albums';
 import { playerRouter } from '../routes/player';
 import { stationsRouter } from '../routes/stations';
+import { Config } from './Config';
 import { Context } from './Context';
 import { createErrorHandler } from './ErrorHandler';
 import { Logger } from './Logger';
@@ -26,13 +28,13 @@ export class Server {
   private _httpServer: http.Server | undefined;
 
   constructor(context: Context) {
-    this._logger = ensure(context.logger);
+    this._logger = ensure(context.logger).child('Server');
     this._port = ensure(context.config).port;
     this._app = new Koa();
-    this._app.on('error', (err, ctx) => this._logger.error(err));
+    this._app.on('error', err => this._logger.error('Server error', {err}));
     this._app.use((conditional as any)());
     this._app.use((etag as any)());
-    this._app.use(createLogAppender(this._logger));
+    this._app.use(createLogAppender(ensure(context.config)));
     this._app.use(createViewsRenderer(viewsDir));
     this._app.use(createErrorHandler(this._logger));
     this._app.use(serveStatic(staticDir, {maxAge: 3600000}));
@@ -85,19 +87,11 @@ function createViewsRenderer(root: string) {
   };
 }
 
-function createLogAppender(logger: Logger) {
-  let config: morgan.Options = {
-    stream: {
-      write(message: string) {
-        logger.info(message.trim());
-      }
-    }
-  } as any;
-  let level = logger.levels[logger.level];
-  if (level === 0) {
-    config.skip = (req, res) => res.statusCode < 500;
-  } else if (level < 3) {
-    config.skip = (req, res) => res.statusCode < 400;
-  }
-  return morgan('tiny', config);
+function createLogAppender(config: Config) {
+  let accessLogStream = rfs('access.log', {
+    interval: '1d',
+    maxFiles: 5,
+    path: config.logDir
+  });
+  return morgan('common', { stream: accessLogStream });
 }

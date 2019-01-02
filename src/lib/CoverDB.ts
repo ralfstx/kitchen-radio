@@ -2,8 +2,8 @@ import { copy, mkdirs } from 'fs-extra';
 import { resolve } from 'path';
 import { resizeImage } from '../lib/images';
 import { Context } from './Context';
-import { Logger } from './Logger';
 import { statSafe } from './files';
+import { Logger } from './Logger';
 import { ensure } from './util';
 
 const SIZE_CLASSES = [100, 250];
@@ -15,7 +15,7 @@ export class CoverDB {
   private _map: Map<string, string>;
 
   constructor(context: Context) {
-    this._logger = ensure(context.logger);
+    this._logger = ensure(context.logger).child('CoverDB');
     this._coverDir = resolve(ensure(context.config).cacheDir, 'cover');
     this._map = new Map();
   }
@@ -42,14 +42,14 @@ export class CoverDB {
     let cacheFile = resolve(this._coverDir, id + '-' + size);
     await this._createCopy(origFile, cacheFile, size);
     let result = await statSafe(cacheFile) ? cacheFile : null;
-    this._logger.info('created image copy', id, size, result); // TODO
+    this._logger.info('created image copy', {id, size, result}); // TODO
     return result;
   }
 
   private async _createCopy(srcPath: string, dstPath: string, size: number): Promise<void> {
     let srcStats = await statSafe(srcPath);
     let dstStats = await statSafe(dstPath);
-    this._logger.info('creating image copy', srcPath, dstPath); // TODO
+    this._logger.info('creating image copy', {srcPath, dstPath}); // TODO
     if (srcStats && srcStats.isFile() && (!dstStats || (dstStats.mtime < srcStats.mtime))) {
       try {
         if (size) {
@@ -58,7 +58,7 @@ export class CoverDB {
           await copy(srcPath, dstPath);
         }
       } catch (err) {
-        this._logger.error(`Unable to create cache copy '${dstPath}'`, err);
+        this._logger.error(`Unable to create cache copy '${dstPath}'`, {err});
       }
     }
   }

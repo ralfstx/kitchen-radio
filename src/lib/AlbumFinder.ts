@@ -1,13 +1,13 @@
-import { readJson, readdir } from 'fs-extra';
+import { readdir, readJson } from 'fs-extra';
 import { basename, extname, join } from 'path';
 import { AudioFileMetadata, Metadata } from '../lib/Metadata';
 import { Album } from './Album';
 import { AlbumDB } from './AlbumDB';
 import { readAlbumFromIndex } from './AlbumIndex';
+import { statSafe } from './files';
 import { Logger } from './Logger';
 import { Track } from './Track';
 import { TrackList } from './TrackList';
-import { statSafe } from './files';
 
 export class AlbumFinder {
   private _logger: Logger;
@@ -88,9 +88,9 @@ export class AlbumFinder {
 
   private async _readMetadataSafe(file: string): Promise<AudioFileMetadata> {
     try {
-      return Metadata.getTrackMetadata(file);
+      return await Metadata.getTrackMetadata(file);
     } catch (err) {
-      this._logger.warn(err);
+      this._logger.warn(`Failed to get metadata for ${file}`, {err});
       return {};
     }
   }
@@ -107,7 +107,7 @@ export class AlbumFinder {
     try {
       return await readdir(dir);
     } catch (err) {
-      this._logger.warn(`Could not read dir '${dir}'`);
+      this._logger.warn(`Could not read dir '${dir}'`, {err});
       return [];
     }
   }
@@ -116,7 +116,7 @@ export class AlbumFinder {
     try {
       return await readJson(file);
     } catch (err) {
-      this._logger.warn(`Could not read JSON file '${file}'`);
+      this._logger.warn(`Could not read JSON file '${file}'`, {err});
       return null;
     }
   }

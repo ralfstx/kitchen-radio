@@ -6,8 +6,9 @@ const CONFIG_VARS: {[key: string]: ConfigSpec} = {
   mpdHost: {type: 'nonEmpty', default: 'localhost'},
   musicDir: {type: 'nonEmpty'},
   cacheDir: {type: 'nonEmpty'},
-  logDir: {type: 'nonEmpty', default:  '.'},
-  logLevel: {type: 'logLevel', default: 'info'}
+  logDir: {type: 'nonEmpty', default: '.'},
+  logLevel: {type: 'logLevel', default: 'info'},
+  logToConsole: {type: 'boolean', default: false}
 };
 
 export class Config {
@@ -47,6 +48,11 @@ export class Config {
     */
   public readonly logLevel!: 'info'|'debug'|'warn'|'error';
 
+   /**
+    * Whether or not to log to stdout.
+    */
+  public readonly logToConsole!: boolean;
+
   public constructor(values: any) {
     extractConfigValues(this, values);
   }
@@ -83,10 +89,18 @@ function extractConfigValues(target: object, values: any) {
 }
 
 function checkType(type: string, value: any, handler: (message: string) => any) {
+  if (type === 'boolean') return requireBoolean(value, handler);
   if (type === 'validPort') return requireValidPort(value, handler);
   if (type === 'nonEmpty') return requireNonEmpty(value, handler);
   if (type === 'logLevel') return requireLogLevel(value, handler);
   throw new Error('invalid type ' + type);
+}
+
+function requireBoolean(value: boolean, handler: (message: string) => boolean): boolean {
+  if (value !== true && value !== false) {
+    return handler('not a boolean: ' + value);
+  }
+  return value;
 }
 
 function requireValidPort(number: number, handler: (message: string) => number): number {
