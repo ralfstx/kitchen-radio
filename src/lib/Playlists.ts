@@ -2,7 +2,7 @@ export function isPlaylist(url: string) {
   return url.endsWith('.m3u') || url.endsWith('.m3u8') || url.endsWith('.pls');
 }
 
-export function readFiles(text: string) {
+export function readPlaylist(text: string) {
   let tracks = [];
   let lines = text.split(/\n/).map(line => line.trim());
   let isPls = false;

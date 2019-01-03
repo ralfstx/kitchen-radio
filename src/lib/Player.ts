@@ -5,7 +5,7 @@ import { AlbumDB } from './AlbumDB';
 import { Config } from './Config';
 import { Context } from './Context';
 import { Logger } from './Logger';
-import { isPlaylist, readFiles } from './Playlist';
+import { isPlaylist, readPlaylist } from './Playlists';
 import { ensure, readProps } from './util';
 
 export class Player {
@@ -208,7 +208,7 @@ export class Player {
       }
       if (isPlaylist(url)) {
         let content = await getText(url);
-        let tracks = readFiles(content);
+        let tracks = readPlaylist(content);
         tracks.forEach(track => commands.push('add "' + track + '"'));
       } else {
         commands.push('add "' + url + '"');

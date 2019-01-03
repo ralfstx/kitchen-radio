@@ -1,6 +1,5 @@
-import {expect} from '../test';
-
-import {isPlaylist, readFiles} from '../../src/lib/Playlist';
+import { isPlaylist, readPlaylist } from '../../src/lib/Playlists';
+import { expect } from '../test';
 
 describe('playlist', function() {
 
@@ -17,7 +16,7 @@ describe('playlist', function() {
 
   });
 
-  describe('readFiles', function() {
+  describe('readPlaylist', function() {
 
     it('recognizes simple PLS playlist', async function() {
       let content = [
@@ -27,7 +26,7 @@ describe('playlist', function() {
         'NumberOfEntries=1'
       ].join('\n');
 
-      expect(readFiles(content)).to.deep.equal(['http://example.com:8080/']);
+      expect(readPlaylist(content)).to.deep.equal(['http://example.com:8080/']);
     });
 
     it('recognizes PLS playlist with multiple files', async function() {
@@ -45,7 +44,7 @@ describe('playlist', function() {
         'Version=2'
       ].join('\n');
 
-      expect(readFiles(content)).to.deep.equal(['http://example.com:8080', 'example2.mp3']);
+      expect(readPlaylist(content)).to.deep.equal(['http://example.com:8080', 'example2.mp3']);
     });
 
     it('recognizes simple M3U playlist', async function() {
@@ -56,7 +55,7 @@ describe('playlist', function() {
         'https://streaming.example.com/listen'
       ].join('\n');
 
-      expect(readFiles(content)).to.deep.equal(['https://streaming.example.com/listen']);
+      expect(readPlaylist(content)).to.deep.equal(['https://streaming.example.com/listen']);
     });
 
   });
