@@ -12,10 +12,6 @@ describe('ErrorHandler', function() {
     let logger: any = {debug: spy(), info: spy(), warn: spy(), error: spy()};
     handler = createErrorHandler(logger);
     app = new Koa();
-    app.use(async (ctx, next) => {
-      ctx.render = async (name: string, params: any) => ctx.body = `<html>${JSON.stringify(params)}</html>`;
-      return next();
-    });
   });
 
   it('returns 404 if not handled', async () => {
@@ -24,16 +20,6 @@ describe('ErrorHandler', function() {
     await request(app.callback())
       .get('/')
       .expect(404);
-  });
-
-  it('returns HTML if accepted', async () => {
-    app.use(handler);
-
-    await request(app.callback())
-      .get('/')
-      .set('Accept', 'text/html')
-      .expect('Content-Type', 'text/html; charset=utf-8')
-      .expect(/<html>.*Not Found/);
   });
 
   it('returns JSON otherwise', async () => {

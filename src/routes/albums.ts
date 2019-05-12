@@ -5,7 +5,6 @@ import { basename, join } from 'path';
 import { ZipFile } from 'yazl';
 import { Album } from '../lib/Album';
 import { Context } from '../lib/Context';
-import { isHtml } from '../lib/Server';
 import { ensure } from '../lib/util';
 
 export function albumsRouter(context: Context) {
@@ -14,43 +13,27 @@ export function albumsRouter(context: Context) {
   let musicDir = ensure(context.config).musicDir;
   let router = new Router();
   router.get('/', async (ctx) => {
-    if (isHtml(ctx)) {
-      await ctx.render('albums', {});
-    } else {
-      ctx.body = albumDB.getAlbumIds().map(id => ({id, name: albumDB.getAlbum(id)!.name}));
-    }
+    ctx.body = albumDB.getAlbumIds().map(id => ({id, name: albumDB.getAlbum(id)!.name}));
   });
   router.get('/search', async (ctx) => {
     let query = ctx.query.q || '';
     let terms = query.split(/\s+/);
-    if (isHtml(ctx)) {
-      await ctx.render('search', {query});
-    } else {
-      ctx.body = albumDB.search(terms).map(match => ({
-        id: match.id,
-        name: match.album.name,
-        tracks: match.tracks.map(track => match.album.tracks.indexOf(track))
-      }));
-    }
+    ctx.body = albumDB.search(terms).map(match => ({
+      id: match.id,
+      name: match.album.name,
+      tracks: match.tracks.map(track => match.album.tracks.indexOf(track))
+    }));
   });
   router.get('/update', async (ctx) => {
     let {count} = await albumDB.update();
     let message = `Found ${count} albums`;
-    if (isHtml(ctx)) {
-      await ctx.render('ok', {message});
-    } else {
-      ctx.body = {message};
-    }
+    ctx.body = {message};
   });
   router.get('/:id', async (ctx) => {
     let id = ctx.params.id;
     let album = albumDB.getAlbum(id);
     if (album) {
-      if (isHtml(ctx)) {
-        await ctx.render('album', {title: album.name, url: `/albums/${id}`});
-      } else {
-        ctx.body = {id, ...serializeAlbum(album)};
-      }
+      ctx.body = {id, ...serializeAlbum(album)};
     }
   });
   router.post('/:id', bodyParser(), async function(ctx) {

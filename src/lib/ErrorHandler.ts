@@ -1,7 +1,6 @@
 import * as http from 'http';
 import * as Koa from 'koa';
 import { Logger } from './Logger';
-import { isHtml } from './Server';
 
 export function createErrorHandler(logger: Logger) {
 
@@ -20,11 +19,7 @@ export function createErrorHandler(logger: Logger) {
     let status = ctx.status;
     let statusText = http.STATUS_CODES[status];
     let message = ctx.message !== statusText ? ctx.message : '';
-    if (isHtml(ctx)) {
-      await ctx.render('error', {title: statusText, message});
-    } else {
-      ctx.body = {error: statusText, ...(message ? {message} : {})};
-    }
+    ctx.body = {error: statusText, ...(message ? {message} : {})};
     ctx.status = status; // status code is reset to 200 when body is written
   }
 

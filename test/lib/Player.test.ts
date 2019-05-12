@@ -7,13 +7,13 @@ import { TrackList } from '../../src/lib/TrackList';
 import { catchError, expect, restore, spy, stub } from '../test';
 
 const EXAMPLE_PLAYLIST_RESULT = `
-file: http://localhost:8080/albums/aaa/tracks/1
+file: http://localhost:8080/api/albums/aaa/tracks/1
 Pos: 1
 Id: 23
-file: http://localhost:8080/albums/aaa/tracks/2
+file: http://localhost:8080/api/albums/aaa/tracks/2
 Pos: 2
 Id: 24
-file: http://localhost:8080/albums/aaa/discs/2/tracks/1
+file: http://localhost:8080/api/albums/aaa/discs/2/tracks/1
 Pos: 3
 Id: 25`;
 
@@ -190,7 +190,7 @@ describe('player', function() {
       expect(mpdClient.sendCommand).to.have.been.calledWith('playlistinfo');
       expect(result).to.eql([
         {
-          file: '/albums/aaa/tracks/1',
+          file: '/api/albums/aaa/tracks/1',
           album: 'aaa',
           disc: 1,
           track: 1,
@@ -198,7 +198,7 @@ describe('player', function() {
           time: 100
         },
         {
-          file: '/albums/aaa/tracks/2',
+          file: '/api/albums/aaa/tracks/2',
           album: 'aaa',
           disc: 1,
           track: 2,
@@ -206,7 +206,7 @@ describe('player', function() {
           time: 200
         },
         {
-          file: '/albums/aaa/discs/2/tracks/1',
+          file: '/api/albums/aaa/discs/2/tracks/1',
           album: 'aaa',
           disc: 2,
           track: 1,

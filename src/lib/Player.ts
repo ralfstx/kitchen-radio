@@ -154,8 +154,8 @@ export class Player {
 
   private _processPlaylistEntry(item: any) {
     let url = parseUrl(item.file);
-    if (url.hostname === 'localhost' && url.pathname) {
-      let info = this._extractTrackInfo(url.pathname);
+    if (url.hostname === 'localhost' && url.pathname && url.pathname.startsWith('/api/')) {
+      let info = this._extractTrackInfo(url.pathname.substring('/api/'.length));
       if (info) {
         let track = this._findTrack(info);
         if (track) {
@@ -204,7 +204,7 @@ export class Player {
     let commands: string[] = [];
     for (let url of urls) {
       if (url.startsWith('/')) {
-        url = 'http://localhost:' + this._config.port + url;
+        url = `http://localhost:${this._config.port}/api${url}`;
       }
       if (isPlaylist(url)) {
         let content = await getText(url);

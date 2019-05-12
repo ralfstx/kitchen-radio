@@ -1,4 +1,3 @@
-import { readFile } from 'fs-extra';
 import * as http from 'http';
 import * as Koa from 'koa';
 import * as conditional from 'koa-conditional-get';
@@ -18,7 +17,6 @@ import { Logger } from './Logger';
 import { ensure } from './util';
 
 const staticDir = join(__dirname, '../static');
-const viewsDir = join(__dirname, '../views');
 
 export class Server {
 
@@ -35,18 +33,17 @@ export class Server {
     this._app.use((conditional as any)());
     this._app.use((etag as any)());
     this._app.use(createLogAppender(ensure(context.config)));
-    this._app.use(createViewsRenderer(viewsDir));
     this._app.use(createErrorHandler(this._logger));
     this._app.use(serveStatic(staticDir, {maxAge: 3600000}));
     this._app.use(async (ctx, next) => {
       if (ctx.path === '/') {
-        await ctx.render('index', {});
+        await ctx.redirect('/index.html');
       }
       await next();
     });
-    this._addRouter('/player', playerRouter(context));
-    this._addRouter('/albums', albumsRouter(context));
-    this._addRouter('/stations', stationsRouter(context));
+    this._addRouter('/api/player', playerRouter(context));
+    this._addRouter('/api/albums', albumsRouter(context));
+    this._addRouter('/api/stations', stationsRouter(context));
   }
 
   public async start() {
@@ -69,22 +66,6 @@ export class Server {
     router.prefix(prefix);
     this._app.use(router.routes()).use(router.allowedMethods());
   }
-}
-
-export function isHtml(ctx: Koa.Context) { // TODO
-  return ctx.request.query.type !== 'json' && ctx.accepts(['json', 'html']) === 'html';
-}
-
-function createViewsRenderer(root: string) {
-  return async function(ctx: Koa.Context, next: () => Promise<any>) {
-    if (ctx.render) return next();
-    ctx.render = async function(relPath: string, options: any = {}) {
-      let filePath = join(root, relPath + '.html');
-      let content = await readFile(filePath, 'utf-8');
-      ctx.body = content.replace(/\${\s*(.*?)\s*}/g, (m, m1) => m1 in options ? options[m1] : '');
-    };
-    return next();
-  };
 }
 
 function createLogAppender(config: Config) {

@@ -61,7 +61,7 @@
     "mocha": "mocha -r ts-node/register",
     "test": "npm run mocha -- 'test/**/*.test.ts'",
     "posttest": "npm run lint",
-    "build": "rm -rf out/ dist/ && tsc -p . && cp -r out/src dist/ && cp -r src/static src/views src/config.json package.json dist/ && cp node_modules/vue/dist/vue.min.js dist/static/",
+    "build": "rm -rf out/ dist/ && tsc -p . && cp -r out/src dist/ && cp -r src/config.json package.json dist/",
     "server": "node dist/main.js | bunyan",
     "start": "npm run build && npm run server",
     "predeploy": "npm run build",
