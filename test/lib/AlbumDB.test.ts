@@ -13,7 +13,7 @@ describe('AlbumDB', function() {
   beforeEach(async function() {
     musicDir = tmpdir();
     await copy(join(__dirname, 'files', 'albums'), join(musicDir, 'albums'));
-    let logger = {debug: spy(), info: spy(), warn: spy()};
+    let logger = {child: () => ({debug: spy(), info: spy(), warn: spy(), error: spy()})};
     let coverDB = {storeAlbumCover: spy()};
     albumDB = new AlbumDB(new Context({logger, coverDB, config: {musicDir}}));
   });

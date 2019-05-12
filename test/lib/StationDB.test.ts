@@ -13,7 +13,7 @@ describe('StationDB', function() {
     let tmp = tmpdir();
     musicDir = join(tmp, 'music');
     await copy(join(__dirname, 'files', 'stations'), join(musicDir, 'stations'));
-    let logger = {debug: spy(), info: spy(), warn: spy()};
+    let logger = {child: () => ({debug: spy(), info: spy(), warn: spy(), error: spy()})};
     db = new StationDB(new Context({logger, config: {musicDir}}));
   });
 

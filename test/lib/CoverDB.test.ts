@@ -13,7 +13,7 @@ describe('CoverDB', function() {
   beforeEach(async function() {
     let tmpDir = tmpdir();
     cacheDir = join(tmpDir, 'cache');
-    let logger = {info: spy(), warn: spy(), error: spy()};
+    let logger = {child: () => ({debug: spy(), info: spy(), warn: spy(), error: spy()})};
     let albumDB = {getAlbum: (id: string) => ({id, path: id})};
     coverDB = new CoverDB(new Context({logger, albumDB, config: {cacheDir}}));
     await coverDB.init();
