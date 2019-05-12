@@ -41,6 +41,7 @@ export class Server {
       }
       await next();
     });
+    this._app.use(addCorsHeader());
     this._addRouter('/api/player', playerRouter(context));
     this._addRouter('/api/albums', albumsRouter(context));
     this._addRouter('/api/stations', stationsRouter(context));
@@ -75,4 +76,13 @@ function createLogAppender(config: Config) {
     path: config.logDir
   });
   return morgan('common', { stream: accessLogStream });
+}
+
+function addCorsHeader() {
+  return async (ctx: Koa.Context, next: () => Promise<any>) => {
+    ctx.set('Access-Control-Allow-Origin', '*');
+    ctx.set('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, HEAD, OPTIONS');
+    ctx.set('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin');
+    await next();
+  };
 }
