@@ -4,6 +4,7 @@ import * as send from 'koa-send';
 import { basename, join } from 'path';
 import { ZipFile } from 'yazl';
 import { Album } from '../lib/Album';
+import { AlbumDB } from '../lib/AlbumDB';
 import { Context } from '../lib/Context';
 import { ensure } from '../lib/util';
 
@@ -12,9 +13,16 @@ export function albumsRouter(context: Context) {
   let coverDB = ensure(context.coverDB);
   let musicDir = ensure(context.config).musicDir;
   let router = new Router();
+
   router.get('/', async (ctx) => {
-    ctx.body = albumDB.getAlbumIds().map(id => ({id, name: albumDB.getAlbum(id)!.name}));
+    ctx.body = getAlbums(albumDB);
   });
+
+  router.put('/', async (ctx) => {
+    await albumDB.update();
+    ctx.body = getAlbums(albumDB);
+  });
+
   router.get('/search', async (ctx) => {
     let query = ctx.query.q || '';
     let terms = query.split(/\s+/);
@@ -24,11 +32,7 @@ export function albumsRouter(context: Context) {
       tracks: match.tracks.map(track => match.album.tracks.indexOf(track))
     }));
   });
-  router.get('/update', async (ctx) => {
-    let {count} = await albumDB.update();
-    let message = `Found ${count} albums`;
-    ctx.body = {message};
-  });
+
   router.get('/:id', async (ctx) => {
     let id = ctx.params.id;
     let album = albumDB.getAlbum(id);
@@ -36,7 +40,8 @@ export function albumsRouter(context: Context) {
       ctx.body = {id, ...serializeAlbum(album)};
     }
   });
-  router.post('/:id', bodyParser(), async function(ctx) {
+
+  router.put('/:id', bodyParser(), async function(ctx) {
     let id = ctx.params.id;
     let album = albumDB.getAlbum(ctx.params.id);
     if (album) {
@@ -53,6 +58,7 @@ export function albumsRouter(context: Context) {
       ctx.body = {id, ...serializeAlbum(album)};
     }
   });
+
   router.get('/:id/cover', async (ctx) => {
     let size = ctx.query.size ? parseInt(ctx.query.size) : 0;
     let file = await coverDB.getAlbumCover(ctx.params.id, size);
@@ -60,15 +66,7 @@ export function albumsRouter(context: Context) {
       await send(ctx, file, {root: '/', hidden: true, maxAge: 3600000});
     }
   });
-  router.get('/:id/download', async (ctx) => {
-    let id = ctx.params.id;
-    let album = albumDB.getAlbum(id);
-    if (album) {
-      let zipStream = await createDownloadZip(album, musicDir);
-      ctx.set('content-disposition', 'attachment; filename="album.zip"');
-      ctx.body = zipStream;
-    }
-  });
+
   router.get('/:id/tracks/:number', async (ctx) => {
     let album = albumDB.getAlbum(ctx.params.id);
     if (album) {
@@ -79,6 +77,7 @@ export function albumsRouter(context: Context) {
       }
     }
   });
+
   router.get('/:id/discs/:dnr/tracks/:tnr', async (ctx) => {
     let album = albumDB.getAlbum(ctx.params.id);
     if (album) {
@@ -93,7 +92,22 @@ export function albumsRouter(context: Context) {
       }
     }
   });
+
+  router.get('/:id/download', async (ctx) => {
+    let id = ctx.params.id;
+    let album = albumDB.getAlbum(id);
+    if (album) {
+      let zipStream = await createDownloadZip(album, musicDir);
+      ctx.set('content-disposition', 'attachment; filename="album.zip"');
+      ctx.body = zipStream;
+    }
+  });
+
   return router;
+}
+
+function getAlbums(albumDB: AlbumDB): any {
+  return albumDB.getAlbumIds().map(id => ({ id, name: albumDB.getAlbum(id)!.name }));
 }
 
 function serializeAlbum(album: Album) {
