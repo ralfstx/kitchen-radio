@@ -203,18 +203,35 @@ export class Player {
   private async _toCommands(urls: string[]) {
     let commands: string[] = [];
     for (let url of urls) {
-      if (url.startsWith('/')) {
-        url = `http://localhost:${this._config.port}/api${url}`;
-      }
-      if (isPlaylist(url)) {
-        let content = await getText(url);
-        let tracks = readPlaylist(content);
-        tracks.forEach(track => commands.push('add "' + track + '"'));
-      } else {
-        commands.push('add "' + url + '"');
+      let resolvedUrls = await this._resolveUrl(url);
+      for (const resolvedUrl of resolvedUrls) {
+        let fixedUrl = this._fixUrl(resolvedUrl);
+        commands.push(`add "${fixedUrl}"`);
       }
     }
     return commands;
+  }
+
+  private async _resolveUrl(url: string) {
+    if (url.match(/^\/albums\/[\da-f]+$/)) {
+      let albumId = url.match(/^\/albums\/([\da-f]+)$/)![1];
+      let album = this._albumDb.getAlbum(albumId);
+      if (album) {
+        return album.tracks.map((tr, i) => `/albums/${albumId}/tracks/${i + 1}`);
+      }
+    }
+    if (isPlaylist(url)) {
+      let content = await getText(url);
+      return readPlaylist(content);
+    }
+    return [url];
+  }
+
+  private _fixUrl(url: string) {
+    if (url.startsWith('/')) {
+      return `http://localhost:${this._config.port}/api${url}`;
+    }
+    return url;
   }
 
 }
